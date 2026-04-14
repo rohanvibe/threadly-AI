@@ -486,7 +486,7 @@ export default function ChatPage() {
                   transition={{ delay: i * 0.05 }}
                   key={msg.id} 
                   id={`message-${msg.id}`}
-                  className={`flex gap-5 md:gap-8 group transition-all duration-700 rounded-2xl p-6 -mx-6 ${
+                  className={`flex gap-4 md:gap-8 group transition-all duration-700 rounded-2xl p-4 -mx-4 md:p-6 md:-mx-6 ${
                     highlightedMessageId === msg.id ? 'highlight-bg bg-blue-500/5 ring-1 ring-blue-500/20' : 'hover:bg-white/1'
                   }`}
                 >
@@ -516,7 +516,21 @@ export default function ChatPage() {
                            <span className="text-[10px] font-black tracking-widest uppercase text-blue-500 pt-0.5">Syncing Stream</span>
                         </div>
                       ) : (
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        <ReactMarkdown 
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            table: ({ children }) => (
+                              <div className="overflow-x-auto my-6 rounded-xl border border-white/10 bg-white/5 custom-scrollbar">
+                                <table className="min-w-full divide-y divide-white/10">{children}</table>
+                              </div>
+                            ),
+                            th: ({ children }) => <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-blue-500 bg-white/5">{children}</th>,
+                            td: ({ children }) => <td className="px-4 py-3 text-xs border-t border-white/5 text-gray-300">{children}</td>,
+                            ul: ({ children }) => <ul className="list-disc pl-5 space-y-2 mb-4">{children}</ul>,
+                            ol: ({ children }) => <ol className="list-decimal pl-5 space-y-2 mb-4">{children}</ol>,
+                            li: ({ children }) => <li className="leading-relaxed">{children}</li>
+                          }}
+                        >
                           {msg.content}
                         </ReactMarkdown>
                       )}
