@@ -15,16 +15,16 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Threadly AI",
   description: "Next-gen AI chatbot workspace with SambaNova streaming.",
-  manifest: "/manifest.json?v=2",
+  manifest: "/manifest.json?v=3",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "Threadly AI",
-    startupImage: "/icon.png?v=2"
+    startupImage: "/icon-v3.png"
   },
   icons: {
-    icon: "/favicon.ico?v=2",
-    apple: "/apple-touch-icon.png?v=2",
+    icon: "/icon-v3.png",
+    apple: "/icon-v3.png",
   },
 };
 
