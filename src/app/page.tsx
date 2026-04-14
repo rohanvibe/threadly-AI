@@ -497,7 +497,7 @@ export default function ChatPage() {
                   transition={{ delay: i * 0.05 }}
                   key={msg.id} 
                   id={`message-${msg.id}`}
-                  className={`flex gap-4 md:gap-8 group transition-all duration-700 rounded-2xl p-4 -mx-4 md:p-6 md:-mx-6 ${
+                  className={`flex gap-4 md:gap-8 group transition-all duration-700 rounded-2xl p-4 md:p-6 md:-mx-6 ${
                     highlightedMessageId === msg.id ? 'highlight-bg bg-blue-500/5 ring-1 ring-blue-500/20' : 'hover:bg-white/1'
                   }`}
                 >
@@ -506,7 +506,7 @@ export default function ChatPage() {
                   }`}>
                     {msg.role === 'assistant' ? <Zap className="w-5 h-5" /> : <Plus className="w-5 h-5 rotate-45" />}
                   </div>
-                  <div className="flex-1 space-y-4 min-w-0">
+                  <div className="flex-1 space-y-4 min-w-0 overflow-hidden">
                     <div className="flex items-center justify-between">
                       <span className="font-black text-[10px] tracking-[0.3em] uppercase text-gray-500 pt-1">
                         {msg.role === 'assistant' ? 'Assistant·AI' : 'Member·Space'}
@@ -518,7 +518,7 @@ export default function ChatPage() {
                          )}
                       </div>
                     </div>
-                    <div className="text-gray-200 leading-relaxed text-[15px] prose prose-invert prose-sm max-w-none prose-p:leading-[1.7] prose-pre:rounded-2xl prose-code:text-blue-400 wrap-break-word whitespace-pre-wrap selection:bg-blue-500/40">
+                    <div className="text-gray-200 leading-relaxed text-[15px] prose prose-invert prose-sm max-w-none prose-p:leading-[1.7] prose-pre:rounded-2xl prose-code:text-blue-400 break-all wrap-break-word selection:bg-blue-500/40">
                       {msg.content === '' && loading ? (
                         <div className="flex items-center gap-4 py-2">
                            <div className="flex gap-1.5 item-center">
@@ -537,9 +537,9 @@ export default function ChatPage() {
                             ),
                             th: ({ children }) => <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-blue-500 bg-white/5">{children}</th>,
                             td: ({ children }) => <td className="px-4 py-3 text-xs border-t border-white/5 text-gray-300">{children}</td>,
-                            ul: ({ children }) => <ul className="list-disc pl-5 space-y-2 mb-4">{children}</ul>,
-                            ol: ({ children }) => <ol className="list-decimal pl-5 space-y-2 mb-4">{children}</ol>,
-                            li: ({ children }) => <li className="leading-relaxed">{children}</li>
+                            ul: ({ children }) => <ul className="list-disc pl-5 space-y-2 mb-4 wrap-break-word">{children}</ul>,
+                            ol: ({ children }) => <ol className="list-decimal pl-5 space-y-2 mb-4 wrap-break-word">{children}</ol>,
+                            li: ({ children }) => <li className="leading-relaxed wrap-break-word">{children}</li>
                           }}
                         >
                           {msg.content}

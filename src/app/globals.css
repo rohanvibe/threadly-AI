@@ -29,6 +29,12 @@
   --radius: 0.75rem;
 }
 
+html, body {
+  overflow-x: hidden;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .glass {
   background: rgba(15, 15, 18, 0.7);
   backdrop-filter: blur(12px);
