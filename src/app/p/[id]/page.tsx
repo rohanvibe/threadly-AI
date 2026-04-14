@@ -26,7 +26,7 @@ export default async function PromptSharePage({ params }: { params: { id: string
         </div>
 
         <div className="text-center space-y-4 mb-12">
-           <h1 className="text-3xl md:text-4xl font-black tracking-tight tracking-tight uppercase tracking-[0.1em]">{prompt.title}</h1>
+           <h1 className="text-3xl md:text-4xl font-black uppercase tracking-widest">{prompt.title}</h1>
            <p className="text-gray-500 font-bold uppercase tracking-widest text-[10px]">Prompt Template Shared via Threadly</p>
         </div>
 

@@ -81,7 +81,7 @@ export default async function SharePage({ params }: { params: { chatId: string }
 
         {/* Footer Viral CTA */}
         <div className="mt-24 p-12 rounded-3xl border border-white/5 bg-white/1 text-center space-y-8 relative overflow-hidden group">
-           <div className="absolute inset-0 bg-gradient-to-b from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+           <div className="absolute inset-0 bg-linear-to-b from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
            <div className="relative z-10 space-y-6">
               <h2 className="text-2xl font-black tracking-tight">Experience high-speed intelligence.</h2>
               <p className="text-gray-400 max-w-md mx-auto">Threadly is a next-gen workspace designed for thinkers and builders. Navigate massive threads in milliseconds.</p>
