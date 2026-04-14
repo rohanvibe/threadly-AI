@@ -261,7 +261,9 @@ export default function ChatPage() {
       created_at: new Date().toISOString()
     }
     setMessages(prev => [...prev, tempUserMsg])
-    await supabase.from('messages').insert([{ chat_id: chatId, role: 'user', content: messageContent }])
+    
+    // Start DB insert and AI fetch in parallel for zero-latency start
+    const dbInsertPromise = supabase.from('messages').insert([{ chat_id: chatId, role: 'user', content: messageContent }])
 
     // Create placeholder for assistant message
     const assistantMsgId = Math.random().toString()

@@ -26,7 +26,10 @@ export async function POST(req: Request) {
       },
       body: JSON.stringify({
         model: 'Meta-Llama-3.1-8B-Instruct',
-        messages: [{ role: 'user', content: message }],
+        messages: [
+          { role: 'system', content: 'You are Threadly, a high-performance AI. Be extremely concise, use technical markdown, and skip pleasantries. Speed is priority.' },
+          { role: 'user', content: message }
+        ],
         stream: requestedStream
       })
     })
@@ -54,28 +57,31 @@ export async function POST(req: Request) {
         }
 
         let fullAssistantContent = ''
+        let buffer = ''
 
         try {
           while (true) {
             const { done, value } = await reader.read()
             if (done) break
 
-            const chunk = decoder.decode(value)
-            const lines = chunk.split('\n')
+            buffer += decoder.decode(value, { stream: true })
+            const lines = buffer.split('\n')
+            buffer = lines.pop() || '' // Keep the incomplete line in the buffer
 
             for (const line of lines) {
-              if (line.trim() === '' || line.trim() === 'data: [DONE]') continue
+              const trimmed = line.trim()
+              if (!trimmed || trimmed === 'data: [DONE]') continue
               
-              if (line.startsWith('data: ')) {
+              if (trimmed.startsWith('data: ')) {
                 try {
-                  const data = JSON.parse(line.slice(6))
-                  const content = data.choices[0]?.delta?.content || ''
+                  const json = JSON.parse(trimmed.slice(6))
+                  const content = json.choices[0]?.delta?.content || ''
                   if (content) {
                     fullAssistantContent += content
                     controller.enqueue(encoder.encode(content))
                   }
                 } catch (e) {
-                  // Ignore parse errors for partial chunks
+                  // Buffer likely split mid-JSON, will catch on next chunk
                 }
               }
             }
@@ -83,8 +89,9 @@ export async function POST(req: Request) {
         } catch (error) {
           controller.error(error)
         } finally {
-          // Save assistant message to DB after stream ends (unless it's a utility call like title generation)
           if (fullAssistantContent && !skipSave) {
+             // Use a non-blocking background task for DB insert if possible, 
+             // but here we are in a stream so we await before closing.
              await supabase.from('messages').insert([{ 
                 chat_id: chatId, 
                 role: 'assistant', 
