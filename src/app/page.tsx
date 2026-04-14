@@ -568,7 +568,14 @@ export default function ChatPage() {
           <div className="absolute top-0 left-0 right-0 h-14 border-b border-white/5 bg-black/40 backdrop-blur-xl flex items-center justify-between px-4 z-40">
             <button onClick={() => setIsNavOpen(true)} className="p-2 hover:bg-white/5 rounded-xl"><Menu className="w-5 h-5" /></button>
             <h1 className="font-black text-xs tracking-[0.3em] uppercase ml-4">THREADLY</h1>
-            <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`p-2 rounded-xl border transition-all ${isSidebarOpen ? 'border-blue-500/50 bg-blue-500/10 text-blue-400' : 'border-transparent'}`}><History className="w-5 h-5" /></button>
+            <div className="flex items-center gap-1">
+               {currentChatId && (
+                  <button onClick={shareChat} className="p-2 hover:bg-white/5 rounded-xl text-blue-500 transition-all active:scale-95">
+                     <Share2 className="w-5 h-5" />
+                  </button>
+               )}
+               <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`p-2 rounded-xl border transition-all ${isSidebarOpen ? 'border-blue-500/50 bg-blue-500/10 text-blue-400' : 'border-transparent'}`}><History className="w-5 h-5" /></button>
+            </div>
           </div>
         )}
 
