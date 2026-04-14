@@ -37,6 +37,8 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
+import { ToastProvider } from "@/components/ui";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -47,8 +49,11 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-        {children}
+      <body className="min-h-full flex flex-col bg-[#09090b] selection:bg-blue-500/30">
+        <ToastProvider>
+           <div className="fixed inset-0 pointer-events-none opacity-[0.03] z-50 grain-texture" />
+           {children}
+        </ToastProvider>
         <script
           dangerouslySetInnerHTML={{
             __html: `
