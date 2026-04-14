@@ -19,7 +19,9 @@ import {
   Globe,
   Trash2,
   Edit2,
-  Check
+  Check,
+  LogOut,
+  UserMinus
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import ReactMarkdown from 'react-markdown'
@@ -152,6 +154,25 @@ export default function ChatPage() {
       setChats(chats.map(c => c.id === id ? { ...c, title: editingTitle } : c))
       setEditingChatId(null)
     }
+  }
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    router.push('/auth')
+  }
+
+  const handleDeleteAccount = async () => {
+    if (!confirm('Are you absolutely sure? This will permanently delete your account and all your chats.')) return
+    
+    setLoading(true)
+    const res = await fetch('/api/user/delete', { method: 'POST' })
+    if (res.ok) {
+        await supabase.auth.signOut()
+        router.push('/auth')
+    } else {
+        alert('Failed to delete account. You may need to sign in again.')
+    }
+    setLoading(false)
   }
 
   const sendMessage = async (e?: React.FormEvent) => {
@@ -333,9 +354,25 @@ export default function ChatPage() {
                 <div className="w-10 h-10 rounded-xl bg-linear-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold shadow-lg glow">
                   {user?.email?.slice(0, 2).toUpperCase()}
                 </div>
-                <div className="flex flex-col min-w-0">
+                <div className="flex flex-col min-w-0 flex-1">
                   <span className="text-sm font-bold truncate">Member Account</span>
                   <span className="text-[11px] text-gray-500 truncate">{user?.email}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button 
+                    onClick={handleLogout}
+                    className="p-1.5 hover:bg-white/10 rounded-md text-gray-400 hover:text-white transition-colors"
+                    title="Log Out"
+                  >
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={handleDeleteAccount}
+                    className="p-1.5 hover:bg-red-500/10 rounded-md text-gray-400 hover:text-red-500 transition-colors"
+                    title="Delete Account"
+                  >
+                    <UserMinus className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             </div>
