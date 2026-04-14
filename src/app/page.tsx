@@ -307,22 +307,30 @@ export default function ChatPage() {
 
     toast("Generating snapshot...", "info")
     try {
-      // Add watermark temporarily if not individual message
+      // Use a slightly more robust sequence for mobile Browsers
       const dataUrl = await toPng(element, {
         cacheBust: true,
         backgroundColor: '#09090b',
+        pixelRatio: 2, // High definition
+        fontEmbedCSS: '', // Skip heavy font embedding to prevent timeout/CORS errors
         style: {
           padding: '40px',
-          borderRadius: '0'
+          borderRadius: '16px',
+          margin: '0'
         }
       })
+      
       const link = document.createElement('a')
-      link.download = `threadly-snapshot-${Date.now()}.png`
+      link.download = `threadly-${messageId ? 'message' : 'session'}-${Date.now()}.png`
       link.href = dataUrl
+      document.body.appendChild(link)
       link.click()
+      document.body.removeChild(link)
+      
       toast("Image exported successfully", "success")
-    } catch (err) {
-      toast("Failed to export image", "error")
+    } catch (err: any) {
+      console.error("Export error:", err)
+      toast(`Export failed: ${err.message || 'Check browser permissions'}`, "error")
     }
   }
 
