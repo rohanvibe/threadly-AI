@@ -507,7 +507,7 @@ export default function ChatPage() {
                          )}
                       </div>
                     </div>
-                    <div className="text-gray-200 leading-relaxed text-[15px] prose prose-invert prose-sm max-w-none prose-p:leading-[1.7] prose-pre:rounded-2xl prose-code:text-blue-400 overflow-x-auto selection:bg-blue-500/40">
+                    <div className="text-gray-200 leading-relaxed text-[15px] prose prose-invert prose-sm max-w-none prose-p:leading-[1.7] prose-pre:rounded-2xl prose-code:text-blue-400 wrap-break-word whitespace-pre-wrap selection:bg-blue-500/40">
                       {msg.content === '' && loading ? (
                         <div className="flex items-center gap-4 py-2">
                            <div className="flex gap-1.5 item-center">
