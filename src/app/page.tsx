@@ -16,9 +16,14 @@ import {
   History,
   Command,
   Zap,
-  Globe
+  Globe,
+  Trash2,
+  Edit2,
+  Check
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 // Types
 type Message = {
@@ -55,6 +60,8 @@ export default function ChatPage() {
   const [prompts, setPrompts] = useState<Prompt[]>([])
   const [modelType, setModelType] = useState<'default' | 'byok'>('default')
   const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null)
+  const [editingChatId, setEditingChatId] = useState<string | null>(null)
+  const [editingTitle, setEditingTitle] = useState('')
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const supabase = createClient()
@@ -130,13 +137,29 @@ export default function ChatPage() {
     }
   }
 
+  const deleteChat = async (id: string) => {
+    const { error } = await supabase.from('chats').delete().eq('id', id)
+    if (!error) {
+      setChats(chats.filter(c => c.id !== id))
+      if (currentChatId === id) setCurrentChatId(null)
+    }
+  }
+
+  const updateChatTitle = async (id: string) => {
+    if (!editingTitle.trim()) return
+    const { error } = await supabase.from('chats').update({ title: editingTitle }).eq('id', id)
+    if (!error) {
+      setChats(chats.map(c => c.id === id ? { ...c, title: editingTitle } : c))
+      setEditingChatId(null)
+    }
+  }
+
   const sendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault()
     if (!input.trim() || loading || !user) return
 
     let chatId = currentChatId
     if (!chatId) {
-      // Create chat if none exists
       const { data } = await supabase
         .from('chats')
         .insert([{ user_id: user.id, title: input.slice(0, 30) }])
@@ -153,7 +176,7 @@ export default function ChatPage() {
     setInput('')
     setLoading(true)
 
-    // Optimistically add user message
+    // Add user message
     const tempUserMsg: Message = {
       id: Math.random().toString(),
       chat_id: chatId!,
@@ -162,28 +185,52 @@ export default function ChatPage() {
       created_at: new Date().toISOString()
     }
     setMessages(prev => [...prev, tempUserMsg])
-
-    // Save user message to DB
     await supabase.from('messages').insert([{ chat_id: chatId, role: 'user', content: userMessage }])
 
+    // Create placeholder for assistant message
+    const assistantMsgId = Math.random().toString()
+    const tempAssistantMsg: Message = {
+      id: assistantMsgId,
+      chat_id: chatId!,
+      role: 'assistant',
+      content: '', // Start empty for streaming
+      created_at: new Date().toISOString()
+    }
+    setMessages(prev => [...prev, tempAssistantMsg])
+
     try {
-      let assistantResponse = ''
-      
       if (modelType === 'default') {
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: userMessage, chatId })
         })
-        const data = await res.json()
-        assistantResponse = data.content
+
+        if (!res.body) return
+
+        const reader = res.body.getReader()
+        const decoder = new TextDecoder()
+        let accumulatedContent = ''
+
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          const chunk = decoder.decode(value)
+          accumulatedContent += chunk
+
+          // Update messages state in real-time
+          setMessages(prev => 
+            prev.map(m => m.id === assistantMsgId ? { ...m, content: accumulatedContent } : m)
+          )
+        }
       } else {
-        // BYOK Logic (simplified for now, will implement properly later)
+        // BYOK Logic (frontend only)
         const keys = JSON.parse(localStorage.getItem('threadly_keys') || '{}')
         if (!keys.openai) {
-          assistantResponse = "Please set your OpenAI API key in settings for BYOK mode."
+           const err = "Please set your OpenAI API key in settings for BYOK mode."
+           setMessages(prev => prev.map(m => m.id === assistantMsgId ? { ...m, content: err } : m))
         } else {
-          // Call OpenAI directly
           const res = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -191,25 +238,59 @@ export default function ChatPage() {
               'Authorization': `Bearer ${keys.openai}`
             },
             body: JSON.stringify({
-              model: 'gpt-3.5-turbo',
-              messages: [{ role: 'user', content: userMessage }]
+              model: 'gpt-4o-mini',
+              messages: [{ role: 'user', content: userMessage }],
+              stream: true
             })
           })
-          const data = await res.json()
-          assistantResponse = data.choices[0].message.content
+
+          if (!res.body) return
+          const reader = res.body.getReader()
+          const decoder = new TextDecoder()
+          let accumulatedContent = ''
+
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+            const chunk = decoder.decode(value)
+            const lines = chunk.split('\n')
+            for (const line of lines) {
+                if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+                    try {
+                        const data = JSON.parse(line.slice(6))
+                        const content = data.choices[0]?.delta?.content || ''
+                        accumulatedContent += content
+                        setMessages(prev => prev.map(m => m.id === assistantMsgId ? { ...m, content: accumulatedContent } : m))
+                    } catch (e) {}
+                }
+            }
+          }
+          // Save finished BYOK message
+          await supabase.from('messages').insert([{ chat_id: chatId, role: 'assistant', content: accumulatedContent }])
         }
       }
 
-      // Save assistant message to DB
-      const { data: assistantMsgData } = await supabase
-        .from('messages')
-        .insert([{ chat_id: chatId, role: 'assistant', content: assistantResponse }])
-        .select()
-        .single()
-
-      if (assistantMsgData) {
-        setMessages(prev => [...prev, assistantMsgData])
+      // Generate AI Title if it's the first message or default title
+      const currentChat = chats.find(c => c.id === chatId)
+      if (currentChat && (currentChat.title === 'New Chat' || currentChat.title === userMessage.slice(0, 30))) {
+        const titleRes = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            message: `Generate a very short (max 4 words) descriptive title for a chat starting with this message: "${userMessage}". Output ONLY the title.`,
+            chatId,
+            skipSave: true,
+            stream: false
+          })
+        })
+        const titleData = await titleRes.json()
+        if (titleData.content) {
+            const cleanTitle = titleData.content.replace(/["']/g, '').trim()
+            await supabase.from('chats').update({ title: cleanTitle }).eq('id', chatId)
+            setChats(prev => prev.map(c => c.id === chatId ? { ...c, title: cleanTitle } : c))
+        }
       }
+
     } catch (err) {
       console.error(err)
     } finally {
@@ -246,9 +327,21 @@ export default function ChatPage() {
                 <ChevronLeft className="w-4 h-4" />
               </Button>
             </div>
+
+            <div className="p-4 border-b border-[#27272a]">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-linear-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold shadow-lg glow">
+                  {user?.email?.slice(0, 2).toUpperCase()}
+                </div>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-sm font-bold truncate">Member Account</span>
+                  <span className="text-[11px] text-gray-500 truncate">{user?.email}</span>
+                </div>
+              </div>
+            </div>
             
             <div className="p-3">
-              <Button className="w-full flex items-center gap-2" onClick={createNewChat}>
+              <Button className="w-full flex items-center gap-2 shadow-sm" onClick={createNewChat}>
                 <Plus className="w-4 h-4" />
                 New Chat
               </Button>
@@ -256,16 +349,49 @@ export default function ChatPage() {
 
             <div className="flex-1 overflow-y-auto px-2 space-y-1">
               {chats.map(chat => (
-                <button
-                  key={chat.id}
-                  onClick={() => setCurrentChatId(chat.id)}
-                  className={`w-full text-left p-3 rounded-md text-sm transition-colors flex items-center gap-3 ${
-                    currentChatId === chat.id ? 'bg-[#27272a] text-white' : 'text-gray-400 hover:bg-[#18181b]'
-                  }`}
-                >
-                  <MessageSquare className="w-4 h-4 shrink-0" />
-                  <span className="truncate">{chat.title}</span>
-                </button>
+                <div key={chat.id} className="group relative">
+                  {editingChatId === chat.id ? (
+                    <div className="flex items-center gap-2 p-2 bg-[#18181b] rounded-md">
+                      <input 
+                        value={editingTitle}
+                        onChange={e => setEditingTitle(e.target.value)}
+                        className="bg-transparent border-none outline-none text-xs w-full"
+                        autoFocus
+                        onKeyDown={e => e.key === 'Enter' && updateChatTitle(chat.id)}
+                      />
+                      <button onClick={() => updateChatTitle(chat.id)} className="text-green-500 hover:text-green-400">
+                        <Check className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setCurrentChatId(chat.id)}
+                      className={`w-full text-left p-3 rounded-md text-sm transition-colors flex items-center gap-3 pr-12 ${
+                        currentChatId === chat.id ? 'bg-[#27272a] text-white' : 'text-gray-400 hover:bg-[#18181b]'
+                      }`}
+                    >
+                      <MessageSquare className="w-4 h-4 shrink-0" />
+                      <span className="truncate">{chat.title}</span>
+                    </button>
+                  )}
+                  
+                  {editingChatId !== chat.id && (
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); setEditingChatId(chat.id); setEditingTitle(chat.title); }}
+                        className="p-1 hover:text-white text-gray-500"
+                      >
+                        <Edit2 className="w-3 h-3" />
+                      </button>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); deleteChat(chat.id); }}
+                        className="p-1 hover:text-red-500 text-gray-500"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
 
@@ -278,10 +404,6 @@ export default function ChatPage() {
                 <Settings className="w-4 h-4" />
                 Settings
               </Button>
-              <div className="pt-2 flex items-center gap-3 px-2">
-                <div className="w-8 h-8 rounded-full bg-linear-to-tr from-blue-500 to-purple-500" />
-                <span className="text-sm truncate">{user?.email}</span>
-              </div>
             </div>
           </motion.div>
         )}
@@ -360,8 +482,21 @@ export default function ChatPage() {
                         {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
-                    <div className="text-gray-200 leading-relaxed whitespace-pre-wrap text-[15px]">
-                      {msg.content}
+                    <div className="text-gray-200 leading-relaxed text-[15px] prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-[#18181b] prose-pre:border prose-pre:border-[#27272a]">
+                      {msg.content === '' && loading ? (
+                        <div className="flex items-center gap-2 text-blue-500 font-medium">
+                          <motion.div
+                            animate={{ opacity: [0.4, 1, 0.4] }}
+                            transition={{ repeat: Infinity, duration: 1.5 }}
+                          >
+                            Thinking...
+                          </motion.div>
+                        </div>
+                      ) : (
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {msg.content}
+                        </ReactMarkdown>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -388,8 +523,8 @@ export default function ChatPage() {
                 <Send className="w-4 h-4" />
               </button>
            </form>
-           <p className="text-[10px] text-center mt-3 text-gray-500 uppercase tracking-widest font-medium">
-             SambaNova LLaMA 3.1 8B • Enterprise AI
+           <p className="text-[10px] text-center mt-3 text-gray-500/30 uppercase tracking-[0.2em] font-medium pointer-events-none">
+             Powered by SambaNova
            </p>
         </div>
       </div>
@@ -414,11 +549,11 @@ export default function ChatPage() {
                 <button
                   key={msg.id}
                   onClick={() => scrollToMessage(msg.id)}
-                  className="w-full text-left p-3 rounded-lg border border-[#27272a] hover:bg-[#18181b] transition-all group"
+                  className="w-full text-left p-3 rounded-xl border border-[#27272a] hover:border-blue-500/50 hover:bg-blue-500/5 transition-all group active:scale-[0.98]"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-xs font-mono text-blue-500 font-bold">{idx + 1}.</span>
-                    <span className="text-sm truncate text-gray-300 group-hover:text-white">{msg.content}</span>
+                    <span className="text-xs font-mono text-blue-500 font-bold bg-blue-500/10 w-6 h-6 rounded-md flex items-center justify-center">{idx + 1}</span>
+                    <span className="text-sm truncate text-gray-300 group-hover:text-white transition-colors">{msg.content}</span>
                   </div>
                 </button>
               ))}
