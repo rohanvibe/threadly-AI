@@ -11,14 +11,16 @@ export default async function SharePage({ params }: { params: { chatId: string }
   const supabase = await createClient()
   
   // Fetch chat
-  const { data: chat } = await supabase
+  const { data: chat, error: chatError } = await supabase
     .from('chats')
     .select('*')
     .eq('id', params.chatId)
     .single()
 
-  // Note: We don't check for is_public yet in the query to allow the page to render 
-  // if the DB column isn't added yet, but in a production app you'd add .eq('is_public', true)
+  if (chatError) {
+    console.error("Shared Chat Fetch Error:", chatError)
+  }
+
   if (!chat) notFound()
 
   // Fetch messages

@@ -284,7 +284,8 @@ export default function ChatPage() {
      if (!isPublic) {
         const { error } = await supabase.from('chats').update({ is_public: true }).eq('id', currentChatId)
         if (error) {
-           toast("Failed to enable sharing", "error")
+           console.error("Sharing error:", error)
+           toast(`Sharing failed: ${error.message}. Did you run the SQL update?`, "error")
            setSharing(false)
            return
         }
