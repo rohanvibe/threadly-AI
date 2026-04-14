@@ -33,14 +33,7 @@
       "sizes": "512x512",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Threadly Desktop"
-    },
-    {
-      "src": "/icon.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Threadly Mobile"
+      "label": "Threadly AI Workspace"
     }
   ]
 }
