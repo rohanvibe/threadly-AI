@@ -84,6 +84,7 @@ export default function ChatPage() {
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
+  const skipFetchRef = useRef(false)
   const supabase = createClient()
   const router = useRouter()
   const { toast } = useToast()
@@ -120,7 +121,10 @@ export default function ChatPage() {
   useEffect(() => {
     if (currentChatId && user) {
       localStorage.setItem(`threadly_last_chat_${user.id}`, currentChatId)
-      fetchMessages(currentChatId)
+      if (!skipFetchRef.current) {
+        fetchMessages(currentChatId)
+      }
+      skipFetchRef.current = false // Reset for next selection
     } else {
       setMessages([])
     }
@@ -243,6 +247,7 @@ export default function ChatPage() {
         .single()
       if (data) {
         chatId = data.id
+        skipFetchRef.current = true // Critical: tell useEffect not to wipe/fetch for this one
         setCurrentChatId(chatId)
         setChats([data, ...chats])
       } else return
