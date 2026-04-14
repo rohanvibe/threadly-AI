@@ -823,6 +823,11 @@ function PromptManager({ userId, onClose, onSelect }: { userId: string, onClose:
     const supabase = createClient()
     const { toast } = useToast()
 
+    const copyToClipboard = (text: string) => {
+        navigator.clipboard.writeText(text)
+        toast("Link copied to workspace clipboard", "success")
+    }
+
     useEffect(() => { if (userId) fetchPrompts() }, [userId])
 
     const fetchPrompts = async () => {
