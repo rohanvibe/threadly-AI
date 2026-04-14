@@ -36,11 +36,19 @@ import {
   RefreshCw,
   MoreVertical,
   HelpCircle,
-  Square
+  Square,
+  Share2,
+  Camera,
+  LinkIcon,
+  ExternalLink,
+  ChevronRight
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { toPng } from 'html-to-image'
+import { useSearchParams } from 'next/navigation'
+import { Suspense } from 'react'
 
 // Types
 type Message = {
@@ -81,6 +89,9 @@ export default function ChatPage() {
   const [editingChatId, setEditingChatId] = useState<string | null>(null)
   const [editingTitle, setEditingTitle] = useState('')
   const [isMobile, setIsMobile] = useState(false)
+  const [isPublic, setIsPublic] = useState(false)
+  const [sharing, setSharing] = useState(false)
+  const [wowPhase, setWowPhase] = useState(false)
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
@@ -115,6 +126,17 @@ export default function ChatPage() {
     }
     checkMobile()
     window.addEventListener('resize', checkMobile)
+
+    // Handle viral prompt import
+    const searchParams = new URLSearchParams(window.location.search)
+    const sharedPrompt = searchParams.get('prompt')
+    if (sharedPrompt) {
+      setInput(sharedPrompt)
+      toast("Prompt imported successfully", "success")
+      // Clear URL
+      window.history.replaceState({}, '', '/')
+    }
+
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
@@ -132,6 +154,12 @@ export default function ChatPage() {
 
   useEffect(() => {
     scrollToBottom()
+    
+    // Viral Feature 4: Sidebar Wow Moment
+    if (messages.length >= 7 && !localStorage.getItem('threadly_wow_shown')) {
+       setWowPhase(true)
+       localStorage.setItem('threadly_wow_shown', 'true')
+    }
   }, [messages])
 
   const scrollToBottom = () => {
@@ -231,6 +259,71 @@ export default function ChatPage() {
         toast("Failed to delete account. Try signing in again.", "error")
     }
     setLoading(false)
+  }
+
+  const togglePublicSharing = async () => {
+    if (!currentChatId) return
+    const newState = !isPublic
+    const { error } = await supabase.from('chats').update({ is_public: newState }).eq('id', currentChatId)
+    if (!error) {
+      setIsPublic(newState)
+      toast(newState ? "Public link activated" : "Public link disabled", "success")
+    }
+  }
+
+  const shareChat = async () => {
+     if (!currentChatId) return
+     setSharing(true)
+     
+     // Ensure it's public first
+     if (!isPublic) {
+        const { error } = await supabase.from('chats').update({ is_public: true }).eq('id', currentChatId)
+        if (error) {
+           toast("Failed to enable sharing", "error")
+           setSharing(false)
+           return
+        }
+        setIsPublic(true)
+     }
+
+     const url = `${window.location.origin}/share/${currentChatId}`
+     
+     if (navigator.share) {
+        try {
+           await navigator.share({ title: 'Threadly Chat Session', url })
+        } catch (e) {
+           copyToClipboard(url)
+        }
+     } else {
+        copyToClipboard(url)
+     }
+     setSharing(false)
+  }
+
+  const exportAsImage = async (messageId?: string) => {
+    const elementId = messageId ? `message-${messageId}` : 'chat-messages-container'
+    const element = document.getElementById(elementId)
+    if (!element) return
+
+    toast("Generating snapshot...", "info")
+    try {
+      // Add watermark temporarily if not individual message
+      const dataUrl = await toPng(element, {
+        cacheBust: true,
+        backgroundColor: '#09090b',
+        style: {
+          padding: '40px',
+          borderRadius: '0'
+        }
+      })
+      const link = document.createElement('a')
+      link.download = `threadly-snapshot-${Date.now()}.png`
+      link.href = dataUrl
+      link.click()
+      toast("Image exported successfully", "success")
+    } catch (err) {
+      toast("Failed to export image", "error")
+    }
   }
 
   const sendMessage = async (e?: React.FormEvent, customMsg?: string) => {
@@ -440,9 +533,22 @@ export default function ChatPage() {
         </AnimatePresence>
 
         {!isNavOpen && !isMobile && (
-          <button onClick={() => setIsNavOpen(true)} className="p-5 hover:text-blue-500 transition-all absolute left-0 top-0 z-30 flex items-center gap-2 group">
-            <Menu className="w-6 h-6 group-hover:scale-110" />
-          </button>
+          <div className="flex items-center absolute left-5 top-5 z-30 gap-4">
+            <button onClick={() => setIsNavOpen(true)} className="hover:text-blue-500 transition-all flex items-center gap-2 group">
+              <Menu className="w-6 h-6 group-hover:scale-110" />
+            </button>
+            {currentChatId && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={shareChat}
+                className="rounded-xl px-4 flex items-center gap-2 border border-white/5 bg-white/1 hover:bg-white/5"
+              >
+                <Share2 className="w-3.5 h-3.5 text-blue-500" />
+                <span className="text-[10px] font-black uppercase tracking-widest pt-0.5">Viral Share</span>
+              </Button>
+            )}
+          </div>
         )}
 
         {isMobile && (
@@ -453,7 +559,26 @@ export default function ChatPage() {
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-12 scroll-smooth custom-scrollbar relative z-10">
+        <div id="chat-messages-container" className="flex-1 overflow-y-auto p-4 md:p-8 space-y-12 scroll-smooth custom-scrollbar relative z-10">
+          <AnimatePresence>
+            {wowPhase && (
+              <motion.div 
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="max-w-3xl mx-auto mb-10 p-6 rounded-3xl bg-blue-600/10 border border-blue-500/20 text-center relative overflow-hidden group"
+              >
+                <div className="absolute top-0 right-0 p-2 cursor-pointer opacity-40 hover:opacity-100" onClick={() => setWowPhase(false)}>
+                   <X className="w-4 h-4" />
+                </div>
+                <Zap className="w-10 h-10 text-blue-500 mx-auto mb-4 animate-bounce" />
+                <h4 className="text-xl font-black tracking-tight mb-2">Wow Moment Discovery!</h4>
+                <p className="text-gray-400 text-sm leading-relaxed mb-4">You're deep in the flow. Did you know you can jump to any message instantly using the Session Data drawer? Try it now.</p>
+                <Button size="sm" onClick={() => setWowPhase(false)} className="bg-blue-600 hover:bg-blue-500 rounded-xl px-8 font-bold text-[10px] uppercase tracking-widest">Understood</Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {fetchingMessages ? (
              <div className="max-w-3xl mx-auto space-y-12 py-10 opacity-50">
                 {[1,2,3].map(i => (
@@ -507,17 +632,18 @@ export default function ChatPage() {
                     {msg.role === 'assistant' ? <Zap className="w-5 h-5" /> : <Plus className="w-5 h-5 rotate-45" />}
                   </div>
                   <div className="flex-1 space-y-4 min-w-0 overflow-hidden">
-                    <div className="flex items-center justify-between">
-                      <span className="font-black text-[10px] tracking-[0.3em] uppercase text-gray-500 pt-1">
-                        {msg.role === 'assistant' ? 'Assistant·AI' : 'Member·Space'}
-                      </span>
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                         <Button variant="ghost" size="icon" className="w-8 h-8 text-gray-500 hover:text-white" onClick={() => copyToClipboard(msg.content)}><Copy className="w-3.5 h-3.5" /></Button>
-                         {msg.role === 'assistant' && (
-                            <Button variant="ghost" size="icon" className="w-8 h-8 text-gray-500 hover:text-white" onClick={() => sendMessage(undefined, messages[i-1]?.content)}><RefreshCw className="w-3.5 h-3.5" /></Button>
-                         )}
+                      <div className="flex items-center justify-between">
+                        <span className="font-black text-[10px] tracking-[0.3em] uppercase text-gray-500 pt-1">
+                          {msg.role === 'assistant' ? 'Assistant·AI' : 'Member·Space'}
+                        </span>
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                           <Button variant="ghost" size="icon" title="Copy" className="w-8 h-8 text-gray-500 hover:text-white" onClick={() => copyToClipboard(msg.content)}><Copy className="w-3.5 h-3.5" /></Button>
+                           <Button variant="ghost" size="icon" title="Export Image" className="w-8 h-8 text-gray-500 hover:text-white" onClick={() => exportAsImage(msg.id)}><Camera className="w-3.5 h-3.5" /></Button>
+                           {msg.role === 'assistant' && (
+                              <Button variant="ghost" size="icon" title="Regenerate" className="w-8 h-8 text-gray-500 hover:text-white" onClick={() => sendMessage(undefined, messages[i-1]?.content)}><RefreshCw className="w-3.5 h-3.5" /></Button>
+                           )}
+                        </div>
                       </div>
-                    </div>
                     <div className="text-gray-200 leading-relaxed text-[15px] prose prose-invert prose-sm max-w-none prose-p:leading-[1.7] prose-pre:rounded-2xl prose-code:text-blue-400 break-all wrap-break-word selection:bg-blue-500/40">
                       {msg.content === '' && loading ? (
                         <div className="flex items-center gap-4 py-2">
@@ -726,10 +852,16 @@ function PromptManager({ userId, onClose, onSelect }: { userId: string, onClose:
                 <CardContent className="flex-1 overflow-y-auto space-y-8 p-6 custom-scrollbar">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {prompts.map(p => (
-                            <button key={p.id} onClick={() => { onSelect(p.template); onClose(); }} className="p-5 rounded-2xl border border-white/5 bg-white/2 hover:bg-blue-600/5 hover:border-blue-500/20 text-left transition-all active:scale-[0.98]">
+                            <div key={p.id} className="p-5 rounded-2xl border border-white/5 bg-white/2 hover:bg-blue-600/5 hover:border-blue-500/20 text-left transition-all active:scale-[0.98] group relative">
                                 <h4 className="font-black text-[10px] uppercase tracking-widest text-blue-500 mb-2">{p.title}</h4>
-                                <p className="text-xs text-gray-500 font-bold line-clamp-2 leading-relaxed">{p.template}</p>
-                            </button>
+                                <p className="text-xs text-gray-500 font-bold line-clamp-2 leading-relaxed mb-4">{p.template}</p>
+                                <div className="flex items-center gap-2">
+                                   <Button size="sm" onClick={() => { onSelect(p.template); onClose(); }} className="h-8 rounded-lg bg-white text-black text-[9px] font-black uppercase px-4 hover:bg-gray-200">Use</Button>
+                                   <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg border border-white/5 text-gray-500 hover:text-white" onClick={() => copyToClipboard(`${window.location.origin}/p/${p.id}`)}>
+                                      <LinkIcon className="w-3.5 h-3.5" />
+                                   </Button>
+                                </div>
+                            </div>
                         ))}
                     </div>
                     

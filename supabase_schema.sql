@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS chats (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   title TEXT DEFAULT 'Untitled Chat',
+  is_public BOOLEAN DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -23,6 +24,7 @@ CREATE TABLE IF NOT EXISTS prompts (
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   template TEXT NOT NULL,
+  is_public BOOLEAN DEFAULT false,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -60,3 +62,15 @@ CREATE POLICY "Users can update their own prompts" ON prompts
   FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can delete their own prompts" ON prompts 
   FOR DELETE USING (auth.uid() = user_id);
+
+-- Public access policies for Viral Sharing
+CREATE POLICY "Public chats are viewable by everyone" ON chats 
+  FOR SELECT USING (is_public = true);
+
+CREATE POLICY "Public messages are viewable by everyone" ON messages 
+  FOR SELECT USING (
+    chat_id IN (SELECT id FROM chats WHERE is_public = true)
+  );
+
+CREATE POLICY "Public prompts are viewable by everyone" ON prompts 
+  FOR SELECT USING (is_public = true);
