@@ -17,11 +17,20 @@ export default async function SharePage({ params }: { params: { chatId: string }
     .eq('id', params.chatId)
     .single()
 
-  if (chatError) {
-    console.error("Shared Chat Fetch Error:", chatError)
+  if (!chat) {
+    return (
+      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-10 font-mono text-xs">
+        <h1 className="text-red-500 mb-4 font-black text-xl">VIRAL SHARE DEBUG</h1>
+        <div className="bg-white/5 p-4 rounded-xl space-y-2 border border-white/10 max-w-lg">
+          <p><span className="text-gray-500">Error:</span> {chatError?.message || "Chat record not found in database"}</p>
+          <p><span className="text-gray-500">ID Requested:</span> {params.chatId}</p>
+          <p><span className="text-gray-500">Next.js Route:</span> /share/[chatId]</p>
+          <p><span className="text-gray-500">Troubleshooting:</span> Ensure you have run the SQL to add 'is_public' and the GUEST RLS policies.</p>
+        </div>
+        <Link href="/" className="mt-8 text-blue-500 hover:underline">Return to Threadly</Link>
+      </div>
+    )
   }
-
-  if (!chat) notFound()
 
   // Fetch messages
   const { data: messages } = await supabase
