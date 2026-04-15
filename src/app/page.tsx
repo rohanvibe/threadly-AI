@@ -402,7 +402,11 @@ export default function ChatPage() {
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: messageContent, chatId }),
+          body: JSON.stringify({ 
+            message: messageContent, 
+            messages: messages.slice(-20), // Send last 20 messages for context
+            chatId 
+          }),
           signal: abortControllerRef.current.signal
         })
 

@@ -19,10 +19,10 @@ export async function POST(req: Request) {
       .eq('id', user.id)
       .single()
 
-    const { message, chatId, skipSave, stream: requestedStream = true } = await req.json()
+    const { message, messages: history = [], chatId, skipSave, stream: requestedStream = true } = await req.json()
 
-    if (!message) {
-      return NextResponse.json({ error: 'Message is required' }, { status: 400 })
+    if (!message && history.length === 0) {
+      return NextResponse.json({ error: 'Message or history is required' }, { status: 400 })
     }
 
     // Format memory if it exists
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
              memoryPrompt = `USER CONTEXT & MEMORY:\n${memories.map(m => `- ${m}`).join('\n')}`
           }
        } catch (e) {
-          memoryPrompt = profile.ai_memory // Fallback to raw if not JSON
+          memoryPrompt = profile.ai_memory
        }
     }
 
@@ -50,6 +50,17 @@ If the user shares new personal information, preferences, or technical context a
 At the VERY END of your response, output a single line with this format: [MEMORY_LEARNED: <brief concise fact>]. 
 Do not mention memory unless you are recording it. Only record high-value facts.`
 
+    // Construct full message history for the AI
+    const apiMessages = [
+      { role: 'system', content: systemPrompt },
+      ...history.map((m: any) => ({ role: m.role, content: m.content })),
+    ]
+    
+    // Add the current message if it's not already in history
+    if (message && (!history.length || history[history.length-1].content !== message)) {
+      apiMessages.push({ role: 'user', content: message })
+    }
+
     const response = await fetch('https://api.sambanova.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -58,10 +69,7 @@ Do not mention memory unless you are recording it. Only record high-value facts.
       },
       body: JSON.stringify({
         model: 'Meta-Llama-3.3-70B-Instruct',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: message }
-        ],
+        messages: apiMessages,
         stream: requestedStream
       })
     })
