@@ -92,6 +92,8 @@ export default function ChatPage() {
   const [isPublic, setIsPublic] = useState(false)
   const [sharing, setSharing] = useState(false)
   const [wowPhase, setWowPhase] = useState(false)
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
+  const [editValue, setEditValue] = useState('')
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
@@ -429,6 +431,37 @@ export default function ChatPage() {
       abortControllerRef.current = null
     }
   }
+  
+  const handleEditMessage = (msg: Message) => {
+    setEditingMessageId(msg.id)
+    setEditValue(msg.content)
+  }
+
+  const cancelEdit = () => {
+    setEditingMessageId(null)
+    setEditValue('')
+  }
+
+  const submitEdit = async (msgId: string) => {
+    if (!editValue.trim() || !currentChatId) return
+    
+    // Find index of the message being edited
+    const index = messages.findIndex(m => m.id === msgId)
+    if (index === -1) return
+
+    const messagesToDelete = messages.slice(index)
+    const idsToDelete = messagesToDelete.map(m => m.id)
+
+    // Delete from state immediately
+    setMessages(prev => prev.slice(0, index))
+    setEditingMessageId(null)
+
+    // Delete from DB
+    await supabase.from('messages').delete().in('id', idsToDelete)
+
+    // Resend with new content
+    sendMessage(undefined, editValue)
+  }
 
   const scrollToMessage = (msgId: string) => {
     const el = document.getElementById(`message-${msgId}`)
@@ -658,6 +691,9 @@ export default function ChatPage() {
                           {msg.role === 'assistant' ? 'Assistant·AI' : 'Member·Space'}
                         </span>
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                           {msg.role === 'user' && (
+                              <Button variant="ghost" size="icon" title="Edit" className="w-8 h-8 text-gray-500 hover:text-white" onClick={() => handleEditMessage(msg)}><Edit2 className="w-3.5 h-3.5" /></Button>
+                           )}
                            <Button variant="ghost" size="icon" title="Copy" className="w-8 h-8 text-gray-500 hover:text-white" onClick={() => copyToClipboard(msg.content)}><Copy className="w-3.5 h-3.5" /></Button>
                            <Button variant="ghost" size="icon" title="Export Image" className="w-8 h-8 text-gray-500 hover:text-white" onClick={() => exportAsImage(msg.id)}><Camera className="w-3.5 h-3.5" /></Button>
                            {msg.role === 'assistant' && (
@@ -665,34 +701,50 @@ export default function ChatPage() {
                            )}
                         </div>
                       </div>
-                    <div className="text-gray-200 leading-relaxed text-[15px] prose prose-invert prose-sm max-w-none prose-p:leading-[1.7] prose-pre:rounded-2xl prose-code:text-blue-400 break-all wrap-break-word selection:bg-blue-500/40">
-                      {msg.content === '' && loading ? (
-                        <div className="flex items-center gap-4 py-2">
-                           <div className="flex gap-1.5 item-center">
-                              {[1,2,3].map(d => <motion.div key={d} animate={{ opacity: [0.2, 1, 0.2] }} transition={{ repeat: Infinity, duration: 1, delay: d * 0.2 }} className="w-2 h-2 rounded-full bg-blue-600" />)}
+                      
+                      {editingMessageId === msg.id ? (
+                        <div className="space-y-4">
+                           <textarea
+                             value={editValue}
+                             onChange={(e) => setEditValue(e.target.value)}
+                             className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm font-medium outline-none focus:border-blue-500/50 min-h-[100px] resize-none"
+                             autoFocus
+                           />
+                           <div className="flex justify-end gap-2">
+                              <Button variant="ghost" size="sm" onClick={cancelEdit} className="text-[10px] font-bold uppercase tracking-widest px-4">Cancel</Button>
+                              <Button size="sm" onClick={() => submitEdit(msg.id)} className="bg-blue-600 hover:bg-blue-500 text-[10px] font-bold uppercase tracking-widest px-6 shadow-lg shadow-blue-500/20">Save & Resend</Button>
                            </div>
-                           <span className="text-[10px] font-black tracking-widest uppercase text-blue-500 pt-0.5">Syncing Stream</span>
                         </div>
                       ) : (
-                        <ReactMarkdown 
-                          remarkPlugins={[remarkGfm]}
-                          components={{
-                            table: ({ children }) => (
-                              <div className="overflow-x-auto my-6 rounded-xl border border-white/10 bg-white/5 custom-scrollbar">
-                                <table className="min-w-full divide-y divide-white/10">{children}</table>
-                              </div>
-                            ),
-                            th: ({ children }) => <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-blue-500 bg-white/5">{children}</th>,
-                            td: ({ children }) => <td className="px-4 py-3 text-xs border-t border-white/5 text-gray-300">{children}</td>,
-                            ul: ({ children }) => <ul className="list-disc pl-5 space-y-2 mb-4 wrap-break-word">{children}</ul>,
-                            ol: ({ children }) => <ol className="list-decimal pl-5 space-y-2 mb-4 wrap-break-word">{children}</ol>,
-                            li: ({ children }) => <li className="leading-relaxed wrap-break-word">{children}</li>
-                          }}
-                        >
-                          {msg.content}
-                        </ReactMarkdown>
+                        <div className="text-gray-200 leading-relaxed text-[15px] prose prose-invert prose-sm max-w-none prose-p:leading-[1.7] prose-pre:rounded-2xl prose-code:text-blue-400 break-all wrap-break-word selection:bg-blue-500/40">
+                          {msg.content === '' && loading ? (
+                             <div className="flex items-center gap-4 py-2">
+                                <div className="flex gap-1.5 item-center">
+                                   {[1,2,3].map(d => <motion.div key={d} animate={{ opacity: [0.2, 1, 0.2] }} transition={{ repeat: Infinity, duration: 1, delay: d * 0.2 }} className="w-2 h-2 rounded-full bg-blue-600" />)}
+                                </div>
+                                <span className="text-[10px] font-black tracking-widest uppercase text-blue-500 pt-0.5">Syncing Stream</span>
+                             </div>
+                          ) : (
+                            <ReactMarkdown 
+                              remarkPlugins={[remarkGfm]}
+                              components={{
+                                table: ({ children }) => (
+                                  <div className="overflow-x-auto my-6 rounded-xl border border-white/10 bg-white/5 custom-scrollbar">
+                                    <table className="min-w-full divide-y divide-white/10">{children}</table>
+                                  </div>
+                                ),
+                                th: ({ children }) => <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-blue-500 bg-white/5">{children}</th>,
+                                td: ({ children }) => <td className="px-4 py-3 text-xs border-t border-white/5 text-gray-300">{children}</td>,
+                                ul: ({ children }) => <ul className="list-disc pl-5 space-y-2 mb-4 wrap-break-word">{children}</ul>,
+                                ol: ({ children }) => <ol className="list-decimal pl-5 space-y-2 mb-4 wrap-break-word">{children}</ol>,
+                                li: ({ children }) => <li className="leading-relaxed wrap-break-word">{children}</li>
+                              }}
+                            >
+                              {msg.content}
+                            </ReactMarkdown>
+                          )}
+                        </div>
                       )}
-                    </div>
                   </div>
                 </motion.div>
               ))}
