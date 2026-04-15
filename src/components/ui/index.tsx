@@ -99,7 +99,7 @@ export function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivEl
 }
 
 // --- TOAST SYSTEM ---
-type ToastType = 'success' | 'error' | 'info'
+type ToastType = 'success' | 'error' | 'info' | 'warning'
 
 interface Toast {
   id: string
@@ -137,11 +137,13 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 "flex items-center gap-3 px-4 py-3 rounded-xl border shadow-2xl pointer-events-auto min-w-[280px]",
                 t.type === 'success' ? "bg-green-500/10 border-green-500/20 text-green-400" :
                 t.type === 'error' ? "bg-red-500/10 border-red-500/20 text-red-400" :
+                t.type === 'warning' ? "bg-amber-500/10 border-amber-500/20 text-amber-400" :
                 "bg-[#18181b] border-[#27272a] text-white"
               )}
             >
               {t.type === 'success' && <CheckCircle2 className="w-4 h-4" />}
               {t.type === 'error' && <AlertCircle className="w-4 h-4" />}
+              {t.type === 'warning' && <AlertCircle className="w-4 h-4" />}
               {t.type === 'info' && <Info className="w-4 h-4" />}
               <span className="text-sm font-medium">{t.message}</span>
               <button 

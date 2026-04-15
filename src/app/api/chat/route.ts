@@ -99,15 +99,6 @@ export async function POST(req: Request) {
         } catch (error) {
           controller.error(error)
         } finally {
-          if (fullAssistantContent && !skipSave) {
-             // Use a non-blocking background task for DB insert if possible, 
-             // but here we are in a stream so we await before closing.
-             await supabase.from('messages').insert([{ 
-                chat_id: chatId, 
-                role: 'assistant', 
-                content: fullAssistantContent 
-             }])
-          }
           controller.close()
         }
       }

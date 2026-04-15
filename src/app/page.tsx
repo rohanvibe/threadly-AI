@@ -376,8 +376,8 @@ export default function ChatPage() {
     }
     setMessages(prev => [...prev, tempUserMsg])
     
-    // Start DB insert and AI fetch in parallel for zero-latency start
-    const dbInsertPromise = supabase.from('messages').insert([{ chat_id: chatId, role: 'user', content: messageContent }])
+    // Start DB insert in parallel
+    const userMsgInsert = supabase.from('messages').insert([{ chat_id: chatId, role: 'user', content: messageContent }])
 
     // Create placeholder for assistant message
     const assistantMsgId = Math.random().toString()
@@ -412,10 +412,17 @@ export default function ChatPage() {
           setMessages(prev => prev.map(m => m.id === assistantMsgId ? { ...m, content: accumulatedContent } : m))
         }
         // Save to DB after stream finishes
-        await Promise.all([
-          dbInsertPromise,
+        const [userResult, assistantResult] = await Promise.all([
+          userMsgInsert,
           supabase.from('messages').insert([{ chat_id: chatId, role: 'assistant', content: accumulatedContent }])
         ])
+
+        if (userResult.error) console.error("User message save error:", userResult.error)
+        if (assistantResult.error) console.error("Assistant message save error:", assistantResult.error)
+        
+        if (userResult.error || assistantResult.error) {
+           toast("Storage sync failed. History may be incomplete.", "warning")
+        }
       } else {
         // BYOK logic... (same as before but with abort signal support)
       }
