@@ -5,13 +5,14 @@ import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
-export default async function PromptSharePage({ params }: { params: { id: string } }) {
+export default async function PromptSharePage(props: { params: Promise<{ id: string }> }) {
+  const { id } = await props.params
   const supabase = await createClient()
   
   const { data: prompt } = await supabase
     .from('prompts')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (!prompt) notFound()

@@ -7,14 +7,15 @@ import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
-export default async function SharePage({ params }: { params: { chatId: string } }) {
+export default async function SharePage(props: { params: Promise<{ chatId: string }> }) {
+  const { chatId } = await props.params
   const supabase = await createClient()
   
   // Fetch chat
   const { data: chat, error: chatError } = await supabase
     .from('chats')
     .select('*')
-    .eq('id', params.chatId)
+    .eq('id', chatId)
     .single()
 
   if (!chat) {
@@ -23,7 +24,7 @@ export default async function SharePage({ params }: { params: { chatId: string }
         <h1 className="text-red-500 mb-4 font-black text-xl">VIRAL SHARE DEBUG</h1>
         <div className="bg-white/5 p-4 rounded-xl space-y-2 border border-white/10 max-w-lg">
           <p><span className="text-gray-500">Error:</span> {chatError?.message || "Chat record not found in database"}</p>
-          <p><span className="text-gray-500">ID Requested:</span> {params.chatId}</p>
+          <p><span className="text-gray-500">ID Requested:</span> {chatId}</p>
           <p><span className="text-gray-500">Next.js Route:</span> /share/[chatId]</p>
           <p><span className="text-gray-500">Troubleshooting:</span> Ensure you have run the SQL to add 'is_public' and the GUEST RLS policies.</p>
         </div>
@@ -36,7 +37,7 @@ export default async function SharePage({ params }: { params: { chatId: string }
   const { data: messages } = await supabase
     .from('messages')
     .select('*')
-    .eq('chat_id', params.chatId)
+    .eq('chat_id', chatId)
     .order('created_at', { ascending: true })
 
   return (
