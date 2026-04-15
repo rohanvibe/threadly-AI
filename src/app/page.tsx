@@ -598,17 +598,6 @@ export default function ChatPage() {
             <button onClick={() => setIsNavOpen(true)} className="hover:text-blue-500 transition-all flex items-center gap-2 group">
               <Menu className="w-6 h-6 group-hover:scale-110" />
             </button>
-            {currentChatId && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={shareChat}
-                className="rounded-xl px-4 flex items-center gap-2 border border-white/5 bg-white/1 hover:bg-white/5"
-              >
-                <Share2 className="w-3.5 h-3.5 text-blue-500" />
-                <span className="text-[10px] font-black uppercase tracking-widest pt-0.5">Viral Share</span>
-              </Button>
-            )}
           </div>
         )}
 
@@ -625,6 +614,24 @@ export default function ChatPage() {
                <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`p-2 rounded-xl border transition-all ${isSidebarOpen ? 'border-blue-500/50 bg-blue-500/10 text-blue-400' : 'border-transparent'}`}><History className="w-5 h-5" /></button>
             </div>
           </div>
+        )}
+
+        {/* Desktop Header Actions */}
+        {!isMobile && (
+           <div className="absolute top-5 right-5 z-40 flex items-center gap-2">
+              {currentChatId && (
+                 <Button 
+                   variant="ghost" 
+                   size="sm" 
+                   onClick={shareChat}
+                   className="rounded-xl px-4 flex items-center gap-2 border border-white/5 bg-white/10 hover:bg-white/20 backdrop-blur-md"
+                 >
+                   <Share2 className="w-3.5 h-3.5 text-blue-500" />
+                   <span className="text-[10px] font-black uppercase tracking-widest pt-0.5">Viral Share</span>
+                 </Button>
+              )}
+              <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`p-2 rounded-xl border transition-all ${isSidebarOpen ? 'border-blue-500/50 bg-blue-500/10 text-blue-400' : 'border-white/5 text-gray-400 hover:text-white'}`}><History className="w-5 h-5" /></button>
+           </div>
         )}
 
         <div id="chat-messages-container" className="flex-1 overflow-y-auto p-4 md:p-8 space-y-12 scroll-smooth custom-scrollbar relative z-10">
