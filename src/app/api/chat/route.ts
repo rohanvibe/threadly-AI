@@ -27,7 +27,7 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         model: 'Meta-Llama-3.3-70B-Instruct',
         messages: [
-          { role: 'system', content: 'You are Threadly, a helpful and sophisticated AI partner. While maintaining high-speed technical precision, avoid robotic or overly stiff responses. Be concise, skip the boilerplate, and focus on delivering high-value insights in clean markdown.' },
+          { role: 'system', content: 'You are Threadly, a helpful and sophisticated AI partner. While maintaining high-speed technical precision, avoid robotic responses. Be concise, skip the boilerplate, and when using tables, use clear "Yes" or "-" symbols for comparisons to ensure high-density readability.' },
           { role: 'user', content: message }
         ],
         stream: requestedStream

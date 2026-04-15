@@ -750,12 +750,12 @@ export default function ChatPage() {
                               remarkPlugins={[remarkGfm]}
                               components={{
                                 table: ({ children }) => (
-                                  <div className="overflow-x-auto my-6 rounded-xl border border-white/10 bg-white/5 custom-scrollbar">
-                                    <table className="min-w-full divide-y divide-white/10">{children}</table>
+                                  <div className="w-full overflow-x-auto my-8 rounded-2xl border border-white/10 bg-white/2 shadow-2xl custom-scrollbar">
+                                    <table className="min-w-full divide-y divide-white/5 border-collapse">{children}</table>
                                   </div>
                                 ),
-                                th: ({ children }) => <th className="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-blue-500 bg-white/5">{children}</th>,
-                                td: ({ children }) => <td className="px-4 py-3 text-xs border-t border-white/5 text-gray-300">{children}</td>,
+                                th: ({ children }) => <th className="px-6 py-4 text-left text-[11px] font-black uppercase tracking-[0.2em] text-blue-400 bg-white/5 whitespace-nowrap">{children}</th>,
+                                td: ({ children }) => <td className="px-6 py-4 text-sm border-t border-white/5 text-gray-300 whitespace-nowrap min-w-[120px]">{children}</td>,
                                 ul: ({ children }) => <ul className="list-disc pl-5 space-y-2 mb-4 wrap-break-word">{children}</ul>,
                                 ol: ({ children }) => <ol className="list-decimal pl-5 space-y-2 mb-4 wrap-break-word">{children}</ol>,
                                 li: ({ children }) => <li className="leading-relaxed wrap-break-word">{children}</li>
