@@ -6,7 +6,7 @@ Threadly is a high-performance, production-ready AI chatbot workspace built with
 
 ## ✨ Features
 
-- **🚀 SambaNova LLaMA 3.1 Integration**: Blazing fast, enterprise-grade AI responses streaming in real-time.
+- **🚀 SambaNova LLaMA 3.3 Integration**: Blazing fast, enterprise-grade AI responses streaming in real-time.
 - **🛡️ Secure BYOK (Bring Your Own Key)**: Use your own OpenAI keys. Keys are stored safely in your browser and never transmitted to our servers.
 - **🔒 Robust Authentication**: Complete user lifecycle management powered by Supabase Auth.
 - **📂 Persistent Chat History**: Manage multiple conversations with automatic AI-generated titles and persistent storage.
@@ -18,7 +18,7 @@ Threadly is a high-performance, production-ready AI chatbot workspace built with
 
 - **Framework**: Next.js 15+ (App Router)
 - **Database & Auth**: Supabase (PostgreSQL + RLS)
-- **AI Engine**: SambaNova Cloud (LLaMA 3.1 8B)
+- **AI Engine**: SambaNova Cloud (LLaMA 3.3 70B)
 - **Styling**: Tailwind CSS 4
 - **Animations**: Framer Motion
 - **Icons**: Lucide React
