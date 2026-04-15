@@ -35,7 +35,17 @@ export async function POST(req: Request) {
     })
 
     if (!response.ok) {
-        return NextResponse.json({ error: 'SambaNova Error' }, { status: 500 })
+        let errorData
+        try {
+          errorData = await response.json()
+        } catch {
+          errorData = { message: 'Failed to parse error response' }
+        }
+        console.error('SambaNova API Error Context:', errorData)
+        return NextResponse.json({ 
+          error: 'SambaNova Error', 
+          details: errorData.message || response.statusText 
+        }, { status: response.status })
     }
 
     if (!requestedStream) {
