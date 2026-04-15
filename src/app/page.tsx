@@ -424,22 +424,30 @@ export default function ChatPage() {
         }
         
         let finalContent = accumulatedContent
-        const memoryMatch = finalContent.match(/\[MEMORY_LEARNED:\s*(.*?)\]/)
+        const memoryMatch = finalContent.match(/\[MEMORY_LEARNED:\s*(.*?)\]/i)
         
         if (memoryMatch) {
            const newFact = memoryMatch[1].trim()
-           finalContent = finalContent.replace(/\[MEMORY_LEARNED:.*?\]/g, '').trim()
+           finalContent = finalContent.replace(/\[MEMORY_LEARNED:.*?\]/gi, '').trim()
            
            // Sync new memory to Supabase
            const { data: { user } } = await supabase.auth.getUser()
            if (user) {
-              const { data: currentProfile } = await supabase.from('profiles').select('ai_memory').eq('id', user.id).single()
-              let mems = []
-              try { mems = JSON.parse(currentProfile?.ai_memory || '[]') } catch (e) {}
+              const { data: currentProfile } = await supabase.from('profiles').select('ai_memory').eq('id', user.id).maybeSingle()
+              let mems: string[] = []
+              try { 
+                mems = JSON.parse(currentProfile?.ai_memory || '[]')
+                if (!Array.isArray(mems)) mems = []
+              } catch (e) { mems = [] }
+
               if (!mems.includes(newFact)) {
                  const updatedMems = [...mems, newFact]
-                 await supabase.from('profiles').upsert({ id: user.id, ai_memory: JSON.stringify(updatedMems) })
-                 toast(`Threadly remembered: ${newFact}`, "info")
+                 await supabase.from('profiles').upsert({ 
+                   id: user.id, 
+                   ai_memory: JSON.stringify(updatedMems),
+                   updated_at: new Date().toISOString()
+                 }, { onConflict: 'id' })
+                 toast(`Threadly learned: ${newFact}`, "info")
               }
            }
         }
