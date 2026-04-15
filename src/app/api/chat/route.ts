@@ -25,7 +25,7 @@ export async function POST(req: Request) {
         'Authorization': `Bearer ${process.env.SAMBANOVA_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'Meta-Llama-3.1-8B-Instruct',
+        model: 'Meta-Llama-3.3-70B-Instruct',
         messages: [
           { role: 'system', content: 'You are Threadly, a high-performance AI. Be extremely concise, use technical markdown, and skip pleasantries. Speed is priority.' },
           { role: 'user', content: message }
