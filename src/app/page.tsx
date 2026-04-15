@@ -348,6 +348,13 @@ export default function ChatPage() {
     if (!messageContent.trim() || loading || !user) return
 
     let chatId = currentChatId
+    
+    // Self-healing: If currentChatId is stale or not in history, force create a new one
+    if (chatId && !chats.find(c => c.id === chatId)) {
+      chatId = null
+      setCurrentChatId(null)
+    }
+
     if (!chatId) {
       const { data } = await supabase
         .from('chats')
