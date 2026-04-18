@@ -117,6 +117,8 @@ export default function ChatPage() {
   // Phase 6 Chat Map
   const [sidebarMode, setSidebarMode] = useState<'flow' | 'map'>('flow')
 
+  const [savedMemoryMsgId, setSavedMemoryMsgId] = useState<string | null>(null)
+
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -570,7 +572,8 @@ export default function ChatPage() {
                    updated_at: new Date().toISOString()
                  }, { onConflict: 'id' })
                  setProfileMemories(updatedMems)
-                 toast(`Threadly learned: ${newFact}`, "info")
+                 setSavedMemoryMsgId(assistantMsgId)
+                 setTimeout(() => setSavedMemoryMsgId(null), 4000)
               }
            }
         }
@@ -886,9 +889,24 @@ export default function ChatPage() {
                   </div>
                   <div className="flex-1 space-y-4 min-w-0 overflow-hidden">
                       <div className="flex items-center justify-between">
-                        <span className="font-black text-[10px] tracking-[0.3em] uppercase text-gray-500 pt-1">
-                          {msg.role === 'assistant' ? 'Assistant·AI' : 'Member·Space'}
-                        </span>
+                        <div className="flex items-center gap-3">
+                          <span className="font-black text-[10px] tracking-[0.3em] uppercase text-gray-500 pt-1">
+                            {msg.role === 'assistant' ? 'Assistant·AI' : 'Member·Space'}
+                          </span>
+                          <AnimatePresence>
+                            {savedMemoryMsgId === msg.id && (
+                               <motion.div
+                                 initial={{ opacity: 0, scale: 0.8, x: -10 }}
+                                 animate={{ opacity: 1, scale: 1, x: 0 }}
+                                 exit={{ opacity: 0, scale: 0.8 }}
+                                 className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20"
+                               >
+                                  <Check className="w-3 h-3 text-blue-500" />
+                                  <span className="text-[8px] font-black uppercase tracking-widest text-blue-500 pt-px">Saved</span>
+                               </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
                         <div className={`flex items-center gap-1 transition-opacity ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                            {msg.role === 'user' && (
                               <Button variant="ghost" size="icon" title="Edit" className="w-8 h-8 text-gray-500 hover:text-white" onClick={() => handleEditMessage(msg)}><Edit2 className="w-3.5 h-3.5" /></Button>

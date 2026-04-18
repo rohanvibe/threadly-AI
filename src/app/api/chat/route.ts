@@ -60,8 +60,10 @@ ${profile?.custom_instructions ? `HOW TO RESPOND: ${profile.custom_instructions}
 ${memoryPrompt}
 
 MEMORY MANAGEMENT: 
-If the user shares new technical or project context, identify it. 
-At the VERY END of your response, output a single line with this format: [MEMORY_LEARNED: <brief concise fact>].`
+Do NOT output phrases like "Memory learned" or "I will remember that" in your natural text. Act completely natural.
+IF AND ONLY IF the user explicitly asks you to remember something, or shares a highly critical persistent fact (e.g., tech stack, project rules), you may trigger the memory system.
+To log a memory, output a single line at the VERY END of your response exactly like this: [MEMORY_LEARNED: <brief concise fact>]. 
+DO NOT USE THIS TAG unless absolutely critical. Keep it extremely rare.`
 
     // Construct full message history for the AI
     const apiMessages = [
