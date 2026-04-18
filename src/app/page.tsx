@@ -148,12 +148,12 @@ export default function ChatPage() {
   const fetchProfile = async (uid: string) => {
     const { data } = await supabase.from('profiles').select('ai_memory').eq('id', uid).maybeSingle()
     if (data) {
+       let mems: string[] = []
        try {
-          const mems = JSON.parse(data.ai_memory || '[]')
-          setProfileMemories(Array.isArray(mems) ? mems : [])
-       } catch (e) {
-          setProfileMemories([])
-       }
+          if (Array.isArray(data.ai_memory)) mems = data.ai_memory
+          else if (typeof data.ai_memory === 'string') mems = JSON.parse(data.ai_memory)
+       } catch (e) { }
+       setProfileMemories(Array.isArray(mems) ? mems : [])
     }
   }
 
@@ -565,15 +565,17 @@ export default function ChatPage() {
               const { data: currentProfile } = await supabase.from('profiles').select('ai_memory').eq('id', user.id).maybeSingle()
               let mems: string[] = []
               try { 
-                mems = JSON.parse(currentProfile?.ai_memory || '[]')
-                if (!Array.isArray(mems)) mems = []
-              } catch (e) { mems = [] }
+                if (Array.isArray(currentProfile?.ai_memory)) mems = currentProfile.ai_memory
+                else if (typeof currentProfile?.ai_memory === 'string') mems = JSON.parse(currentProfile.ai_memory)
+              } catch (e) { }
+
+              if (!Array.isArray(mems)) mems = []
 
               if (!mems.includes(newFact)) {
                  const updatedMems = [...mems, newFact]
                  await supabase.from('profiles').upsert({ 
                    id: user.id, 
-                   ai_memory: JSON.stringify(updatedMems),
+                   ai_memory: updatedMems,
                    updated_at: new Date().toISOString()
                  }, { onConflict: 'id' })
                  setProfileMemories(updatedMems)

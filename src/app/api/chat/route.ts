@@ -31,13 +31,12 @@ export async function POST(req: Request) {
     // Format memory if it exists
     let memoryPrompt = ''
     if (profile?.ai_memory) {
-       try {
-          const memories = JSON.parse(profile.ai_memory)
-          if (Array.isArray(memories) && memories.length > 0) {
-             memoryPrompt = `USER CONTEXT & MEMORY:\n${memories.map((m: string) => `- ${m}`).join('\n')}`
-          }
-       } catch (e) {
-          memoryPrompt = profile.ai_memory
+       let memories = profile.ai_memory
+       if (typeof memories === 'string') {
+          try { memories = JSON.parse(memories) } catch (e) {}
+       }
+       if (Array.isArray(memories) && memories.length > 0) {
+          memoryPrompt = `USER CONTEXT & MEMORY:\n${memories.map((m: any) => `- ${m}`).join('\n')}`
        }
     }
 
