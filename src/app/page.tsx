@@ -1,6 +1,8 @@
 'use client'
 
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import { useShortcuts, ShortcutContextMenu, SHORTCUT_LABELS, DEFAULT_SHORTCUTS, captureShortcutString } from '@/hooks/useShortcuts'
+import type { ShortcutId, ContextMenuState } from '@/hooks/useShortcuts'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import { 
@@ -119,6 +121,9 @@ export default function ChatPage() {
 
   const [savedMemoryMsgId, setSavedMemoryMsgId] = useState<string | null>(null)
 
+  // Shortcut state
+  const [contextMenu, setContextMenu] = useState<ContextMenuState>(null)
+
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -126,6 +131,25 @@ export default function ChatPage() {
   const supabase = createClient()
   const router = useRouter()
   const { toast } = useToast()
+
+  // ── Shortcuts ──────────────────────────────────────────────────
+  const { shortcuts, updateShortcut, resetShortcuts, getShortcutLabel } = useShortcuts({
+    newChat:       () => createNewChat(),
+    sendMessage:   () => sendMessage(),
+    stopResponse:  () => stopResponding(),
+    toggleNav:     () => setIsNavOpen(p => !p),
+    toggleSidebar: () => setIsSidebarOpen(p => !p),
+    focusSearch:   () => { setIsNavOpen(true); setTimeout(() => document.getElementById('chat-search')?.focus(), 100) },
+    openSettings:  () => setShowSettings(true),
+    openPrompts:   () => setShowPrompts(true),
+    shareChat:     () => currentChatId && shareChat(),
+    attachFile:    () => fileInputRef.current?.click(),
+  })
+
+  const openContextMenu = useCallback((e: React.MouseEvent, id: ShortcutId) => {
+    e.preventDefault()
+    setContextMenu({ x: e.clientX, y: e.clientY, shortcutId: id, label: SHORTCUT_LABELS[id] })
+  }, [])
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -195,25 +219,8 @@ export default function ChatPage() {
       window.history.replaceState({}, '', '/')
     }
 
-    // Handle keyboard shortcuts
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Cmd/Ctrl + \ to toggle sidebar
-      if ((e.metaKey || e.ctrlKey) && e.key === '\\') {
-        setIsSidebarOpen(prev => !prev)
-        e.preventDefault()
-      }
-      // Cmd/Ctrl + K to search sidebar
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        setIsSidebarOpen(true)
-        setTimeout(() => document.getElementById('sidebar-search')?.focus(), 100)
-        e.preventDefault()
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-
     return () => {
       window.removeEventListener('resize', checkMobile)
-      window.removeEventListener('keydown', handleKeyDown)
     }
   }, [])
 
@@ -786,13 +793,15 @@ export default function ChatPage() {
                   <button onClick={handleDeleteAccount} className="p-2 hover:bg-red-500/10 rounded-xl transition-all group/del"><UserMinus className="w-4 h-4 text-gray-400 group-hover/del:text-red-500" /></button>
                 </div>
               </div>
-              <Button variant="ghost" className="w-full justify-start gap-4 rounded-xl py-5" onClick={() => setShowPrompts(true)}>
+              <Button variant="ghost" className="w-full justify-start gap-4 rounded-xl py-5" onClick={() => setShowPrompts(true)} onContextMenu={e => openContextMenu(e, 'openPrompts')}>
                 <Command className="w-4 h-4 text-blue-500" />
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] pt-0.5">Prompt Library</span>
+                <span className="ml-auto text-[8px] font-mono text-gray-600">{getShortcutLabel('openPrompts')}</span>
               </Button>
-              <Button variant="ghost" className="w-full justify-start gap-4 rounded-xl py-5" onClick={() => setShowSettings(true)}>
+              <Button variant="ghost" className="w-full justify-start gap-4 rounded-xl py-5" onClick={() => setShowSettings(true)} onContextMenu={e => openContextMenu(e, 'openSettings')}>
                 <Settings className="w-4 h-4 text-blue-500" />
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] pt-0.5">Settings</span>
+                <span className="ml-auto text-[8px] font-mono text-gray-600">{getShortcutLabel('openSettings')}</span>
               </Button>
             </div>
           </motion.div>
@@ -837,13 +846,15 @@ export default function ChatPage() {
                    variant="ghost" 
                    size="sm" 
                    onClick={shareChat}
+                   onContextMenu={e => openContextMenu(e, 'shareChat')}
                    className="rounded-xl px-4 flex items-center gap-2 border border-white/5 bg-white/10 hover:bg-white/20 backdrop-blur-md"
                  >
                    <Share2 className="w-3.5 h-3.5 text-blue-500" />
-                   <span className="text-[10px] font-black uppercase tracking-widest pt-0.5">Viral Share</span>
+                   <span className="text-[10px] font-black uppercase tracking-widest pt-0.5">Share</span>
+                   <span className="text-[8px] font-mono text-gray-500">{getShortcutLabel('shareChat')}</span>
                  </Button>
               )}
-              <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`p-2 rounded-xl border transition-all ${isSidebarOpen ? 'border-blue-500/50 bg-blue-500/10 text-blue-400' : 'border-white/5 text-gray-400 hover:text-white'}`}><History className="w-5 h-5" /></button>
+              <button onContextMenu={e => openContextMenu(e, 'toggleSidebar')} onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`p-2 rounded-xl border transition-all ${isSidebarOpen ? 'border-blue-500/50 bg-blue-500/10 text-blue-400' : 'border-white/5 text-gray-400 hover:text-white'}`}><History className="w-5 h-5" /></button>
            </div>
         )}
 
@@ -1050,11 +1061,11 @@ export default function ChatPage() {
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
                     {loading ? (
-                      <Button onClick={stopResponding} variant="outline" size="icon" className="w-10 h-10 rounded-xl border-white/10 hover:border-red-500/50 hover:text-red-500">
+                      <Button onContextMenu={e => openContextMenu(e, 'stopResponse')} onClick={stopResponding} variant="outline" size="icon" className="w-10 h-10 rounded-xl border-white/10 hover:border-red-500/50 hover:text-red-500">
                         <Square className="w-4 h-4" />
                       </Button>
                     ) : (
-                      <Button type="submit" disabled={!input.trim()} size="icon" className="w-10 h-10 rounded-xl bg-blue-600 shadow-xl shadow-blue-600/20 active:scale-90 disabled:opacity-30 disabled:grayscale">
+                      <Button onContextMenu={e => openContextMenu(e, 'sendMessage')} type="submit" disabled={!input.trim()} size="icon" className="w-10 h-10 rounded-xl bg-blue-600 shadow-xl shadow-blue-600/20 active:scale-90 disabled:opacity-30 disabled:grayscale">
                         <Send className="w-4 h-4 text-white" />
                       </Button>
                     )}
@@ -1068,6 +1079,14 @@ export default function ChatPage() {
            </div>
         </div>
       </div>
+
+      {/* Global shortcut context menu */}
+      <ShortcutContextMenu
+        state={contextMenu}
+        currentKey={contextMenu ? shortcuts[contextMenu.shortcutId] : ''}
+        onAssign={updateShortcut}
+        onClose={() => setContextMenu(null)}
+      />
 
       <AnimatePresence>
         {isSidebarOpen && (
@@ -1208,14 +1227,14 @@ export default function ChatPage() {
         )}
       </AnimatePresence>
 
-      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
+      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} shortcuts={shortcuts} updateShortcut={updateShortcut} resetShortcuts={resetShortcuts} />}
       {showPrompts && <PromptManager userId={user?.id} onClose={() => setShowPrompts(false)} onSelect={(p) => setInput(p)} />}
     </div>
   )
 }
 
-function SettingsModal({ onClose }: { onClose: () => void }) {
-  const [activeTab, setActiveTab] = useState<'general' | 'personalization'>('general')
+function SettingsModal({ onClose, shortcuts, updateShortcut, resetShortcuts }: { onClose: () => void, shortcuts: any, updateShortcut: (id: ShortcutId, key: string) => void, resetShortcuts: () => void }) {
+  const [activeTab, setActiveTab] = useState<'general' | 'personalization' | 'shortcuts'>('general')
   const [keys, setKeys] = useState({ openai: '' })
   const [profile, setProfile] = useState({ custom_instructions: '', ai_memory: [] as string[] })
   const [newMemory, setNewMemory] = useState('')
@@ -1293,12 +1312,12 @@ function SettingsModal({ onClose }: { onClose: () => void }) {
              </CardTitle>
              <Button variant="ghost" size="icon" onClick={onClose} className="rounded-xl"><X className="w-4 h-4" /></Button>
           </div>
-          <div className="flex gap-6 mt-4">
-             {['general', 'personalization'].map((tab) => (
+          <div className="flex gap-6 mt-4 overflow-x-auto">
+             {['general', 'personalization', 'shortcuts'].map((tab) => (
                 <button 
                   key={tab}
                   onClick={() => setActiveTab(tab as any)}
-                  className={`pb-2 text-[9px] font-black uppercase tracking-[0.2em] transition-all border-b-2 ${
+                  className={`pb-2 text-[9px] font-black uppercase tracking-[0.2em] transition-all border-b-2 shrink-0 ${
                     activeTab === tab ? 'border-blue-500 text-white' : 'border-transparent text-gray-500 hover:text-gray-300'
                   }`}
                 >
@@ -1355,6 +1374,9 @@ function SettingsModal({ onClose }: { onClose: () => void }) {
                 </div>
               </div>
             </motion.div>
+          )}
+          {activeTab === 'shortcuts' && (
+            <ShortcutsTab shortcuts={shortcuts} updateShortcut={updateShortcut} resetShortcuts={resetShortcuts} />
           )}
         </CardContent>
 
@@ -1441,4 +1463,91 @@ function PromptManager({ userId, onClose, onSelect }: { userId: string, onClose:
             </Card>
         </div>
     )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Shortcuts Tab (used inside SettingsModal)
+// ─────────────────────────────────────────────────────────────────────────────
+function ShortcutsTab({
+  shortcuts,
+  updateShortcut,
+  resetShortcuts,
+}: {
+  shortcuts: Record<string, string>
+  updateShortcut: (id: any, key: string) => void
+  resetShortcuts: () => void
+}) {
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [captured, setCaptured] = useState<string | null>(null)
+
+  const handleKeyDown = (e: React.KeyboardEvent, id: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const ignoredKeys = ['Control', 'Alt', 'Shift', 'Meta', 'CapsLock', 'Tab']
+    if (ignoredKeys.includes(e.key)) return
+    const parts: string[] = []
+    if (e.ctrlKey)  parts.push('Ctrl')
+    if (e.altKey)   parts.push('Alt')
+    if (e.shiftKey) parts.push('Shift')
+    if (e.metaKey)  parts.push('Cmd')
+    parts.push(e.key === ' ' ? 'Space' : e.key)
+    setCaptured(parts.join('+'))
+  }
+
+  const confirm = (id: string) => {
+    if (captured) { updateShortcut(id as any, captured) }
+    setEditingId(null)
+    setCaptured(null)
+  }
+
+  const cancel = () => { setEditingId(null); setCaptured(null) }
+
+  const LABELS: Record<string, string> = {
+    newChat: 'New Chat', sendMessage: 'Send Message', stopResponse: 'Stop Response',
+    toggleNav: 'Toggle Navigation', toggleSidebar: 'Toggle Thread Sidebar',
+    focusSearch: 'Search Chats', openSettings: 'Open Settings', openPrompts: 'Open Prompt Library',
+    shareChat: 'Share Chat', attachFile: 'Attach File',
+  }
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-[9px] font-black uppercase tracking-widest text-gray-500">Keyboard Shortcuts</p>
+        <button
+          onClick={resetShortcuts}
+          className="text-[9px] font-bold text-blue-500 hover:text-blue-400 uppercase tracking-widest transition-colors"
+        >
+          Reset to Defaults
+        </button>
+      </div>
+
+      {Object.entries(shortcuts).map(([id, key]) => (
+        <div key={id} className="flex items-center justify-between p-3 rounded-xl bg-white/2 border border-white/5 group">
+          <span className="text-xs font-bold text-gray-300">{LABELS[id] || id}</span>
+          {editingId === id ? (
+            <div className="flex items-center gap-2">
+              <div
+                tabIndex={0}
+                autoFocus
+                onKeyDown={(e) => handleKeyDown(e as any, id)}
+                className="px-2 py-1 rounded-lg border-2 border-blue-500/60 bg-blue-500/5 text-xs font-mono text-white outline-none min-w-[80px] text-center"
+              >
+                {captured ?? <span className="text-gray-500 animate-pulse text-[9px]">Press keys...</span>}
+              </div>
+              <button onClick={() => confirm(id)} className="text-[9px] font-black text-blue-500 hover:text-blue-400 uppercase">Save</button>
+              <button onClick={cancel} className="text-[9px] font-black text-gray-600 hover:text-white uppercase">✕</button>
+            </div>
+          ) : (
+            <button
+              onClick={() => { setEditingId(id); setCaptured(null) }}
+              className="flex items-center gap-2 group/btn"
+            >
+              <kbd className="px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-[10px] font-mono text-gray-300 group-hover/btn:border-blue-500/40 transition-all">{key as string}</kbd>
+              <span className="text-[8px] text-gray-600 group-hover/btn:text-blue-400 transition-colors uppercase tracking-widest opacity-0 group-hover/btn:opacity-100">Edit</span>
+            </button>
+          )}
+        </div>
+      ))}
+    </motion.div>
+  )
 }
