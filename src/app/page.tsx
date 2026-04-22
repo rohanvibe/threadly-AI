@@ -100,6 +100,8 @@ export default function ChatPage() {
   const [modelType, setModelType] = useState<'default' | 'byok'>('default')
   const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null)
   const [editingChatId, setEditingChatId] = useState<string | null>(null)
+  const [onboardingStep, setOnboardingStep] = useState<number>(-1)
+  const [showBigSignup, setShowBigSignup] = useState(false)
   const [editingTitle, setEditingTitle] = useState('')
   const [isMobile, setIsMobile] = useState(false)
   const [isPublic, setIsPublic] = useState(false)
@@ -202,6 +204,12 @@ export default function ChatPage() {
       }
     }
     checkUser()
+
+    // Trigger onboarding for new guests
+    const hasSeenOnboarding = localStorage.getItem('threadly_onboarding_shown')
+    if (!user && !hasSeenOnboarding) {
+        setTimeout(() => setOnboardingStep(0), 1500)
+    }
 
     const checkMobile = () => {
       const mobile = window.innerWidth < 1024
@@ -809,18 +817,34 @@ export default function ChatPage() {
                   <button onClick={handleDeleteAccount} className="p-2 hover:bg-red-500/10 rounded-xl transition-all group/del"><UserMinus className="w-4 h-4 text-gray-400 group-hover/del:text-red-500" /></button>
                 </div>
               </div>
-              <Button variant="ghost" className="w-full justify-start gap-4 rounded-xl py-5" onClick={() => setShowPrompts(true)} onContextMenu={e => openContextMenu(e, 'openPrompts')}>
+              <Button id="tutorial-prompts" variant="ghost" className="w-full justify-start gap-4 rounded-xl py-5" onClick={() => setShowPrompts(true)} onContextMenu={e => openContextMenu(e, 'openPrompts')}>
                 <Command className="w-4 h-4 text-blue-500" />
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] pt-0.5">Prompt Library</span>
                 <span className="ml-auto text-[8px] font-mono text-gray-600">{getShortcutLabel('openPrompts')}</span>
               </Button>
-              <Button variant="ghost" className="w-full justify-start gap-4 rounded-xl py-5" onClick={() => setShowSettings(true)} onContextMenu={e => openContextMenu(e, 'openSettings')}>
+              <Button id="tutorial-settings" variant="ghost" className="w-full justify-start gap-4 rounded-xl py-5" onClick={() => setShowSettings(true)} onContextMenu={e => openContextMenu(e, 'openSettings')}>
                 <Settings className="w-4 h-4 text-blue-500" />
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] pt-0.5">Settings</span>
                 <span className="ml-auto text-[8px] font-mono text-gray-600">{getShortcutLabel('openSettings')}</span>
               </Button>
             </div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      <OnboardingTutorial 
+        step={onboardingStep} 
+        onNext={() => setOnboardingStep(s => s + 1)}
+        onComplete={() => {
+          setOnboardingStep(-1)
+          setShowBigSignup(true)
+          localStorage.setItem('threadly_onboarding_shown', 'true')
+        }}
+      />
+
+      <AnimatePresence>
+        {showBigSignup && (
+          <BigSignupModal onClose={() => setShowBigSignup(false)} onAction={() => router.push('/auth')} />
         )}
       </AnimatePresence>
 
@@ -1059,7 +1083,7 @@ export default function ChatPage() {
              </motion.div>
            )}
 
-           <div className="w-full max-w-3xl mx-auto relative group">
+           <div id="tutorial-input" className="w-full max-w-3xl mx-auto relative group">
               <form onSubmit={sendMessage}>
                 <div className="relative">
                   <textarea 
@@ -1137,7 +1161,7 @@ export default function ChatPage() {
               )}
 
               {/* Identity & Memory Card */}
-              <div className="p-6 border-b border-white/5 bg-white/2">
+              <div id="tutorial-memory" className="p-6 border-b border-white/5 bg-white/2">
                 <div className="flex items-center justify-between mb-6">
                    <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-black text-white shadow-xl shadow-blue-600/20 uppercase">
@@ -1174,7 +1198,7 @@ export default function ChatPage() {
               </div>
 
               {/* Chat Index (Session Data) */}
-              <div className="p-5 border-b border-white/5 flex flex-col shrink-0 gap-3">
+              <div id="tutorial-history" className="p-5 border-b border-white/5 flex flex-col shrink-0 gap-3">
                 <div className="flex items-center justify-between">
                   <h2 className="font-black text-[9px] uppercase tracking-[0.4em] text-gray-600 pt-1 flex items-center gap-2">
                      <Activity className="w-3 h-3" />
@@ -1590,3 +1614,144 @@ function ShortcutsTab({
     </motion.div>
   )
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Onboarding Tutorial Components
+// ─────────────────────────────────────────────────────────────────────────────
+function OnboardingTutorial({ step, onNext, onComplete }: { step: number, onNext: () => void, onComplete: () => void }) {
+  const steps = [
+    { targetId: 'tutorial-input', title: 'The Command Center', text: 'Type any question or code block here. SambaNova AI powers every response with blazing fast speeds.' },
+    { targetId: 'tutorial-memory', title: 'Persistent Brain', text: 'Every fact you save is stored here. Threadly intelligently pulls context during chats so you never have to repeat yourself.' },
+    { targetId: 'tutorial-history', title: 'Deep History', text: 'Tap any message in the sidebar to instantly jump to that point in the conversation. No more endless scrolling.' },
+    { targetId: 'tutorial-prompts', title: 'Prompt Library', text: 'Save your most complex instructions as templates and reuse them with one click.' },
+    { targetId: 'tutorial-settings', title: 'Total Control', text: 'Customize shortcuts, manage your AI keys, and personalize your experience.' },
+  ]
+
+  const current = steps[step]
+  const [rect, setRect] = useState<DOMRect | null>(null)
+
+  useEffect(() => {
+    if (current) {
+      const el = document.getElementById(current.targetId)
+      if (el) {
+        setRect(el.getBoundingClientRect())
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    }
+  }, [step, current])
+
+  if (step < 0 || step >= steps.length || !rect) return null
+
+  const isLast = step === steps.length - 1
+
+  return (
+    <div className="fixed inset-0 z-[100] pointer-events-none overflow-hidden">
+      <motion.div 
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} 
+        className="absolute inset-0 bg-black/40 backdrop-blur-[2px] pointer-events-auto" 
+        onClick={(e) => e.stopPropagation()}
+      />
+      
+      {/* The Glow Highlight */}
+      <motion.div
+        animate={{
+          top: rect.top - 8,
+          left: rect.left - 8,
+          width: rect.width + 16,
+          height: rect.height + 16,
+        }}
+        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+        className="absolute border-2 border-blue-500 rounded-2xl shadow-[0_0_30px_rgba(59,130,246,0.5)] z-[101]"
+      />
+
+      {/* The Tooltip */}
+      <motion.div
+        animate={{
+          top: Math.min(window.innerHeight - 200, rect.top + rect.height + 24),
+          left: Math.min(window.innerWidth - 340, Math.max(20, rect.left + rect.width / 2 - 150)),
+        }}
+        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+        className="absolute w-[300px] bg-[#18181b] border border-white/10 rounded-2xl p-5 shadow-2xl z-[102] pointer-events-auto"
+      >
+        <div className="flex items-center gap-2 mb-2">
+            <div className="px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-widest">Step {step + 1}/{steps.length}</div>
+            <h4 className="text-xs font-black uppercase tracking-widest text-white">{current.title}</h4>
+        </div>
+        <p className="text-[11px] text-gray-400 leading-relaxed mb-4">{current.text}</p>
+        <div className="flex items-center justify-between">
+            <div className="flex gap-1">
+                {steps.map((_, i) => (
+                    <div key={i} className={`w-1 h-1 rounded-full transition-all ${i === step ? 'bg-blue-500 w-3' : 'bg-gray-700'}`} />
+                ))}
+            </div>
+            <button 
+                onClick={isLast ? onComplete : onNext}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-blue-600/20 active:scale-95 transition-all"
+            >
+                {isLast ? 'Finish Tour' : 'Next Step'}
+            </button>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
+function BigSignupModal({ onClose, onAction }: { onClose: () => void, onAction: () => void }) {
+    return (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+            <motion.div 
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-black/80 backdrop-blur-md" 
+                onClick={onClose}
+            />
+            <motion.div 
+                initial={{ opacity: 0, scale: 0.9, y: 20 }} 
+                animate={{ opacity: 1, scale: 1, y: 0 }} 
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                className="relative w-full max-w-lg bg-[#09090b] border border-white/5 rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.5)]"
+            >
+                <div className="absolute top-0 inset-x-0 h-1 bg-linear-to-r from-blue-600 via-indigo-600 to-purple-600" />
+                
+                <div className="p-10 text-center">
+                    <div className="w-16 h-16 bg-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-blue-600/40 rotate-3 animate-pulse">
+                        <Sparkles className="w-8 h-8 text-white" />
+                    </div>
+                    
+                    <h2 className="text-3xl font-black text-white tracking-tighter mb-4">The Complete Experience</h2>
+                    <p className="text-gray-400 leading-relaxed mb-8">
+                        You've seen what's possible. Now make it yours. Sign up to unlock infinite history, cross-device sync, and your AI's persistent memory system.
+                    </p>
+                    
+                    <div className="grid grid-cols-1 gap-3 mb-8 text-left">
+                        {[
+                            { icon: <History className="w-4 h-4 text-blue-500" />, text: "Never lose a conversation" },
+                            { icon: <Zap className="w-4 h-4 text-purple-500" />, text: "AI that remembers your preferences" },
+                            { icon: <Globe className="w-4 h-4 text-indigo-500" />, text: "Access your workspace anywhere" }
+                        ].map((feat, i) => (
+                            <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5">
+                                {feat.icon}
+                                <span className="text-xs font-bold text-gray-200">{feat.text}</span>
+                            </div>
+                        ))}
+                    </div>
+                    
+                    <div className="flex flex-col gap-3">
+                        <button 
+                            onClick={onAction}
+                            className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-blue-600/30 transition-all active:scale-95"
+                        >
+                            Claim Your Workspace
+                        </button>
+                        <button 
+                            onClick={onClose}
+                            className="text-[10px] font-bold text-gray-600 hover:text-white uppercase tracking-widest transition-colors py-2"
+                        >
+                            I'll explore more first
+                        </button>
+                    </div>
+                </div>
+            </motion.div>
+        </div>
+    )
+}
+
