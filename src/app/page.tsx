@@ -52,7 +52,8 @@ import {
   Search,
   Star,
   Map,
-  List
+  List,
+  Sparkles
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import ReactMarkdown from 'react-markdown'
