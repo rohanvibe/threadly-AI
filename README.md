@@ -8,7 +8,7 @@
 
 Stop losing context. Stop scrolling endlessly. Start thinking clearly.
 
-[![Live App](https://img.shields.io/badge/Live%20App-threadly.vercel.app-blue?style=flat-square&logo=vercel)](https://threadly.vercel.app)
+[![Live App](https://img.shields.io/badge/Live%20App-threadly--ai--zeta.vercel.app-blue?style=flat-square&logo=vercel)](https://threadly-ai-zeta.vercel.app)
 [![License](https://img.shields.io/badge/License-Custom%20Non--Commercial-orange?style=flat-square)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/rohanvibe/threadly-AI?style=flat-square&logo=github)](https://github.com/rohanvibe/threadly-AI/stargazers)
 [![Last Commit](https://img.shields.io/github/last-commit/rohanvibe/threadly-AI?style=flat-square)](https://github.com/rohanvibe/threadly-AI/commits)
