@@ -92,6 +92,7 @@ export default function ChatPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [isNavOpen, setIsNavOpen] = useState(true)
   const [user, setUser] = useState<any>(null)
+  const [isGuest, setIsGuest] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [showPrompts, setShowPrompts] = useState(false)
   const [prompts, setPrompts] = useState<Prompt[]>([])
@@ -186,8 +187,9 @@ export default function ChatPage() {
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        router.push('/auth')
+        setIsGuest(true)
       } else {
+        setIsGuest(false)
         setUser(user)
         fetchChats(user.id)
         fetchPrompts(user.id)
@@ -470,7 +472,8 @@ export default function ChatPage() {
     if (e) e.preventDefault()
     
     const displayContent = customMsg || input
-    if (!displayContent.trim() || loading || !user) return
+    if (!displayContent.trim() || loading) return
+    if (!user && !isGuest) return
 
     let finalPrompt = displayContent
     if (attachedFile) {
@@ -486,17 +489,22 @@ export default function ChatPage() {
     }
 
     if (!chatId) {
-      const { data } = await supabase
-        .from('chats')
-        .insert([{ user_id: user.id, title: displayContent.slice(0, 30) }])
-        .select()
-        .single()
-      if (data) {
-        chatId = data.id
-        skipFetchRef.current = true // Critical: tell useEffect not to wipe/fetch for this one
+      if (isGuest) {
+        chatId = 'guest-session-' + Date.now()
         setCurrentChatId(chatId)
-        setChats([data, ...chats])
-      } else return
+      } else {
+        const { data } = await supabase
+          .from('chats')
+          .insert([{ user_id: user.id, title: displayContent.slice(0, 30) }])
+          .select()
+          .single()
+        if (data) {
+          chatId = data.id
+          skipFetchRef.current = true 
+          setCurrentChatId(chatId)
+          setChats([data, ...chats])
+        } else return
+      }
     }
 
     setInput('')
@@ -515,7 +523,7 @@ export default function ChatPage() {
     setMessages(prev => [...prev, tempUserMsg])
     
     // Start DB insert in parallel
-    const userMsgInsert = supabase.from('messages').insert([{ chat_id: chatId, role: 'user', content: displayContent }])
+    const userMsgInsert = !isGuest ? supabase.from('messages').insert([{ chat_id: chatId, role: 'user', content: displayContent }]) : Promise.resolve()
 
     // Create placeholder for assistant message
     const assistantMsgId = Math.random().toString()
@@ -619,16 +627,23 @@ export default function ChatPage() {
         setMessages(prev => prev.map(m => m.id === assistantMsgId ? { ...m, content: finalContent } : m))
 
         // Save to DB after stream finishes
-        const [userResult, assistantResult] = await Promise.all([
-          userMsgInsert,
-          supabase.from('messages').insert([{ chat_id: chatId, role: 'assistant', content: finalContent }])
-        ])
+        let userResult: any = { error: null }
+        let assistantResult: any = { error: null }
 
-        if (userResult.error) console.error("User message save error:", userResult.error)
-        if (assistantResult.error) console.error("Assistant message save error:", assistantResult.error)
-        
-        if (userResult.error || assistantResult.error) {
-           toast("Storage sync failed. History may be incomplete.", "warning")
+        if (!isGuest) {
+          const results = await Promise.all([
+            userMsgInsert,
+            supabase.from('messages').insert([{ chat_id: chatId, role: 'assistant', content: finalContent }])
+          ])
+          userResult = results[0]
+          assistantResult = results[1]
+
+          if (userResult.error) console.error("User message save error:", userResult.error)
+          if (assistantResult.error) console.error("Assistant message save error:", assistantResult.error)
+          
+          if (userResult.error || assistantResult.error) {
+             toast("Storage sync failed. History may be incomplete.", "warning")
+          }
         }
       } else {
         // BYOK logic... (same as before but with abort signal support)
@@ -1097,6 +1112,29 @@ export default function ChatPage() {
             className={`${isMobile ? 'absolute inset-y-0 right-0 w-[85%] z-50 shadow-2xl' : 'w-80 relative'} border-l border-white/5 flex flex-col bg-[#09090b]/80 backdrop-blur-2xl h-full`}
           >
             <div className="flex flex-col h-full">
+              {/* Guest Banner */}
+              {isGuest && (
+                <div className="m-4 p-4 rounded-2xl bg-linear-to-br from-blue-600/20 to-indigo-600/20 border border-blue-500/30 shadow-lg shadow-blue-500/10">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-blue-500 flex items-center justify-center shrink-0">
+                      <Sparkles className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="flex flex-col">
+                      <h3 className="text-[11px] font-black uppercase tracking-widest text-white">Sign Up for More</h3>
+                      <p className="text-[10px] text-blue-200/70 font-medium leading-relaxed mt-1">
+                        Unlock persistent history, AI memory, and cross-device sync.
+                      </p>
+                      <button 
+                        onClick={() => router.push('/auth')}
+                        className="mt-3 w-full py-2 bg-blue-600 hover:bg-blue-500 text-white text-[9px] font-black uppercase tracking-widest rounded-lg transition-all active:scale-95"
+                      >
+                        Create Account
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Identity & Memory Card */}
               <div className="p-6 border-b border-white/5 bg-white/2">
                 <div className="flex items-center justify-between mb-6">
