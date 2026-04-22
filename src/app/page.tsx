@@ -1645,7 +1645,7 @@ function OnboardingTutorial({ step, onNext, onComplete }: { step: number, onNext
   const isLast = step === steps.length - 1
 
   return (
-    <div className="fixed inset-0 z-[100] pointer-events-none overflow-hidden">
+    <div className="fixed inset-0 z-100 pointer-events-none overflow-hidden">
       <motion.div 
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} 
         className="absolute inset-0 bg-black/40 backdrop-blur-[2px] pointer-events-auto" 
@@ -1661,7 +1661,7 @@ function OnboardingTutorial({ step, onNext, onComplete }: { step: number, onNext
           height: rect.height + 16,
         }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="absolute border-2 border-blue-500 rounded-2xl shadow-[0_0_30px_rgba(59,130,246,0.5)] z-[101]"
+        className="absolute border-2 border-blue-500 rounded-2xl shadow-[0_0_30px_rgba(59,130,246,0.5)] z-101"
       />
 
       {/* The Tooltip */}
@@ -1671,7 +1671,7 @@ function OnboardingTutorial({ step, onNext, onComplete }: { step: number, onNext
           left: Math.min(window.innerWidth - 340, Math.max(20, rect.left + rect.width / 2 - 150)),
         }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className="absolute w-[300px] bg-[#18181b] border border-white/10 rounded-2xl p-5 shadow-2xl z-[102] pointer-events-auto"
+        className="absolute w-[300px] bg-[#18181b] border border-white/10 rounded-2xl p-5 shadow-2xl z-102 pointer-events-auto"
       >
         <div className="flex items-center gap-2 mb-2">
             <div className="px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-widest">Step {step + 1}/{steps.length}</div>
@@ -1698,7 +1698,7 @@ function OnboardingTutorial({ step, onNext, onComplete }: { step: number, onNext
 
 function BigSignupModal({ onClose, onAction }: { onClose: () => void, onAction: () => void }) {
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-200 flex items-center justify-center p-4">
             <motion.div 
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 className="absolute inset-0 bg-black/80 backdrop-blur-md" 
