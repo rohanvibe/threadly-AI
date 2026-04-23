@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/react"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -53,6 +54,7 @@ export default function RootLayout({
         <ToastProvider>
            <div className="fixed inset-0 pointer-events-none opacity-[0.03] z-50 grain-texture" />
            {children}
+           <Analytics />
         </ToastProvider>
         <script
           dangerouslySetInnerHTML={{

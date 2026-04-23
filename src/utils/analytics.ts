@@ -1,9 +1,9 @@
 /**
  * Threadly Analytics Utility
  * 
- * Simple wrapper for tracking user engagement events.
- * Connect this to PostHog, Vercel Analytics, or Mixpanel for production.
+ * Connected to Vercel Analytics.
  */
+import { track } from '@vercel/analytics'
 
 type AnalyticsEvent = 
   | 'signup_started'
@@ -22,8 +22,10 @@ export const trackEvent = (event: AnalyticsEvent, metadata: Record<string, any> 
     console.log(`[Analytics] ${event}`, metadata)
   }
 
-  // 2. Placeholder for production tracking provider
-  // Example: posthog.capture(event, metadata)
-  
-  // 3. Optional: Fire to a lightweight Supabase 'events' table if you need internal metrics
+  // 2. Fire to Vercel Analytics
+  try {
+    track(event, metadata)
+  } catch (e) {
+    console.error('Analytics tracking failed', e)
+  }
 }
