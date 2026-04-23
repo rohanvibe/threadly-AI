@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui'
+import { trackEvent } from '@/utils/analytics'
 
 export default function AuthPage() {
   const [email, setEmail] = useState('')
@@ -23,7 +24,10 @@ export default function AuthPage() {
     if (isSignUp) {
       const { error } = await supabase.auth.signUp({ email, password })
       if (error) setError(error.message)
-      else setError('Check your email for the confirmation link!')
+      else {
+        trackEvent('signup_completed', { method: 'email' })
+        setError('Check your email for the confirmation link!')
+      }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) setError(error.message)
@@ -35,6 +39,7 @@ export default function AuthPage() {
   const handleGoogleLogin = async () => {
     setLoading(true)
     setError(null)
+    trackEvent('signup_started', { method: 'google' })
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {

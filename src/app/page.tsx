@@ -61,6 +61,8 @@ import remarkGfm from 'remark-gfm'
 import { toPng } from 'html-to-image'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
+import { trackEvent } from '@/utils/analytics'
+import { FeedbackWidget } from '@/components/FeedbackWidget'
 
 // Types
 type Message = {
@@ -208,7 +210,10 @@ export default function ChatPage() {
     // Trigger onboarding for new guests
     const hasSeenOnboarding = localStorage.getItem('threadly_onboarding_shown')
     if (!user && !hasSeenOnboarding) {
-        setTimeout(() => setOnboardingStep(0), 1500)
+        setTimeout(() => {
+          setOnboardingStep(0)
+          trackEvent('tutorial_started')
+        }, 1500)
     }
 
     const checkMobile = () => {
@@ -519,6 +524,7 @@ export default function ChatPage() {
     setInput('')
     setAttachedFile(null)
     setLoading(true)
+    trackEvent('chat_sent', { isGuest, model: modelType })
     abortControllerRef.current = new AbortController()
 
     // Add user message
@@ -834,8 +840,12 @@ export default function ChatPage() {
 
       <OnboardingTutorial 
         step={onboardingStep} 
-        onNext={() => setOnboardingStep(s => s + 1)}
+        onNext={() => {
+          trackEvent('sidebar_jump', { step: onboardingStep })
+          setOnboardingStep(s => s + 1)
+        }} 
         onComplete={() => {
+          trackEvent('tutorial_completed')
           setOnboardingStep(-1)
           setShowBigSignup(true)
           localStorage.setItem('threadly_onboarding_shown', 'true')
@@ -844,9 +854,14 @@ export default function ChatPage() {
 
       <AnimatePresence>
         {showBigSignup && (
-          <BigSignupModal onClose={() => setShowBigSignup(false)} onAction={() => router.push('/auth')} />
+          <BigSignupModal onClose={() => setShowBigSignup(false)} onAction={() => {
+            trackEvent('signup_started')
+            router.push('/auth')
+          }} />
         )}
       </AnimatePresence>
+
+      <FeedbackWidget />
 
       <div className={`flex-1 flex flex-col relative bg-[#09090b] ${isMobile ? 'pt-14' : ''}`}>
         <AnimatePresence>
@@ -1717,16 +1732,16 @@ function BigSignupModal({ onClose, onAction }: { onClose: () => void, onAction: 
                         <Sparkles className="w-8 h-8 text-white" />
                     </div>
                     
-                    <h2 className="text-3xl font-black text-white tracking-tighter mb-4">The Complete Experience</h2>
+                    <h2 className="text-3xl font-black text-white tracking-tighter mb-4">Claim Your Pro Workspace</h2>
                     <p className="text-gray-400 leading-relaxed mb-8">
-                        You've seen what's possible. Now make it yours. Sign up to unlock infinite history, cross-device sync, and your AI's persistent memory system.
+                        Join 10,000+ builders using Threadly to supercharge their workflow. Unlock persistent memory, infinite history, and lightning-fast SambaNova inference.
                     </p>
                     
-                    <div className="grid grid-cols-1 gap-3 mb-8 text-left">
+                    <div className="grid grid-cols-1 gap-3 mb-6 text-left">
                         {[
-                            { icon: <History className="w-4 h-4 text-blue-500" />, text: "Never lose a conversation" },
-                            { icon: <Zap className="w-4 h-4 text-purple-500" />, text: "AI that remembers your preferences" },
-                            { icon: <Globe className="w-4 h-4 text-indigo-500" />, text: "Access your workspace anywhere" }
+                            { icon: <History className="w-4 h-4 text-blue-500" />, text: "Infinite Cross-Device History" },
+                            { icon: <Zap className="w-4 h-4 text-purple-500" />, text: "Self-Learning AI Memory System" },
+                            { icon: <Globe className="w-4 h-4 text-indigo-500" />, text: "Early Access to Pro Features" }
                         ].map((feat, i) => (
                             <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5">
                                 {feat.icon}
@@ -1734,13 +1749,18 @@ function BigSignupModal({ onClose, onAction }: { onClose: () => void, onAction: 
                             </div>
                         ))}
                     </div>
+
+                    <div className="mb-8 p-4 rounded-2xl bg-blue-500/5 border border-blue-500/10 italic text-[10px] text-gray-400 text-left relative">
+                        "Threadly is the fastest AI interface I've used. The memory system actually works—it's like having a second brain."
+                        <p className="mt-2 not-italic font-bold text-blue-400 uppercase tracking-widest">— Software Architect @ Scale</p>
+                    </div>
                     
                     <div className="flex flex-col gap-3">
                         <button 
                             onClick={onAction}
                             className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white font-black uppercase tracking-widest rounded-2xl shadow-xl shadow-blue-600/30 transition-all active:scale-95"
                         >
-                            Claim Your Workspace
+                            Get Started for Free
                         </button>
                         <button 
                             onClick={onClose}
@@ -1748,6 +1768,15 @@ function BigSignupModal({ onClose, onAction }: { onClose: () => void, onAction: 
                         >
                             I'll explore more first
                         </button>
+                    </div>
+
+                    <div className="mt-8 pt-6 border-t border-white/5">
+                        <p className="text-[8px] font-black text-gray-700 uppercase tracking-[0.3em] mb-4">Powered by Infrastructure From</p>
+                        <div className="flex justify-center gap-8 opacity-20 grayscale brightness-200">
+                             <span className="text-[10px] font-black tracking-tighter text-white italic">SambaNova</span>
+                             <span className="text-[10px] font-black tracking-tighter text-white italic">Vercel</span>
+                             <span className="text-[10px] font-black tracking-tighter text-white italic">Supabase</span>
+                        </div>
                     </div>
                 </div>
             </motion.div>
