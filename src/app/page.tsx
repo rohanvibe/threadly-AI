@@ -1761,7 +1761,7 @@ function EmptyState({ onCreateNew }: { onCreateNew: () => void }) {
 
       <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
          <Button onClick={onCreateNew} className="px-8 py-6 rounded-2xl bg-white text-black hover:bg-gray-200 font-bold transition-all active:scale-95 group">
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="w-4 h-4 mr-2 transition-transform group-hover:rotate-90" />
             Start a New Thread
          </Button>
          <Button variant="outline" onClick={() => (document.getElementById('tutorial-prompts') as HTMLElement)?.click()} className="px-8 py-6 rounded-2xl border-white/10 hover:bg-white/5 text-white font-bold transition-all">
