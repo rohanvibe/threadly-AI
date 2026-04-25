@@ -748,10 +748,12 @@ export default function ChatPage() {
             </div>
 
             <div className="px-4 mb-4 space-y-3">
-              <Button onClick={createNewChat} className="w-full py-6 rounded-2xl flex items-center gap-2 group shadow-lg shadow-white/5">
-                <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" />
-                <span className="font-bold uppercase tracking-widest text-xs">New Thread</span>
-              </Button>
+              <motion.div whileTap={{ scale: 0.97 }}>
+                <Button onClick={createNewChat} className="w-full py-6 rounded-2xl flex items-center gap-2 group shadow-lg shadow-white/5 bg-white text-black hover:bg-gray-200">
+                  <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" />
+                  <span className="font-black uppercase tracking-widest text-[10px]">New Thread</span>
+                </Button>
+              </motion.div>
               <div className="relative">
                 <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
                 <input
@@ -1105,7 +1107,8 @@ export default function ChatPage() {
             initial={isMobile ? { x: '100%' } : { width: 0, opacity: 0 }}
             animate={isMobile ? { x: 0 } : { width: 320, opacity: 1 }}
             exit={isMobile ? { x: '100%' } : { width: 0, opacity: 0 }}
-            className={`${isMobile ? 'absolute inset-y-0 right-0 w-[85%] z-50 shadow-2xl' : 'w-80 relative'} border-l border-white/5 flex flex-col bg-[#09090b]/80 backdrop-blur-2xl h-full`}
+            transition={{ type: 'spring', damping: 28, stiffness: 220 }}
+            className={`${isMobile ? 'absolute inset-y-0 right-0 w-[85%] z-50' : 'w-80 relative'} border-l border-white/5 flex flex-col bg-[#09090b]/60 backdrop-blur-3xl h-full shadow-2xl`}
           >
             <div className="flex flex-col h-full">
               {/* Guest Banner */}
