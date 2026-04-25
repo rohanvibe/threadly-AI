@@ -52,6 +52,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-[#09090b] selection:bg-blue-500/30">
         <ToastProvider>
+           <div id="spotlight" />
            <div className="fixed inset-0 pointer-events-none opacity-[0.03] z-50 grain-texture" />
            {children}
            <Analytics />
@@ -64,6 +65,15 @@ export default function RootLayout({
                   navigator.serviceWorker.register('/service-worker.js');
                 });
               }
+
+              // Liquid Spotlight Logic
+              const spotlight = document.getElementById('spotlight');
+              document.addEventListener('mousemove', (e) => {
+                if (spotlight) {
+                  spotlight.style.setProperty('--mouse-x', e.clientX + 'px');
+                  spotlight.style.setProperty('--mouse-y', e.clientY + 'px');
+                }
+              });
             `,
           }}
         />

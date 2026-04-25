@@ -801,12 +801,16 @@ export default function ChatPage() {
                     
                     {editingChatId !== chat.id && (
                       <div className={`absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 transition-opacity ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-                        <Button variant="ghost" size="icon" className="w-7 h-7" onClick={(e) => { e.stopPropagation(); setEditingChatId(chat.id); setEditingTitle(chat.title); }}>
-                          <Edit2 className="w-3 h-3" />
-                        </Button>
-                        <Button variant="destructive" size="icon" className="w-7 h-7" onClick={(e) => { e.stopPropagation(); deleteChat(chat.id); }}>
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
+                        <AppleTooltip text="Edit Title">
+                          <Button variant="ghost" size="icon" className="w-7 h-7" onClick={(e) => { e.stopPropagation(); setEditingChatId(chat.id); setEditingTitle(chat.title); }}>
+                            <Edit2 className="w-3 h-3" />
+                          </Button>
+                        </AppleTooltip>
+                        <AppleTooltip text="Delete Thread">
+                          <Button variant="destructive" size="icon" className="w-7 h-7" onClick={(e) => { e.stopPropagation(); deleteChat(chat.id); }}>
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </AppleTooltip>
                       </div>
                     )}
                   </div>
@@ -828,8 +832,12 @@ export default function ChatPage() {
                   <span className="text-[11px] font-bold text-white truncate">{user?.email}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <button onClick={handleLogout} className="p-2 hover:bg-white/10 rounded-xl transition-all"><LogOut className="w-4 h-4 text-gray-400" /></button>
-                  <button onClick={handleDeleteAccount} className="p-2 hover:bg-red-500/10 rounded-xl transition-all group/del"><UserMinus className="w-4 h-4 text-gray-400 group-hover/del:text-red-500" /></button>
+                  <AppleTooltip text="Sign Out">
+                    <button onClick={handleLogout} className="p-2 hover:bg-white/10 rounded-xl transition-all"><LogOut className="w-4 h-4 text-gray-400" /></button>
+                  </AppleTooltip>
+                  <AppleTooltip text="Terminate Identity">
+                    <button onClick={handleDeleteAccount} className="p-2 hover:bg-red-500/10 rounded-xl transition-all group/del"><UserMinus className="w-4 h-4 text-gray-400 group-hover/del:text-red-500" /></button>
+                  </AppleTooltip>
                 </div>
               </div>
               <Button id="tutorial-prompts" variant="ghost" className="w-full justify-start gap-4 rounded-xl py-5" onClick={() => setShowPrompts(true)} onContextMenu={e => openContextMenu(e, 'openPrompts')}>
@@ -933,6 +941,7 @@ export default function ChatPage() {
             <EmptyState onCreateNew={() => createNewChat()} />
           ) : (
             <div className="max-w-3xl mx-auto p-6 md:p-10 space-y-12 pb-32">
+              <motion.div drag="y" dragConstraints={{ top: 0, bottom: 0 }} dragElastic={0.05} className="space-y-12">
               {messages.map((msg, i) => (
                 <motion.div 
                   initial={{ opacity: 0, y: 10 }} 
@@ -1049,6 +1058,7 @@ export default function ChatPage() {
                   </div>
                 </motion.div>
               ))}
+              </motion.div>
             </div>
           )}
           <div ref={messagesEndRef} className="h-20" />
@@ -1116,7 +1126,7 @@ export default function ChatPage() {
             animate={isMobile ? { x: 0 } : { width: 320, opacity: 1 }}
             exit={isMobile ? { x: '100%' } : { width: 0, opacity: 0 }}
             transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-            className={`${isMobile ? 'absolute inset-y-0 right-0 w-[85%] z-50' : 'w-80 relative'} border-l border-white/5 flex flex-col bg-[#09090b]/60 backdrop-blur-3xl h-full shadow-2xl`}
+            className={`${isMobile ? 'absolute inset-y-0 right-0 w-[85%] z-50' : 'w-80 relative'} border-l border-white/5 flex flex-col bg-[#09090b]/60 backdrop-blur-3xl h-full shadow-2xl sidebar-tint`}
           >
             <div className="flex flex-col h-full">
               {/* Guest Banner */}
@@ -1755,11 +1765,28 @@ function BigSignupModal({ onClose, onAction }: { onClose: () => void, onAction: 
     )
 }
 
+function AppleTooltip({ text, children }: { text: string, children: React.ReactNode }) {
+  return (
+    <div className="group relative">
+      {children}
+      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-all pointer-events-none z-[100] translate-y-1 group-hover:translate-y-0">
+        <div className="bg-[#18181b] border border-white/10 px-3 py-1.5 rounded-xl shadow-2xl glass-dark">
+          <p className="text-[10px] font-black uppercase tracking-widest text-white whitespace-nowrap">{text}</p>
+        </div>
+        <div className="w-2 h-2 bg-[#18181b] border-r border-b border-white/10 rotate-45 mx-auto -mt-1" />
+      </div>
+    </div>
+  )
+}
+
 function EmptyState({ onCreateNew }: { onCreateNew: () => void }) {
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }} 
       animate={{ opacity: 1, y: 0 }} 
+      drag="y"
+      dragConstraints={{ top: 0, bottom: 0 }}
+      dragElastic={0.1}
       className="h-full flex flex-col items-center justify-center text-center space-y-12 px-6 max-w-2xl mx-auto py-20"
     >
       <div className="relative group">
