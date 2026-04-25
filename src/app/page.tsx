@@ -816,8 +816,12 @@ export default function ChatPage() {
 
             <div className="p-4 border-t border-white/5 space-y-2 bg-black/20">
               <div className="flex items-center gap-3 p-3 bg-white/5 rounded-2xl border border-white/5 mb-2">
-                <div className="w-10 h-10 rounded-xl bg-linear-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-xs font-black shadow-lg shadow-blue-500/20">
-                  {user?.email?.slice(0, 2).toUpperCase()}
+                <div className="w-10 h-10 squircle bg-linear-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-xs font-black shadow-lg shadow-blue-500/20 overflow-hidden">
+                  {user?.user_metadata?.avatar_url ? (
+                     <img src={user.user_metadata.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                     user?.email?.slice(0, 2).toUpperCase()
+                  )}
                 </div>
                 <div className="flex flex-col min-w-0 flex-1">
                   <span className="text-[11px] font-black uppercase tracking-widest text-gray-500">Identity</span>
