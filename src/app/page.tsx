@@ -944,9 +944,12 @@ export default function ChatPage() {
                     {msg.role === 'assistant' ? <Zap className="w-5 h-5" /> : <Plus className="w-5 h-5 rotate-45" />}
                   </div>
                   <div className="flex-1 space-y-4 min-w-0 overflow-hidden">
-                      <div className="flex items-center justify-between">
+                    <div className={`p-6 md:p-8 rounded-[2.5rem] glass-dark shadow-2xl relative overflow-hidden border border-white/5 ${
+                      msg.role === 'assistant' ? 'ring-1 ring-blue-500/10' : ''
+                    }`}>
+                      <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
-                          <span className="font-black text-[10px] tracking-[0.3em] uppercase text-gray-500 pt-1">
+                          <span className="font-black text-[10px] tracking-[0.3em] uppercase text-blue-500/60 pt-1 glass-text">
                             {msg.role === 'assistant' ? 'Assistant·AI' : 'Member·Space'}
                           </span>
                           <AnimatePresence>
@@ -980,7 +983,7 @@ export default function ChatPage() {
                            <textarea
                              value={editValue}
                              onChange={(e) => setEditValue(e.target.value)}
-                             className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-sm font-medium outline-none focus:border-blue-500/50 min-h-[100px] resize-none"
+                             className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-sm font-medium outline-none focus:border-blue-500/50 min-h-[100px] resize-none"
                              autoFocus
                            />
                            <div className="flex justify-end gap-2">
@@ -989,7 +992,7 @@ export default function ChatPage() {
                            </div>
                         </div>
                       ) : (
-                        <div className="text-gray-200 leading-relaxed text-[15px] prose prose-invert prose-sm max-w-none prose-p:leading-[1.7] prose-pre:rounded-2xl prose-code:text-blue-400 break-all wrap-break-word selection:bg-blue-500/40">
+                        <div className="text-gray-100 leading-relaxed text-[15px] prose prose-invert prose-sm max-w-none prose-p:leading-[1.7] prose-pre:rounded-2xl prose-code:text-blue-400 break-all wrap-break-word selection:bg-blue-500/40 glass-text">
                           {msg.content === '' && loading ? (
                              <div className="flex items-center gap-4 py-2">
                                 <div className="flex gap-1.5 item-center">
@@ -1038,6 +1041,7 @@ export default function ChatPage() {
                           )}
                         </div>
                       )}
+                    </div>
                   </div>
                 </motion.div>
               ))}

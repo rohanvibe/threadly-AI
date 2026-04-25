@@ -64,6 +64,17 @@ html, body {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.glass-dark {
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.glass-text {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
 .squircle {
   mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cpath d='M 0,50 C 0,5 5,0 50,0 C 95,0 100,5 100,50 C 100,95 95,100 50,100 C 5,100 0,95 0,50' /%3E%3C/svg%3E");
   mask-size: 100% 100%;
