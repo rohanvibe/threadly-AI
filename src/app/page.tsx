@@ -111,6 +111,7 @@ export default function ChatPage() {
   const [wowPhase, setWowPhase] = useState(false)
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
+  const [highlightedAnchor, setHighlightedAnchor] = useState<string | null>(null)
   
   const [profileMemories, setProfileMemories] = useState<string[]>([])
   const [attachedFile, setAttachedFile] = useState<{ name: string, content: string } | null>(null)
@@ -710,11 +711,13 @@ export default function ChatPage() {
   }
 
   const scrollToMessage = (msgId: string) => {
-    const el = document.getElementById(`message-${msgId}`)
+    setHighlightedAnchor(msgId)
+    const el = document.getElementById(`msg-${msgId}`)
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      setHighlightedMessageId(msgId)
-      setTimeout(() => setHighlightedMessageId(null), 2000)
+      trackEvent('sidebar_jump', { msgId })
+      // Clear highlight after 2s
+      setTimeout(() => setHighlightedAnchor(null), 2000)
     }
   }
 
@@ -747,13 +750,13 @@ export default function ChatPage() {
             <div className="px-4 mb-4 space-y-3">
               <Button onClick={createNewChat} className="w-full py-6 rounded-2xl flex items-center gap-2 group shadow-lg shadow-white/5">
                 <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" />
-                <span className="font-bold uppercase tracking-widest text-xs">New Chat</span>
+                <span className="font-bold uppercase tracking-widest text-xs">New Thread</span>
               </Button>
               <div className="relative">
                 <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
                 <input
                   type="text"
-                  placeholder="Search chats..."
+                  placeholder="Filter threads..."
                   value={chatSearch}
                   onChange={(e) => setChatSearch(e.target.value)}
                   className="w-full bg-white/5 border border-white/5 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 transition-colors"
@@ -765,8 +768,8 @@ export default function ChatPage() {
               {chats.length === 0 ? (
                 <div className="flex flex-col items-center justify-center text-center p-6 space-y-4 opacity-50 mt-10">
                   <MessageSquare className="w-8 h-8 text-gray-500" />
-                  <p className="text-xs font-bold text-gray-400">No chats yet.</p>
-                  <p className="text-[10px] text-gray-500">Start a new thread to begin your workspace flow.</p>
+                  <p className="text-xs font-bold text-gray-400">Empty workspace.</p>
+                  <p className="text-[10px] text-gray-500">Kick off a new intelligent session.</p>
                 </div>
               ) : (
                 chats.filter(c => chatSearch.trim() === '' || c.title.toLowerCase().includes(chatSearch.toLowerCase())).map(chat => (
@@ -815,7 +818,7 @@ export default function ChatPage() {
                   {user?.email?.slice(0, 2).toUpperCase()}
                 </div>
                 <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-[11px] font-black uppercase tracking-widest text-gray-500">Workspace</span>
+                  <span className="text-[11px] font-black uppercase tracking-widest text-gray-500">Identity</span>
                   <span className="text-[11px] font-bold text-white truncate">{user?.email}</span>
                 </div>
                 <div className="flex items-center gap-1">
@@ -825,12 +828,12 @@ export default function ChatPage() {
               </div>
               <Button id="tutorial-prompts" variant="ghost" className="w-full justify-start gap-4 rounded-xl py-5" onClick={() => setShowPrompts(true)} onContextMenu={e => openContextMenu(e, 'openPrompts')}>
                 <Command className="w-4 h-4 text-blue-500" />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] pt-0.5">Prompt Library</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] pt-0.5">Prompt Registry</span>
                 <span className="ml-auto text-[8px] font-mono text-gray-600">{getShortcutLabel('openPrompts')}</span>
               </Button>
               <Button id="tutorial-settings" variant="ghost" className="w-full justify-start gap-4 rounded-xl py-5" onClick={() => setShowSettings(true)} onContextMenu={e => openContextMenu(e, 'openSettings')}>
                 <Settings className="w-4 h-4 text-blue-500" />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] pt-0.5">Settings</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] pt-0.5">Preferences</span>
                 <span className="ml-auto text-[8px] font-mono text-gray-600">{getShortcutLabel('openSettings')}</span>
               </Button>
             </div>
@@ -913,72 +916,25 @@ export default function ChatPage() {
            </div>
         )}
 
-        <div id="chat-messages-container" className="flex-1 overflow-y-auto p-4 md:p-8 space-y-12 scroll-smooth custom-scrollbar relative z-10">
-          <AnimatePresence>
-            {wowPhase && (
-              <motion.div 
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="max-w-3xl mx-auto mb-10 p-6 rounded-3xl bg-blue-600/10 border border-blue-500/20 text-center relative overflow-hidden group"
-              >
-                <div className="absolute top-0 right-0 p-2 cursor-pointer opacity-40 hover:opacity-100" onClick={() => setWowPhase(false)}>
-                   <X className="w-4 h-4" />
-                </div>
-                <Zap className="w-10 h-10 text-blue-500 mx-auto mb-4 animate-bounce" />
-                <h4 className="text-xl font-black tracking-tight mb-2">Wow Moment Discovery!</h4>
-                <p className="text-gray-400 text-sm leading-relaxed mb-4">You're deep in the flow. Did you know you can jump to any message instantly using the Session Data drawer? Try it now.</p>
-                <Button size="sm" onClick={() => setWowPhase(false)} className="bg-blue-600 hover:bg-blue-500 rounded-xl px-8 font-bold text-[10px] uppercase tracking-widest">Understood</Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
+        <div className="flex-1 overflow-y-auto custom-scrollbar scroll-smooth relative z-10" id="chat-messages-container">
           {fetchingMessages ? (
-             <div className="max-w-3xl mx-auto space-y-12 py-10 opacity-50">
-                {[1,2,3].map(i => (
-                  <div key={i} className="flex gap-6 animate-pulse">
-                     <Skeleton className="w-10 h-10 rounded-xl shrink-0" />
-                     <div className="space-y-3 flex-1">
-                        <Skeleton className="h-4 w-32" />
-                        <Skeleton className="h-20 w-full rounded-2xl" />
-                     </div>
-                  </div>
-                ))}
-             </div>
+            <div className="max-w-3xl mx-auto p-6 md:p-10 space-y-8">
+              <Skeleton className="h-32 w-full rounded-2xl bg-white/5" />
+              <Skeleton className="h-24 w-[80%] rounded-2xl bg-white/5" />
+              <Skeleton className="h-32 w-full rounded-2xl bg-white/5" />
+            </div>
           ) : messages.length === 0 ? (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="h-full flex flex-col items-center justify-center text-center space-y-10 px-6 max-w-2xl mx-auto">
-              <div className="w-24 h-24 rounded-4xl bg-linear-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-2xl glow relative group">
-                <Globe className="w-12 h-12 text-white group-hover:scale-110 transition-transform duration-500" />
-                <div className="absolute inset-0 rounded-4xl bg-blue-500 blur-2xl opacity-20 group-hover:opacity-40 transition-opacity" />
-              </div>
-              <div className="space-y-4">
-                <h2 className="text-4xl md:text-5xl font-black tracking-tighter uppercase leading-[0.8]">Threadly<br/><span className="text-blue-600">Workspace</span></h2>
-                <p className="text-gray-500 text-sm font-medium leading-relaxed">Your high-performance AI engineer and creative partner. Built for speed, precision, and instant conversation jumping.</p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full">
-                 {[
-                   { label: "Analyze complex code", hint: "Drop a code snippet and ask for optimization" },
-                   { label: "Draft a technical brief", hint: "I need a PRD for a new PWA app..." }
-                 ].map((chip, i) => (
-                   <button key={i} onClick={() => setInput(chip.hint)} className="p-4 rounded-2xl border border-white/5 bg-white/2 hover:bg-white/5 text-left transition-all active:scale-[0.98]">
-                      <div className="text-[10px] font-black uppercase text-blue-500 tracking-widest mb-1">Try This</div>
-                      <div className="text-sm font-bold text-gray-300">{chip.label}</div>
-                   </button>
-                 ))}
-              </div>
-            </motion.div>
+            <EmptyState onCreateNew={() => createNewChat()} />
           ) : (
-            <div className="w-full max-w-3xl mx-auto space-y-10 md:space-y-16 py-10 px-0 md:px-0">
+            <div className="max-w-3xl mx-auto p-6 md:p-10 space-y-12 pb-32">
               {messages.map((msg, i) => (
                 <motion.div 
-                  initial={{ opacity: 0, x: -10 }} 
-                  animate={{ opacity: 1, x: 0 }} 
+                  initial={{ opacity: 0, y: 10 }} 
+                  animate={{ opacity: 1, y: 0 }} 
                   transition={{ delay: i * 0.05 }}
                   key={msg.id} 
-                  id={`message-${msg.id}`}
-                  className={`flex gap-3 md:gap-8 group transition-all duration-700 rounded-2xl p-3 md:p-6 md:-mx-6 ${
-                    highlightedMessageId === msg.id ? 'highlight-bg bg-blue-500/5 ring-1 ring-blue-500/20' : 'hover:bg-white/1'
-                  }`}
+                  id={`msg-${msg.id}`}
+                  className={`group relative ${highlightedAnchor === msg.id ? 'highlight-bg p-4 -m-4 rounded-2xl bg-blue-500/5 ring-1 ring-blue-500/20' : ''} transition-all duration-700`}
                 >
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-lg ${
                     msg.role === 'assistant' ? 'bg-blue-600 text-white glow' : 'bg-white/5 text-gray-500'
@@ -1783,4 +1739,37 @@ function BigSignupModal({ onClose, onAction }: { onClose: () => void, onAction: 
         </div>
     )
 }
+
+function EmptyState({ onCreateNew }: { onCreateNew: () => void }) {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      className="h-full flex flex-col items-center justify-center text-center space-y-12 px-6 max-w-2xl mx-auto py-20"
+    >
+      <div className="relative group">
+        <div className="w-24 h-24 rounded-[2.5rem] bg-linear-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-2xl relative z-10">
+          <Sparkles className="w-10 h-10 text-white" />
+        </div>
+        <div className="absolute inset-0 rounded-[2.5rem] bg-blue-500 blur-2xl opacity-20 group-hover:opacity-40 transition-opacity animate-pulse" />
+      </div>
+
+      <div className="space-y-4">
+        <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-white leading-tight">Focus on your ideas,<br/><span className="text-gray-500">not the interface.</span></h2>
+        <p className="text-gray-500 text-sm font-medium leading-relaxed max-w-md mx-auto">Threadly is your high-performance workspace for deep thinking. Start a new thread to begin your intelligent workflow.</p>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
+         <Button onClick={onCreateNew} className="px-8 py-6 rounded-2xl bg-white text-black hover:bg-gray-200 font-bold transition-all active:scale-95 group">
+            <Plus className="w-4 h-4 mr-2" />
+            Start a New Thread
+         </Button>
+         <Button variant="outline" onClick={() => (document.getElementById('tutorial-prompts') as HTMLElement)?.click()} className="px-8 py-6 rounded-2xl border-white/10 hover:bg-white/5 text-white font-bold transition-all">
+            Browse Registry
+         </Button>
+      </div>
+    </motion.div>
+  )
+}
+
 
