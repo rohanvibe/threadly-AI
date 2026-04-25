@@ -1142,8 +1142,12 @@ export default function ChatPage() {
               <div id="tutorial-memory" className="p-6 border-b border-white/5 bg-white/2">
                 <div className="flex items-center justify-between mb-6">
                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 squircle bg-blue-600 flex items-center justify-center font-black text-white shadow-xl shadow-blue-600/20 uppercase">
-                         {user?.email?.[0] || 'U'}
+                      <div className="w-10 h-10 squircle bg-blue-600 flex items-center justify-center font-black text-white shadow-xl shadow-blue-600/20 uppercase overflow-hidden">
+                         {user?.user_metadata?.avatar_url ? (
+                            <img src={user.user_metadata.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                         ) : (
+                            user?.email?.[0] || 'U'
+                         )}
                       </div>
                       <div className="flex flex-col">
                          <span className="text-[10px] font-black uppercase tracking-widest text-white truncate max-w-[140px]">
