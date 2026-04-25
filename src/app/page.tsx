@@ -1769,7 +1769,7 @@ function AppleTooltip({ text, children }: { text: string, children: React.ReactN
   return (
     <div className="group relative">
       {children}
-      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-all pointer-events-none z-[100] translate-y-1 group-hover:translate-y-0">
+      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-all pointer-events-none z-100 translate-y-1 group-hover:translate-y-0">
         <div className="bg-[#18181b] border border-white/10 px-3 py-1.5 rounded-xl shadow-2xl glass-dark">
           <p className="text-[10px] font-black uppercase tracking-widest text-white whitespace-nowrap">{text}</p>
         </div>
