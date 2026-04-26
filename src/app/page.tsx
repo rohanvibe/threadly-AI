@@ -64,18 +64,7 @@ import { Suspense } from 'react'
 import { trackEvent } from '@/utils/analytics'
 import { FeedbackWidget } from '@/components/FeedbackWidget'
 
-const SFX = {
-  tick: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3',
-  pop: 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3',
-  slide: 'https://assets.mixkit.co/active_storage/sfx/2564/2564-preview.mp3'
-}
 
-function playSFX(type: keyof typeof SFX) {
-  if (typeof window === 'undefined') return
-  const audio = new Audio(SFX[type])
-  audio.volume = 0.15
-  audio.play().catch(() => {})
-}
 
 // --- Premium Components ---
 
@@ -123,7 +112,7 @@ function LandingPage({ onEnter }: { onEnter: () => void }) {
         </p>
         <div className="pt-8">
           <Button 
-            onClick={() => { playSFX('pop'); onEnter(); }} 
+            onClick={() => { onEnter(); }} 
             className="px-12 py-8 rounded-2xl bg-white text-black font-bold tracking-tight text-lg hover:bg-gray-100 transition-all active:scale-95 shadow-2xl"
           >
             Enter Workspace
@@ -843,7 +832,7 @@ export default function ChatPage() {
                 Threadly
               </h1>
               <AppleTooltip text="Dismiss">
-                <Button variant="ghost" size="icon" className="rounded-xl hover:bg-white/5" onClick={() => { playSFX('slide'); setIsNavOpen(false); }}>
+                <Button variant="ghost" size="icon" className="rounded-xl hover:bg-white/5" onClick={() => { setIsNavOpen(false); }}>
                   <X className="w-4 h-4 text-gray-500" />
                 </Button>
               </AppleTooltip>
@@ -851,7 +840,7 @@ export default function ChatPage() {
 
             <div className="px-8 mb-8 space-y-4">
               <motion.div whileTap={{ scale: 0.98 }}>
-                <Button onClick={() => { playSFX('pop'); createNewChat(); }} className="w-full py-7 rounded-2xl flex items-center gap-2 group shadow-2xl bg-white text-black hover:bg-gray-100 no-border font-bold text-[13px] tracking-tight">
+                <Button onClick={() => { createNewChat(); }} className="w-full py-7 rounded-2xl flex items-center gap-2 group shadow-2xl bg-white text-black hover:bg-gray-100 no-border font-bold text-[13px] tracking-tight">
                   <Plus className="w-4 h-4 transition-transform group-hover:rotate-90" />
                   New Session
                 </Button>
@@ -892,7 +881,7 @@ export default function ChatPage() {
                       <motion.button
                         whileHover={{ x: 4 }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => { playSFX('tick'); setCurrentChatId(chat.id); if (isMobile) setIsNavOpen(false); }}
+                        onClick={() => { setCurrentChatId(chat.id); if (isMobile) setIsNavOpen(false); }}
                         className={`w-full text-left p-4 rounded-2xl text-[13px] font-bold tracking-tight transition-all flex items-center gap-3 group relative overflow-hidden ${
                           currentChatId === chat.id ? 'bg-(--apple-blue)/10 text-(--apple-blue)' : 'text-(--apple-gray) hover:bg-white/5 hover:text-white'
                         }`}
@@ -949,12 +938,12 @@ export default function ChatPage() {
                   </AppleTooltip>
                 </div>
               </div>
-              <Button id="tutorial-prompts" variant="ghost" className="w-full justify-start gap-4 rounded-xl py-6 hover:bg-white/5" onClick={() => { playSFX('tick'); setShowPrompts(true); }} onContextMenu={e => openContextMenu(e, 'openPrompts')}>
+              <Button id="tutorial-prompts" variant="ghost" className="w-full justify-start gap-4 rounded-xl py-6 hover:bg-white/5" onClick={() => { setShowPrompts(true); }} onContextMenu={e => openContextMenu(e, 'openPrompts')}>
                 <Command className="w-4 h-4 text-(--apple-blue)" />
                 <span className="text-[12px] font-bold tracking-tight">Prompt Library</span>
                 <span className="ml-auto text-[8px] font-mono text-(--apple-gray)">{getShortcutLabel('openPrompts')}</span>
               </Button>
-              <Button id="tutorial-settings" variant="ghost" className="w-full justify-start gap-4 rounded-xl py-6 hover:bg-white/5" onClick={() => { playSFX('tick'); setShowSettings(true); }} onContextMenu={e => openContextMenu(e, 'openSettings')}>
+              <Button id="tutorial-settings" variant="ghost" className="w-full justify-start gap-4 rounded-xl py-6 hover:bg-white/5" onClick={() => { setShowSettings(true); }} onContextMenu={e => openContextMenu(e, 'openSettings')}>
                 <Settings className="w-4 h-4 text-(--apple-blue)" />
                 <span className="text-[12px] font-bold tracking-tight">System Preferences</span>
                 <span className="ml-auto text-[8px] font-mono text-(--apple-gray)">{getShortcutLabel('openSettings')}</span>
@@ -997,22 +986,22 @@ export default function ChatPage() {
         </AnimatePresence>
 
           <div className="flex items-center absolute left-6 top-6 z-30 gap-4">
-            <button onClick={() => { playSFX('slide'); setIsNavOpen(true); }} className="hover:text-(--apple-blue) transition-all flex items-center gap-2 group">
+            <button onClick={() => { setIsNavOpen(true); }} className="hover:text-(--apple-blue) transition-all flex items-center gap-2 group">
               <Menu className="w-6 h-6 group-hover:scale-110" />
             </button>
           </div>
 
         {isMobile && (
           <div className="absolute top-0 left-0 right-0 h-14 border-b border-white/5 bg-black/40 backdrop-blur-xl flex items-center justify-between px-4 z-40">
-            <button onClick={() => { playSFX('slide'); setIsNavOpen(true); }} className="p-2 hover:bg-white/5 rounded-xl"><Menu className="w-5 h-5 text-(--apple-gray)" /></button>
+            <button onClick={() => { setIsNavOpen(true); }} className="p-2 hover:bg-white/5 rounded-xl"><Menu className="w-5 h-5 text-(--apple-gray)" /></button>
             <h1 className="font-bold text-[13px] tracking-tight text-white">Threadly</h1>
             <div className="flex items-center gap-1">
                {currentChatId && (
-                  <button onClick={() => { playSFX('pop'); shareChat(); }} className="p-2 hover:bg-white/5 rounded-xl text-(--apple-blue) transition-all active:scale-95">
+                  <button onClick={() => { shareChat(); }} className="p-2 hover:bg-white/5 rounded-xl text-(--apple-blue) transition-all active:scale-95">
                      <Share2 className="w-5 h-5" />
                   </button>
                )}
-               <button onClick={() => { playSFX('slide'); setIsSidebarOpen(!isSidebarOpen); }} className={`p-2 rounded-xl transition-all ${isSidebarOpen ? 'text-(--apple-blue)' : 'text-(--apple-gray)'}`}><History className="w-5 h-5" /></button>
+               <button onClick={() => { setIsSidebarOpen(!isSidebarOpen); }} className={`p-2 rounded-xl transition-all ${isSidebarOpen ? 'text-(--apple-blue)' : 'text-(--apple-gray)'}`}><History className="w-5 h-5" /></button>
             </div>
           </div>
         )}
@@ -1024,7 +1013,7 @@ export default function ChatPage() {
                  <Button 
                    variant="ghost" 
                    size="sm" 
-                   onClick={() => { playSFX('pop'); shareChat(); }}
+                   onClick={() => { shareChat(); }}
                    onContextMenu={e => openContextMenu(e, 'shareChat')}
                    className="rounded-2xl px-5 py-5 flex items-center gap-2 border-none bg-white text-black hover:bg-gray-100 shadow-xl"
                  >
@@ -1034,7 +1023,7 @@ export default function ChatPage() {
               )}
               <button 
                onContextMenu={e => openContextMenu(e, 'toggleSidebar')} 
-               onClick={() => { playSFX('slide'); setIsSidebarOpen(!isSidebarOpen); }} 
+               onClick={() => { setIsSidebarOpen(!isSidebarOpen); }} 
                className={`p-3 rounded-2xl transition-all shadow-xl ${isSidebarOpen ? 'bg-(--apple-blue) text-white' : 'bg-(--surface) text-(--apple-gray) hover:text-white'}`}
               >
                 <History className="w-5 h-5" />
@@ -1191,7 +1180,6 @@ export default function ChatPage() {
                       if (e.key === 'Enter' && (e.metaKey || e.ctrlKey || !e.shiftKey)) {
                         if (!e.shiftKey || (e.metaKey || e.ctrlKey)) {
                            e.preventDefault()
-                           playSFX('pop');
                            sendMessage()
                         }
                       }
@@ -1206,7 +1194,7 @@ export default function ChatPage() {
                         <Square className="w-5 h-5 fill-current" />
                       </Button>
                     ) : (
-                      <Button type="submit" disabled={!input.trim()} size="icon" className="w-12 h-12 rounded-2xl bg-(--apple-blue) text-white shadow-2xl active:scale-90 disabled:opacity-20 transition-all no-border" onClick={() => playSFX('pop')}>
+                      <Button type="submit" disabled={!input.trim()} size="icon" className="w-12 h-12 rounded-2xl bg-(--apple-blue) text-white shadow-2xl active:scale-90 disabled:opacity-20 transition-all no-border" >
                         <ArrowRight className="w-6 h-6" />
                       </Button>
                     )}
@@ -1257,7 +1245,7 @@ export default function ChatPage() {
                         Persistent history, intelligent AI memory, and cross-device sync.
                       </p>
                       <button 
-                        onClick={() => { playSFX('pop'); router.push('/auth'); }}
+                        onClick={() => { router.push('/auth'); }}
                         className="mt-4 w-full py-2.5 bg-(--apple-blue) hover:bg-blue-600 text-white text-[11px] font-bold tracking-tight rounded-xl transition-all active:scale-95 shadow-lg"
                       >
                         Claim My Workspace
@@ -1882,7 +1870,7 @@ function BigSignupModal({ onClose, onAction }: { onClose: () => void, onAction: 
 
                     <div className="flex flex-col gap-4">
                         <button 
-                            onClick={() => { playSFX('pop'); onAction(); }}
+                            onClick={() => { onAction(); }}
                             className="w-full py-5 bg-white text-black font-bold rounded-2xl shadow-2xl hover:bg-gray-100 transition-all active:scale-95"
                         >
                             Claim Workspace
