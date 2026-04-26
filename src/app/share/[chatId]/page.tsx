@@ -62,8 +62,8 @@ export default async function SharePage(props: { params: Promise<{ chatId: strin
 
       <main className="max-w-4xl mx-auto px-6 py-12 md:py-24">
         <div className="mb-20 space-y-4">
-           <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-tight text-white">{chat.title}</h1>
-           <p className="text-(--apple-gray) text-[13px] font-medium tracking-tight uppercase">Shared Flow • Refined with Threadly AI</p>
+           <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-tight text-white">{chat.title}</h1>
+           <p className="text-(--apple-gray) text-[12px] font-medium tracking-tight uppercase">Shared Flow • Refined with Threadly AI</p>
         </div>
 
         <div className="space-y-24">

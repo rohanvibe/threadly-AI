@@ -114,10 +114,10 @@ function LandingPage({ onEnter }: { onEnter: () => void }) {
              <Sparkles className="w-8 h-8 text-white" />
           </div>
         </div>
-        <h1 className="text-6xl md:text-8xl font-bold tracking-tight leading-tight text-white">
+        <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-tight text-white">
           Your Thoughts, <br/> <span className="text-(--apple-gray)">Refined.</span>
         </h1>
-        <p className="text-xl text-(--apple-gray) font-medium max-w-xl mx-auto leading-relaxed">
+        <p className="text-lg text-(--apple-gray) font-medium max-w-xl mx-auto leading-relaxed">
           The next evolution of thought infrastructure. <br/>
           Built for clarity, designed for precision.
         </p>
@@ -1042,7 +1042,7 @@ export default function ChatPage() {
            </div>
         )}
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar scroll-smooth relative z-10" id="chat-messages-container">
+        <div className={`flex-1 ${messages.length === 0 ? 'overflow-hidden' : 'overflow-y-auto'} custom-scrollbar scroll-smooth relative z-10`} id="chat-messages-container">
           {fetchingMessages ? (
             <div className="max-w-3xl mx-auto p-6 md:p-10 space-y-8">
               <Skeleton className="h-32 w-full rounded-2xl bg-white/5" />
@@ -1920,7 +1920,7 @@ function EmptyState({ onCreateNew }: { onCreateNew: () => void }) {
       drag="y"
       dragConstraints={{ top: 0, bottom: 0 }}
       dragElastic={0.1}
-      className="h-full flex flex-col items-center justify-center text-center space-y-12 px-6 max-w-2xl mx-auto py-20"
+      className="h-full flex flex-col items-center justify-center text-center space-y-8 px-6 max-w-2xl mx-auto py-10"
     >
       <div className="relative group">
         <div className="w-24 h-24 squircle bg-(--apple-blue) flex items-center justify-center shadow-2xl relative z-10">
@@ -1929,11 +1929,11 @@ function EmptyState({ onCreateNew }: { onCreateNew: () => void }) {
         <div className="absolute inset-0 squircle bg-blue-500 blur-2xl opacity-20 group-hover:opacity-40 transition-opacity animate-pulse" />
       </div>
 
-      <div className="space-y-6">
-        <h2 className="text-6xl md:text-8xl font-bold tracking-tight text-white leading-tight">
+      <div className="space-y-4">
+        <h2 className="text-5xl md:text-6xl font-bold tracking-tight text-white leading-tight">
           Clear mind. <br/> <span className="text-(--apple-gray)">Complex flow.</span>
         </h2>
-        <p className="text-lg text-(--apple-gray) font-medium leading-relaxed max-w-lg mx-auto">
+        <p className="text-base text-(--apple-gray) font-medium leading-relaxed max-w-lg mx-auto">
           Welcome to your high-performance workspace. Your intelligent session is ready when you are.
         </p>
       </div>
