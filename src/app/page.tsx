@@ -77,12 +77,7 @@ function playSFX(type: 'tick' | 'pop' | 'slide') {
     const audio = new Audio(sfx.src)
     audio.volume = 0.15
     audio.play().catch(() => {})
-    
-    // Strict cutoff to ensure sound exactly matches action duration
-    setTimeout(() => {
-      audio.pause()
-      audio.currentTime = 0
-    }, sfx.duration)
+
   } catch (e) {
     console.error('Audio playback failed', e)
   }
