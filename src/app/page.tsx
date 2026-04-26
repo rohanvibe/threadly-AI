@@ -65,22 +65,16 @@ import { trackEvent } from '@/utils/analytics'
 import { FeedbackWidget } from '@/components/FeedbackWidget'
 
 const SFX = {
-  tick: { src: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3', duration: 40 },
-  pop: { src: 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3', duration: 100 },
-  slide: { src: 'https://assets.mixkit.co/active_storage/sfx/2564/2564-preview.mp3', duration: 150 }
+  tick: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3',
+  pop: 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3',
+  slide: 'https://assets.mixkit.co/active_storage/sfx/2564/2564-preview.mp3'
 }
 
-function playSFX(type: 'tick' | 'pop' | 'slide') {
+function playSFX(type: keyof typeof SFX) {
   if (typeof window === 'undefined') return
-  try {
-    const sfx = SFX[type]
-    const audio = new Audio(sfx.src)
-    audio.volume = 0.15
-    audio.play().catch(() => {})
-
-  } catch (e) {
-    console.error('Audio playback failed', e)
-  }
+  const audio = new Audio(SFX[type])
+  audio.volume = 0.15
+  audio.play().catch(() => {})
 }
 
 // --- Premium Components ---
