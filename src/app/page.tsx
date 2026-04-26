@@ -99,7 +99,7 @@ function LandingPage({ onEnter }: { onEnter: () => void }) {
         </h1>
         <p className="text-xl text-gray-400 font-medium max-w-xl mx-auto leading-relaxed">
           The flagship workspace for high-performance builders. 
-          Context-aware memory, smart prompt history, and an unforgettable interface.
+          Smart memory, organized history, and a beautiful interface.
         </p>
         <div className="pt-8">
           <Button 
@@ -113,7 +113,7 @@ function LandingPage({ onEnter }: { onEnter: () => void }) {
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl w-full pt-20">
         {[
-          { icon: Zap, title: "Command Center", desc: "Instant response with SambaNova Llama-3." },
+          { icon: Zap, title: "Command Center", desc: "Instant responses with ultra-fast AI." },
           { icon: Sparkles, title: "AI Memory", desc: "It remembers your preferences and projects." },
           { icon: List, title: "Smart Sidebar", desc: "Your entire creative session, indexed." }
         ].map((f, i) => (
@@ -1484,7 +1484,7 @@ function SettingsModal({ onClose, shortcuts, updateShortcut, resetShortcuts }: {
             {activeTab === 'general' && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
                 <div className="space-y-3">
-                  <label className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-500 ml-2">OpenAI BYOK Interface</label>
+                  <label className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-500 ml-2">AI API Key</label>
                   <Input type="password" value={keys.openai} onChange={(e) => setKeys({...keys, openai: e.target.value})} placeholder="sk-••••••••••••••••••••••••" className="bg-white/5 py-8 rounded-2xl border-white/5 focus:ring-1 focus:ring-blue-500/30" />
                 </div>
               </motion.div>
@@ -1493,7 +1493,7 @@ function SettingsModal({ onClose, shortcuts, updateShortcut, resetShortcuts }: {
             {activeTab === 'personalization' && (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-10">
                 <div className="space-y-4">
-                  <label className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-500 ml-2">Response Directives</label>
+                  <label className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-500 ml-2">AI Instructions</label>
                   <textarea 
                     value={profile.custom_instructions}
                     onChange={(e) => setProfile({...profile, custom_instructions: e.target.value})}
@@ -1503,12 +1503,12 @@ function SettingsModal({ onClose, shortcuts, updateShortcut, resetShortcuts }: {
                 </div>
 
                 <div className="space-y-4">
-                  <label className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-500 ml-2">Long-term Memory Registry</label>
+                  <label className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-500 ml-2">AI Memory</label>
                   <div className="flex gap-3">
                     <Input 
                       value={newMemory}
                       onChange={(e) => setNewMemory(e.target.value)}
-                      placeholder="Inject fact into memory..."
+                      placeholder="Save a fact..."
                       className="bg-white/5 border-white/5 rounded-2xl h-14 text-sm"
                       onKeyDown={(e) => e.key === 'Enter' && addMemory()}
                     />
@@ -1523,7 +1523,7 @@ function SettingsModal({ onClose, shortcuts, updateShortcut, resetShortcuts }: {
                     ))}
                     {profile.ai_memory.length === 0 && (
                       <div className="py-12 text-center border-2 border-dashed border-white/5 rounded-4xl">
-                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-700">Memory Registry Empty</p>
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-700">No memories saved</p>
                       </div>
                     )}
                   </div>
@@ -1544,7 +1544,7 @@ function SettingsModal({ onClose, shortcuts, updateShortcut, resetShortcuts }: {
               className="bg-blue-600 hover:bg-blue-500 text-white rounded-2xl px-12 font-black text-[10px] uppercase tracking-widest shadow-2xl shadow-blue-500/20 active:scale-95 transition-all h-14 no-border"
             >
               {saving ? <RefreshCw className="w-4 h-4 animate-spin mr-3" /> : <Zap className="w-4 h-4 mr-3" />}
-              Commit Configuration
+              Save Changes
             </Button>
           </div>
         </div>
@@ -1588,7 +1588,7 @@ function PromptManager({ userId, onClose, onSelect }: { userId: string, onClose:
                 <CardHeader className="shrink-0 border-b border-white/5">
                     <CardTitle className="uppercase tracking-widest text-sm flex items-center gap-2">
                        <Command className="w-4 h-4 text-blue-500" />
-                       Prompt Infrastructure
+                       Prompt Library
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="flex-1 overflow-y-auto space-y-8 p-6 custom-scrollbar">

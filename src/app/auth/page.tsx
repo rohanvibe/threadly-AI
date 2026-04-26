@@ -59,28 +59,26 @@ export default function AuthPage() {
       <div id="spotlight" />
       <div className="fixed inset-0 pointer-events-none z-10 grain-texture opacity-[0.03]" />
       
-      <div className="absolute top-12 left-1/2 -translate-x-1/2 z-20">
-         <div className="flex items-center gap-3">
-            <div className="w-10 h-10 squircle bg-blue-600 flex items-center justify-center shadow-2xl shadow-blue-500/20">
-               <Globe className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-xl font-black tracking-tightest text-white uppercase">Threadly</span>
-         </div>
-      </div>
-
       <motion.div 
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         className="w-full max-w-lg relative z-20"
       >
+        <div className="flex flex-col items-center gap-3 mb-12">
+            <div className="w-12 h-12 squircle bg-blue-600 flex items-center justify-center shadow-2xl shadow-blue-500/20">
+               <Globe className="w-6 h-6 text-white" />
+            </div>
+            <span className="text-2xl font-black tracking-tightest text-white uppercase">Threadly</span>
+        </div>
+
         <div className="glass-dark rounded-[2.5rem] p-8 md:p-12 apple-shadow space-y-10 border border-white/5">
            <div className="space-y-3 text-center">
               <h2 className="text-3xl md:text-4xl font-black tracking-tightest text-white">
-                 {isSignUp ? 'Create Identity' : 'Resume Session'}
+                 {isSignUp ? 'Create Account' : 'Sign In'}
               </h2>
               <p className="text-gray-500 font-medium text-sm md:text-base leading-relaxed">
-                 {isSignUp ? 'Join the flagship workspace for high-performance builders.' : 'Sign in to access your intelligent session flow.'}
+                 {isSignUp ? 'Join the flagship workspace for high-performance builders.' : 'Welcome back to your intelligent workspace.'}
               </p>
            </div>
 
@@ -101,16 +99,16 @@ export default function AuthPage() {
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/5"></div></div>
-                <div className="relative flex justify-center text-[9px] uppercase"><span className="bg-[#09090b] px-4 text-gray-700 font-black tracking-[0.4em]">Secure Protocol</span></div>
+                <div className="relative flex justify-center text-[9px] uppercase"><span className="bg-[#09090b] px-4 text-gray-700 font-black tracking-[0.4em]">Or continue with</span></div>
               </div>
 
               <form onSubmit={handleAuth} className="space-y-6">
                 <div className="space-y-4">
                    <div className="space-y-2">
-                      <label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-600 pl-2">Neural Identity (Email)</label>
+                      <label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-600 pl-2">Email Address</label>
                       <Input
                         type="email"
-                        placeholder="identity@threadly.ai"
+                        placeholder="name@example.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
@@ -118,7 +116,7 @@ export default function AuthPage() {
                       />
                    </div>
                    <div className="space-y-2">
-                      <label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-600 pl-2">Access Key (Password)</label>
+                      <label className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-600 pl-2">Password</label>
                       <Input
                         type="password"
                         placeholder="••••••••••••"
@@ -146,7 +144,7 @@ export default function AuthPage() {
                     disabled={loading}
                     className="w-full py-7 rounded-2xl bg-blue-600 text-white font-black uppercase tracking-widest text-[10px] hover:bg-blue-500 transition-all active:scale-[0.98] shadow-2xl shadow-blue-500/20 no-border"
                    >
-                     {loading ? 'Decrypting...' : isSignUp ? 'Initialize Workspace' : 'Enter Workspace'}
+                     {loading ? 'Processing...' : isSignUp ? 'Sign Up' : 'Sign In'}
                    </Button>
                    
                    <button
@@ -154,7 +152,7 @@ export default function AuthPage() {
                     onClick={() => setIsSignUp(!isSignUp)}
                     className="w-full text-center text-[10px] font-black uppercase tracking-widest text-gray-600 hover:text-white transition-colors py-2"
                    >
-                    {isSignUp ? 'Already registered? Resume Session' : "New Identity? Initialize Workspace"}
+                    {isSignUp ? 'Already have an account? Sign In' : "New here? Create Account"}
                    </button>
                 </div>
               </form>
@@ -163,7 +161,7 @@ export default function AuthPage() {
 
         <div className="mt-12 grid grid-cols-3 gap-6 opacity-20 filter grayscale">
            {[
-             { icon: Zap, label: "Llama-3 70B" },
+             { icon: Zap, label: "Fast AI" },
              { icon: Sparkles, label: "Smart Memory" },
              { icon: Command, label: "Pro Tools" }
            ].map((item, i) => (
