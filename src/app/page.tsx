@@ -64,44 +64,25 @@ import { Suspense } from 'react'
 import { trackEvent } from '@/utils/analytics'
 import { FeedbackWidget } from '@/components/FeedbackWidget'
 
+const SFX = {
+  tick: { src: 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3', duration: 40 },
+  pop: { src: 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3', duration: 100 },
+  slide: { src: 'https://assets.mixkit.co/active_storage/sfx/2564/2564-preview.mp3', duration: 150 }
+}
+
 function playSFX(type: 'tick' | 'pop' | 'slide') {
   if (typeof window === 'undefined') return
   try {
-    const AudioContext = window.AudioContext || (window as any).webkitAudioContext
-    if (!AudioContext) return
-    const ctx = new AudioContext()
-    const osc = ctx.createOscillator()
-    const gain = ctx.createGain()
+    const sfx = SFX[type]
+    const audio = new Audio(sfx.src)
+    audio.volume = 0.15
+    audio.play().catch(() => {})
     
-    osc.connect(gain)
-    gain.connect(ctx.destination)
-    
-    const now = ctx.currentTime
-    
-    if (type === 'pop') {
-      osc.type = 'sine'
-      osc.frequency.setValueAtTime(400, now)
-      osc.frequency.exponentialRampToValueAtTime(800, now + 0.05)
-      gain.gain.setValueAtTime(0.4, now)
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1)
-      osc.start(now)
-      osc.stop(now + 0.1)
-    } else if (type === 'tick') {
-      osc.type = 'triangle'
-      osc.frequency.setValueAtTime(1000, now)
-      gain.gain.setValueAtTime(0.15, now)
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.04)
-      osc.start(now)
-      osc.stop(now + 0.04)
-    } else if (type === 'slide') {
-      osc.type = 'sine'
-      osc.frequency.setValueAtTime(300, now)
-      osc.frequency.exponentialRampToValueAtTime(150, now + 0.15)
-      gain.gain.setValueAtTime(0.2, now)
-      gain.gain.linearRampToValueAtTime(0, now + 0.15)
-      osc.start(now)
-      osc.stop(now + 0.15)
-    }
+    // Strict cutoff to ensure sound exactly matches action duration
+    setTimeout(() => {
+      audio.pause()
+      audio.currentTime = 0
+    }, sfx.duration)
   } catch (e) {
     console.error('Audio playback failed', e)
   }
