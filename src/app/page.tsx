@@ -70,12 +70,19 @@ function AppleTooltip({ text, children }: { text: string, children: React.ReactN
   return (
     <div className="group relative">
       {children}
-      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-all pointer-events-none z-100 translate-y-1 group-hover:translate-y-0">
-        <div className="bg-[#18181b] border border-white/10 px-3 py-1.5 rounded-xl shadow-2xl glass-dark no-border">
-          <p className="text-[10px] font-black uppercase tracking-widest text-white whitespace-nowrap">{text}</p>
-        </div>
-        <div className="w-2 h-2 bg-[#18181b] rotate-45 mx-auto -mt-1" />
-      </div>
+      <AnimatePresence>
+        <motion.div 
+          initial={{ opacity: 0, y: 10, x: '-50%', scale: 0.95 }}
+          whileHover={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+          className="absolute bottom-full left-1/2 mb-2 pointer-events-none z-100 opacity-0 group-hover:opacity-100"
+        >
+          <div className="bg-[#18181b] border border-white/10 px-3 py-1.5 rounded-xl shadow-2xl glass-dark no-border">
+            <p className="text-[10px] font-black uppercase tracking-widest text-white whitespace-nowrap">{text}</p>
+          </div>
+          <div className="w-2 h-2 bg-[#18181b] rotate-45 mx-auto -mt-1" />
+        </motion.div>
+      </AnimatePresence>
     </div>
   )
 }
@@ -86,7 +93,7 @@ function LandingPage({ onEnter }: { onEnter: () => void }) {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ type: 'spring', damping: 28, stiffness: 220 }}
         className="max-w-3xl space-y-6"
       >
         <div className="flex justify-center mb-12">
@@ -811,6 +818,7 @@ export default function ChatPage() {
             initial={isMobile ? { x: -300 } : { width: 0, opacity: 0 }}
             animate={isMobile ? { x: 0 } : { width: 280, opacity: 1 }}
             exit={isMobile ? { x: -300 } : { width: 0, opacity: 0 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 220 }}
             className={`${isMobile ? 'absolute inset-y-0 left-0 w-80 z-50' : 'w-72 relative'} border-r border-white/5 flex flex-col bg-[#09090b]/80 backdrop-blur-2xl h-full shadow-2xl overflow-hidden`}
           >
             <div className="p-6 flex items-center justify-between shrink-0">
@@ -1441,12 +1449,14 @@ function SettingsModal({ onClose, shortcuts, updateShortcut, resetShortcuts }: {
     <div className="fixed inset-0 z-200 flex items-center justify-center p-6">
       <motion.div 
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        transition={{ duration: 0.4 }}
         className="absolute inset-0 bg-black/80 backdrop-blur-md" 
         onClick={onClose}
       />
       <motion.div 
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ type: 'spring', damping: 28, stiffness: 220 }}
         className="w-full max-w-2xl relative z-20"
       >
         <div className="glass-dark rounded-[2.5rem] overflow-hidden apple-shadow border border-white/5 flex flex-col max-h-[85vh]">
@@ -1482,7 +1492,12 @@ function SettingsModal({ onClose, shortcuts, updateShortcut, resetShortcuts }: {
 
           <div className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
             {activeTab === 'general' && (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                transition={{ type: 'spring', damping: 30, stiffness: 250 }}
+                className="space-y-6"
+              >
                 <div className="space-y-3">
                   <label className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-500 ml-2">AI API Key</label>
                   <Input type="password" value={keys.openai} onChange={(e) => setKeys({...keys, openai: e.target.value})} placeholder="sk-••••••••••••••••••••••••" className="bg-white/5 py-8 rounded-2xl border-white/5 focus:ring-1 focus:ring-blue-500/30" />
@@ -1491,7 +1506,12 @@ function SettingsModal({ onClose, shortcuts, updateShortcut, resetShortcuts }: {
             )}
 
             {activeTab === 'personalization' && (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-10">
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                transition={{ type: 'spring', damping: 30, stiffness: 250 }}
+                className="space-y-10"
+              >
                 <div className="space-y-4">
                   <label className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-500 ml-2">AI Instructions</label>
                   <textarea 
@@ -1754,7 +1774,7 @@ function OnboardingTutorial({ step, onNext, onComplete }: { step: number, onNext
           width: rect.width + 16,
           height: rect.height + 16,
         }}
-        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+        transition={{ type: 'spring', damping: 28, stiffness: 220 }}
         className="absolute border-2 border-blue-500 rounded-2xl shadow-[0_0_30px_rgba(59,130,246,0.5)] z-101"
       />
 
@@ -1764,7 +1784,7 @@ function OnboardingTutorial({ step, onNext, onComplete }: { step: number, onNext
           top: Math.min(window.innerHeight - 200, rect.top + rect.height + 24),
           left: Math.min(window.innerWidth - 340, Math.max(20, rect.left + rect.width / 2 - 150)),
         }}
-        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+        transition={{ type: 'spring', damping: 28, stiffness: 220 }}
         className="absolute w-[300px] bg-[#18181b] border border-white/10 rounded-2xl p-5 shadow-2xl z-102 pointer-events-auto"
       >
         <div className="flex items-center gap-2 mb-2">
@@ -1802,6 +1822,7 @@ function BigSignupModal({ onClose, onAction }: { onClose: () => void, onAction: 
                 initial={{ opacity: 0, scale: 0.9, y: 20 }} 
                 animate={{ opacity: 1, scale: 1, y: 0 }} 
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                transition={{ type: 'spring', damping: 28, stiffness: 220 }}
                 className="relative w-full max-w-lg bg-[#0d0d0f]/90 backdrop-blur-3xl border border-white/10 rounded-[3rem] overflow-hidden apple-shadow"
             >
                 <div className="absolute top-0 inset-x-0 h-1 bg-linear-to-r from-blue-600 via-indigo-600 to-purple-600" />
@@ -1870,6 +1891,7 @@ function EmptyState({ onCreateNew }: { onCreateNew: () => void }) {
     <motion.div 
       initial={{ opacity: 0, y: 20 }} 
       animate={{ opacity: 1, y: 0 }} 
+      transition={{ type: 'spring', damping: 28, stiffness: 220 }} 
       drag="y"
       dragConstraints={{ top: 0, bottom: 0 }}
       dragElastic={0.1}
