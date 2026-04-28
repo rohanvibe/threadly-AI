@@ -611,6 +611,20 @@ export default function ChatPage() {
           skipFetchRef.current = true 
           setCurrentChatId(chatId)
           setChats([data, ...chats])
+          
+          // Force immediate naming for new chats
+          fetch('/api/chat/title', {
+            method: 'POST',
+            body: JSON.stringify({ messages: [{ role: 'user', content: displayContent }] })
+          }).then(res => res.json()).then(titleData => {
+            if (titleData.title) {
+               const newTitle = titleData.title;
+               supabase.from('chats').update({ title: newTitle }).eq('id', data.id).then(() => {
+                 setChats(prev => prev.map(c => c.id === data.id ? { ...c, title: newTitle } : c))
+                 setCurrentChatId(data.id) // Ensure state is synced
+               })
+            }
+          }).catch(err => console.error("Immediate naming failed:", err))
         } else return
       }
     }
@@ -768,9 +782,9 @@ export default function ChatPage() {
         // BYOK logic... (same as before but with abort signal support)
       }
 
-        // Generate AI Title if needed
-        const needsNaming = wasJustCreated || chats.find(c => c.id === chatId)?.title === 'New Chat'
-        if (needsNaming && !isGuest && finalContent.length > 30) {
+        // Secondary naming fallback (if first one failed or for existing New Chats)
+        const currentChat = chats.find(c => c.id === chatId)
+        if (currentChat?.title === 'New Chat' && !isGuest) {
            fetch('/api/chat/title', {
              method: 'POST',
              body: JSON.stringify({ messages: [...messages, { role: 'assistant', content: finalContent }] })
@@ -778,7 +792,6 @@ export default function ChatPage() {
              if (data.title) {
                supabase.from('chats').update({ title: data.title }).eq('id', chatId!).then(() => {
                  setChats(prev => prev.map(c => c.id === chatId ? { ...c, title: data.title } : c))
-                 toast("Thread renamed", "success")
                })
              }
            }).catch(err => console.error("Title generation failed:", err))
@@ -1237,13 +1250,13 @@ export default function ChatPage() {
                   </div>
                 </div>
               </form>
-              <div className="flex justify-between items-center mt-6 px-4">
+              <div className="hidden md:flex justify-between items-center mt-6 px-4">
                  <div className="flex items-center gap-3">
                     <span className="text-[9px] font-black text-gray-700 uppercase tracking-[0.4em]">SambaNova Llama-3</span>
                     <div className="w-1 h-1 rounded-full bg-gray-800" />
                     <span className="text-[9px] font-black text-gray-700 uppercase tracking-[0.4em]">Optimized Inference</span>
                  </div>
-                 <p className="text-[9px] font-bold text-gray-700 uppercase tracking-widest hidden md:block opacity-50">⌘ + Enter to dispatch</p>
+                 <p className="text-[9px] font-bold text-gray-700 uppercase tracking-widest opacity-50">⌘ + Enter to dispatch</p>
               </div>
            </div>
         </div>
@@ -1947,30 +1960,30 @@ function EmptyState({ onCreateNew }: { onCreateNew: () => void }) {
       drag="y"
       dragConstraints={{ top: 0, bottom: 0 }}
       dragElastic={0.1}
-      className="h-full flex flex-col items-center justify-center text-center space-y-8 px-6 max-w-2xl mx-auto py-10"
+      className="h-full flex flex-col items-center justify-center text-center space-y-6 md:space-y-8 px-6 max-w-2xl mx-auto py-10"
     >
-      <div className="relative group">
+      <div className="relative group hidden md:block">
         <div className="w-24 h-24 squircle bg-(--apple-blue) flex items-center justify-center shadow-2xl relative z-10">
           <Sparkles className="w-10 h-10 text-white" />
         </div>
         <div className="absolute inset-0 squircle bg-blue-500 blur-2xl opacity-20 group-hover:opacity-40 transition-opacity animate-pulse" />
       </div>
 
-      <div className="space-y-4">
-        <h2 className="text-5xl md:text-6xl font-bold tracking-tight text-white leading-tight">
+      <div className="space-y-2 md:space-y-4">
+        <h2 className="text-4xl md:text-6xl font-bold tracking-tight text-white leading-tight">
           Clear mind. <br/> <span className="text-(--apple-gray)">Complex flow.</span>
         </h2>
-        <p className="text-base text-(--apple-gray) font-medium leading-relaxed max-w-lg mx-auto">
+        <p className="hidden md:block text-base text-(--apple-gray) font-medium leading-relaxed max-w-lg mx-auto">
           Welcome to your high-performance workspace. Your intelligent session is ready when you are.
         </p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
-         <Button onClick={onCreateNew} className="px-8 py-6 rounded-2xl bg-white text-black hover:bg-gray-200 font-bold transition-all active:scale-95 group">
+         <Button onClick={onCreateNew} className="px-8 py-5 md:py-6 rounded-2xl bg-white text-black hover:bg-gray-200 font-bold transition-all active:scale-95 group shadow-xl">
             <Plus className="w-4 h-4 mr-2 transition-transform group-hover:rotate-90" />
             Start a New Thread
          </Button>
-         <Button variant="outline" onClick={() => (document.getElementById('tutorial-prompts') as HTMLElement)?.click()} className="px-8 py-6 rounded-2xl border-white/10 hover:bg-white/5 text-white font-bold transition-all">
+         <Button variant="outline" onClick={() => (document.getElementById('tutorial-prompts') as HTMLElement)?.click()} className="hidden md:flex px-8 py-6 rounded-2xl border-white/10 hover:bg-white/5 text-white font-bold transition-all">
             Browse Registry
          </Button>
       </div>
