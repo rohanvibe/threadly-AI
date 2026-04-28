@@ -643,6 +643,7 @@ export default function ChatPage() {
     }
     setMessages(prev => [...prev, tempAssistantMsg])
 
+    let finalContent = ''
     try {
       if (modelType === 'default') {
         const res = await fetch('/api/chat', {
@@ -674,7 +675,7 @@ export default function ChatPage() {
           setMessages(prev => prev.map(m => m.id === assistantMsgId ? { ...m, content: accumulatedContent } : m))
         }
         
-        let finalContent = accumulatedContent
+        finalContent = accumulatedContent
         const memoryPatterns = [
            /\[MEMORY_(ADD|LEARNED|EDIT|DELETE):.*?\]/gi,
            /\n[a-z]+\|.*$/i, // Catch legacy tag|fact at the very end
