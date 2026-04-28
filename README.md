@@ -4,209 +4,124 @@
 
 # Threadly AI
 
-**The AI workspace built for long conversations.**
+### The AI Workspace for Deep, Long Conversations
 
-Stop losing context. Stop scrolling endlessly. Start thinking clearly.
+**Stop losing context. Stop scrolling endlessly. Start thinking clearly.**
 
 [![Live App](https://img.shields.io/badge/Live%20App-threadly--ai--zeta.vercel.app-blue?style=flat-square&logo=vercel)](https://threadly-ai-zeta.vercel.app)
-[![License](https://img.shields.io/badge/License-Custom%20Non--Commercial-orange?style=flat-square)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![Stars](https://img.shields.io/github/stars/rohanvibe/threadly-AI?style=flat-square&logo=github)](https://github.com/rohanvibe/threadly-AI/stargazers)
+[![Clones](https://img.shields.io/badge/clones-1.6k+-brightgreen?style=flat-square)](https://github.com/rohanvibe/threadly-AI)
 [![Last Commit](https://img.shields.io/github/last-commit/rohanvibe/threadly-AI?style=flat-square)](https://github.com/rohanvibe/threadly-AI/commits)
-[![Issues](https://img.shields.io/github/issues/rohanvibe/threadly-AI?style=flat-square)](https://github.com/rohanvibe/threadly-AI/issues)
 
 <br />
 
-> If this project helps you, please consider giving it a ⭐ — it helps others find it.
+> **Stop losing context in AI chats.** Threadly is a high-performance workspace designed for complex flows and long-term memory.
 
 </div>
 
 ---
 
-## The Problem
+## 🚀 Why Threadly? (The Pain Point)
 
-Every AI chat app has the same flaw: **long conversations become unusable.**
+Every traditional AI chat app has the same flaw: **long conversations become unusable.**
 
-- You lose track of what was said 40 messages ago.
-- You can't jump back to a key decision point.
-- Your context disappears when you close the tab.
-- You have no control over which AI model or key is used.
-- You start over. Again.
+- **The Memory Leak:** You lose track of what was said 40 messages ago.
+- **The Scroll Fatigue:** You can't jump back to a key decision point without scrolling for minutes.
+- **The Context Reset:** Your "memory" disappears when you close the tab.
+- **The Black Box:** You have no control over your API keys or data persistence.
 
-Threadly is built specifically to fix this.
+**Threadly is built specifically to bridge this trust and context gap.**
 
 ---
 
-## What Threadly Does Differently
+## ⚡ Why not ChatGPT?
 
-| Feature | Generic AI Chat | Threadly |
+| Feature | ChatGPT / Generic Wrappers | Threadly AI |
 |---|---|---|
-| Persistent chat history | ❌ or fragile | ✅ Supabase-backed |
-| Jump to any message | ❌ | ✅ Thread sidebar |
-| AI Memory (Persistent Brain) | ❌ | ✅ Tag-based memory |
-| Bring Your Own Key | ❌ | ✅ BYOK + local storage |
-| Prompt library | ❌ | ✅ Saved templates |
-| Custom keyboard shortcuts | ❌ | ✅ Fully assignable |
-| PWA installable | ❌ | ✅ Desktop + mobile |
-| Chat sharing | ❌ | ✅ Public share links |
-| Code block copy | ❌ | ✅ Built-in |
+| **Deep Navigation** | Endless scrolling only | **Instant Thread Sidebar Anchors** |
+| **Persistent Memory** | "Custom Instructions" (Limited) | **Semantic, Tag-Based Fact Store** |
+| **Data Control** | Their server, their rules | **Your Keys (BYOK), Your Database** |
+| **Interface** | One-size-fits-all | **Pro-Grade Workspace (Shortcuts, Maps)** |
+| **Latency** | Perceptible cloud delay | **Zero-Delay Streaming (SambaNova)** |
 
 ---
 
-## Key Features
+## 📽️ Proof in Motion
 
-### 🧵 Thread Navigation Sidebar
-Every user message becomes a clickable anchor. Instantly jump to any point in a long conversation — no scrolling, no searching.
+> [!TIP]
+> **See it in action.** Threadly isn't just a shell; it's a high-performance inference engine.
 
-### 🧠 Persistent AI Memory
-The AI remembers facts across sessions using a tag-based memory system. Memories are only injected into the prompt when contextually relevant — keeping responses fast even with hundreds of stored facts.
+![Chat Interface](public/Screenshot%202026-04-17%20at%2021-35-58%20Threadly%20AI.png)
+*Real-time streaming powered by Llama 3.3 70B via SambaNova Cloud.*
+
+---
+
+## 🧠 Core Pillars
+
+### 🧵 Deep Navigation Sidebar
+Every user message becomes a clickable anchor. Instantly jump to any point in a 200-message conversation. It’s a "Table of Contents" for your thoughts.
+
+### 🧠 Persistent Brain (AI Memory)
+Threadly intelligently remembers facts across sessions. Using a tag-based system, it only injects facts when contextually relevant — keeping your context window clean and your AI focused.
 
 ### 🔑 Bring Your Own Key (BYOK)
-Use your own OpenAI API key. Your key is stored locally in the browser — never sent to any server.
+Total sovereignty. Use your own OpenAI or SambaNova keys. Keys are stored in your browser's local storage — they never touch our servers.
 
-### ⚡ Fast Streaming AI
-Powered by SambaNova's LLaMA 3.3 70B. Real-time streaming with no perceptible delay.
-
-### 📚 Prompt Library
-Save complex, recurring prompts as reusable templates. One click to inject into your next chat.
-
-### ⌨️ Fully Assignable Shortcuts
-Right-click any button to assign a custom keyboard shortcut. All shortcuts are visible in Settings → Shortcuts and persist across sessions.
-
-### 📤 Share Any Chat
-Generate a public read-only link to any conversation. Useful for sharing AI research, answers, or code sessions.
-
-### 📱 PWA Ready
-Install Threadly as a desktop or mobile app. Fully offline-capable UI shell.
-
-### 🔍 Chat Search
-Real-time filtering across all your conversations in the navigation sidebar.
+### 📱 PWA & Offline Shell
+Install Threadly on your desktop or mobile. The UI shell is fully offline-capable, ensuring your workspace is always ready when the spark hits.
 
 ---
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | Next.js 16 (App Router, Turbopack) |
-| Language | TypeScript |
-| Database | Supabase (PostgreSQL + Row Level Security) |
-| Auth | Supabase Auth |
-| AI Engine | SambaNova Cloud — LLaMA 3.3 70B Instruct |
-| Styling | Tailwind CSS v4 |
-| Animations | Framer Motion |
-| Icons | Lucide React |
-| Markdown | ReactMarkdown + remark-gfm |
-| Deployment | Vercel |
+- **Framework:** Next.js 16 (App Router, Turbopack)
+- **Database/Auth:** Supabase (PostgreSQL + RLS)
+- **AI Engine:** SambaNova Cloud (LLaMA 3.3 70B)
+- **Styling:** Tailwind CSS v4 + Apple Design Language
+- **Animations:** Framer Motion
 
 ---
 
-## Quick Start
+## 📦 Quick Start
 
-Get a working local instance in under 3 minutes.
+Get your private workspace running in under 3 minutes.
 
-### Prerequisites
-- Node.js 18+
-- A [Supabase](https://supabase.com) account (free tier works)
-- A [SambaNova](https://sambanova.ai) API key (free tier available)
-
-### 1. Clone
-
+### 1. Clone & Install
 ```bash
 git clone https://github.com/rohanvibe/threadly-AI.git
 cd threadly-AI
 npm install
 ```
 
-### 2. Set Up Supabase
-
-1. Create a new project at [supabase.com](https://supabase.com)
-2. Go to **SQL Editor** and run the contents of [`supabase_schema.sql`](supabase_schema.sql)
-3. Enable **Email Auth** under Authentication → Providers
-
-### 3. Configure Environment
-
-```bash
-cp .env.example .env.local
-```
-
-Edit `.env.local`:
-
+### 2. Configure Environment
+Create a `.env.local` file:
 ```env
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-SAMBANOVA_API_KEY=your_sambanova_api_key
+NEXT_PUBLIC_SUPABASE_URL=your_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SAMBANOVA_API_KEY=your_api_key
 ```
 
-### 4. Run
-
+### 3. Run
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+---
+
+## 🛣️ Roadmap
+
+- [x] High-speed Llama 3.3 Integration
+- [x] Semantic Memory Sync
+- [ ] Multi-model Support (Claude 3.5, Gemini 1.5)
+- [ ] Voice-to-Thought (Whisper Sync)
+- [ ] Collaborative Workspaces
 
 ---
 
-## Environment Variables
+## 📄 License
 
-| Variable | Required | Description |
-|---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | ✅ | Your Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ | Supabase anonymous public key |
-| `SAMBANOVA_API_KEY` | ✅ | SambaNova API key for LLM access |
-
----
-
-## Deploying to Vercel
-
-1. Push your fork to GitHub
-2. Import into [Vercel](https://vercel.com)
-3. Add all three environment variables in Vercel Project Settings
-4. Set **Site URL** in Supabase → Auth → URL Configuration to your Vercel deployment URL
-5. Deploy
-
----
-
-## Screenshots
-
-![Chat Interface](public/Screenshot%202026-04-17%20at%2021-35-58%20Threadly%20AI.png)
-![Thread Sidebar](public/Screenshot%202026-04-17%20at%2021-36-37%20Threadly%20AI.png)
-![Mobile Responsive](public/Screenshot%202026-04-17%20at%2021-36-57%20Threadly%20AI.png)
-
-
----
-
-## Roadmap
-
-- [ ] Multi-model support (Claude, Gemini, GPT-4o)
-- [ ] Chat folders and tagging
-- [ ] Voice input / TTS output
-- [ ] Export chat as PDF / Markdown
-- [ ] Plugin / tool-calling support
-- [ ] Team workspaces
-- [ ] Chat templates per domain (coding, writing, research)
-
----
-
-## Contributing
-
-Threadly is actively welcoming contributors. See [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
-
-Good first issues are labeled [`good first issue`](https://github.com/rohanvibe/threadly-AI/labels/good%20first%20issue).
-
----
-
-## License
-
-This project uses a custom non-commercial license.
-
-- ✅ Personal use
-- ✅ Educational use
-- ✅ Open-source contributions and learning
-- ✅ Modifications with attribution
-- ❌ Commercial use without permission
-
-See [LICENSE](LICENSE) for full terms. For commercial inquiries: [maheshkumar79759@gmail.com](mailto:maheshkumar79759@gmail.com)
+Threadly is now licensed under the **MIT License**. We believe in open-source growth and invite the community to build, fork, and star.
 
 ---
 
@@ -214,6 +129,6 @@ See [LICENSE](LICENSE) for full terms. For commercial inquiries: [maheshkumar797
 
 Built with care. Designed for focused work.
 
-**[⭐ Star this repo](https://github.com/rohanvibe/threadly-AI) · [Report a Bug](https://github.com/rohanvibe/threadly-AI/issues/new?template=bug_report.md) · [Request a Feature](https://github.com/rohanvibe/threadly-AI/issues/new?template=feature_request.md)**
+**[⭐ Star this repo](https://github.com/rohanvibe/threadly-AI) · [Report a Bug](https://github.com/rohanvibe/threadly-AI/issues/new) · [Request a Feature](https://github.com/rohanvibe/threadly-AI/issues/new)**
 
 </div>

@@ -13,6 +13,7 @@
     "workspace"
   ],
   "author": "Rohan <maheshkumar79759@gmail.com>",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "next dev",
