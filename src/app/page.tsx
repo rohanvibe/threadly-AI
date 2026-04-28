@@ -867,11 +867,11 @@ export default function ChatPage() {
         {isNavOpen && (
           <motion.div 
             layout
-            initial={isMobile ? { x: -300 } : { width: 0, opacity: 0 }}
-            animate={isMobile ? { x: 0 } : { width: 280, opacity: 1 }}
-            exit={isMobile ? { x: -300 } : { width: 0, opacity: 0 }}
+            initial={isMobile ? { x: -320 } : { width: 0, opacity: 0 }}
+            animate={isMobile ? { x: 0 } : { width: 320, opacity: 1 }}
+            exit={isMobile ? { x: -320 } : { width: 0, opacity: 0 }}
             transition={{ type: 'spring', damping: 32, stiffness: 180 }}
-            className={`${isMobile ? 'absolute inset-y-0 left-0 w-80 z-50' : 'w-72 relative'} border-r border-white/8 flex flex-col bg-[#09090b] h-full shadow-2xl overflow-hidden`}
+            className={`${isMobile ? 'absolute inset-y-0 left-0 w-80 z-50' : 'w-80 relative'} border-r border-white/8 flex flex-col bg-[#09090b] h-full shadow-2xl overflow-hidden`}
           >
             <div className="p-8 flex items-center justify-between shrink-0">
               <h1 className="font-bold text-xl flex items-center gap-3 tracking-tight text-white">
@@ -954,38 +954,36 @@ export default function ChatPage() {
               )}
             </div>
 
-            <div className="p-4 border-t border-white/5 space-y-2 bg-black/20">
-              <div className="flex items-center gap-3 p-4 bg-(--surface) rounded-2xl border border-white/5 mb-4">
-                <div className="w-10 h-10 squircle bg-(--apple-blue) flex items-center justify-center text-xs font-bold shadow-lg overflow-hidden">
+            <div className="p-6 border-t border-white/8 space-y-3 bg-[#09090b]">
+              <div className="flex items-center gap-4 p-5 bg-[#1c1c1e] rounded-[24px] border border-white/8 mb-2">
+                <div className="w-12 h-12 squircle bg-[#0a84ff] flex items-center justify-center text-sm font-bold text-white shadow-xl overflow-hidden shrink-0">
                   {user?.user_metadata?.avatar_url ? (
                      <img src={user.user_metadata.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
-                     user?.email?.slice(0, 2).toUpperCase()
+                     user?.email?.slice(0, 1).toUpperCase() || '?'
                   )}
                 </div>
                 <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-(--apple-gray) mb-0.5">Session Identity</span>
-                  <span className="text-[12px] font-bold text-white truncate">{user?.email}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/24 mb-1">Session ID</span>
+                  <span className="text-[13px] font-bold text-white truncate tracking-tight">{user?.email || 'Guest User'}</span>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 shrink-0">
                   <AppleTooltip text="Sign Out">
-                    <button onClick={handleLogout} className="p-2 hover:bg-white/10 rounded-xl transition-all"><LogOut className="w-4 h-4 text-gray-400" /></button>
-                  </AppleTooltip>
-                  <AppleTooltip text="Terminate Identity">
-                    <button onClick={handleDeleteAccount} className="p-2 hover:bg-red-500/10 rounded-xl transition-all group/del"><UserMinus className="w-4 h-4 text-gray-400 group-hover/del:text-red-500" /></button>
+                    <button onClick={handleLogout} className="p-2.5 hover:bg-white/5 rounded-full transition-all"><LogOut className="w-4 h-4 text-white/48" /></button>
                   </AppleTooltip>
                 </div>
               </div>
-              <Button id="tutorial-prompts" variant="ghost" className="w-full justify-start gap-4 rounded-xl py-6 hover:bg-white/5" onClick={() => { setShowPrompts(true); }} onContextMenu={e => openContextMenu(e, 'openPrompts')}>
-                <Command className="w-4 h-4 text-(--apple-blue)" />
-                <span className="text-[12px] font-bold tracking-tight">Prompt Library</span>
-                <span className="ml-auto text-[8px] font-mono text-(--apple-gray)">{getShortcutLabel('openPrompts')}</span>
-              </Button>
-              <Button id="tutorial-settings" variant="ghost" className="w-full justify-start gap-4 rounded-xl py-6 hover:bg-white/5" onClick={() => { setShowSettings(true); }} onContextMenu={e => openContextMenu(e, 'openSettings')}>
-                <Settings className="w-4 h-4 text-(--apple-blue)" />
-                <span className="text-[12px] font-bold tracking-tight">System Preferences</span>
-                <span className="ml-auto text-[8px] font-mono text-(--apple-gray)">{getShortcutLabel('openSettings')}</span>
-              </Button>
+              
+              <div className="grid grid-cols-2 gap-3 pt-2">
+                <Button id="tutorial-prompts" variant="ghost" className="justify-center flex-col gap-2 rounded-[20px] py-6 h-auto hover:bg-white/5 border border-white/5" onClick={() => { setShowPrompts(true); }} onContextMenu={e => openContextMenu(e, 'openPrompts')}>
+                  <Command className="w-5 h-5 text-[#0a84ff]" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest">Library</span>
+                </Button>
+                <Button id="tutorial-settings" variant="ghost" className="justify-center flex-col gap-2 rounded-[20px] py-6 h-auto hover:bg-white/5 border border-white/5" onClick={() => { setShowSettings(true); }} onContextMenu={e => openContextMenu(e, 'openSettings')}>
+                  <Settings className="w-5 h-5 text-white/48" />
+                  <span className="text-[10px] font-bold uppercase tracking-widest">Prefs</span>
+                </Button>
+              </div>
             </div>
           </motion.div>
         )}
@@ -1023,10 +1021,15 @@ export default function ChatPage() {
           )}
         </AnimatePresence>
 
-          <div className="flex items-center absolute left-6 top-6 z-30 gap-4">
-            <button onClick={() => { setIsNavOpen(true); }} className="hover:text-(--apple-blue) transition-all flex items-center gap-2 group">
-              <Menu className="w-6 h-6 group-hover:scale-110" />
+          <div className="flex items-center justify-between absolute inset-x-0 top-0 p-8 z-30 pointer-events-none">
+            <button onClick={() => { setIsNavOpen(true); }} className="p-3 bg-black/40 backdrop-blur-xl border border-white/8 rounded-full hover:bg-white/5 transition-all group pointer-events-auto shadow-2xl">
+              <Menu className="w-5 h-5 text-white/48 group-hover:text-white transition-colors" />
             </button>
+            <div className="flex items-center gap-4 pointer-events-auto">
+               <button onClick={() => setIsSidebarOpen(true)} className="p-3 bg-black/40 backdrop-blur-xl border border-white/8 rounded-full hover:bg-white/5 transition-all group shadow-2xl">
+                 <History className="w-5 h-5 text-white/48 group-hover:text-white transition-colors" />
+               </button>
+            </div>
           </div>
 
         {isMobile && (
@@ -1242,13 +1245,13 @@ export default function ChatPage() {
                   </div>
                 </div>
               </form>
-              <div className="hidden md:flex justify-between items-center mt-8 px-6">
-                 <div className="flex items-center gap-4">
-                    <span className="text-[10px] font-bold text-white/24 uppercase tracking-[0.3em]">Llama 3.3 70B</span>
+              <div className="hidden md:flex justify-between items-center mt-10 px-10">
+                 <div className="flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/3 border border-white/5">
+                    <span className="text-[10px] font-bold text-white/24 uppercase tracking-[0.2em]">Llama 3.3 70B</span>
                     <div className="w-1 h-1 rounded-full bg-white/10" />
-                    <span className="text-[10px] font-bold text-white/24 uppercase tracking-[0.3em]">SambaNova Inference</span>
+                    <span className="text-[10px] font-bold text-white/48 uppercase tracking-[0.2em]">SambaNova 1.4ms</span>
                  </div>
-                 <p className="text-[10px] font-bold text-white/24 uppercase tracking-widest">⌘ + Enter to dispatch</p>
+                 <p className="text-[11px] font-bold text-white/24 tracking-tight">⌥ + ⌘ + P to open Library</p>
               </div>
            </div>
         </div>
@@ -1267,122 +1270,101 @@ export default function ChatPage() {
           <motion.div 
             layout
             initial={isMobile ? { x: '100%' } : { width: 0, opacity: 0 }}
-            animate={isMobile ? { x: 0 } : { width: 320, opacity: 1 }}
+            animate={isMobile ? { x: 0 } : { width: 340, opacity: 1 }}
             exit={isMobile ? { x: '100%' } : { width: 0, opacity: 0 }}
             transition={{ type: 'spring', damping: 32, stiffness: 180 }}
-            className={`${isMobile ? 'absolute inset-y-0 right-0 w-[85%] z-50' : 'w-80 relative'} border-l border-white/5 flex flex-col bg-[#09090b]/60 backdrop-blur-3xl h-full shadow-2xl sidebar-tint`}
+            className={`${isMobile ? 'absolute inset-y-0 right-0 w-[85%] z-50' : 'w-[340px] relative'} border-l border-white/8 flex flex-col bg-[#09090b] h-full shadow-2xl overflow-hidden`}
           >
             <div className="flex flex-col h-full">
-              {/* Guest Banner */}
-              {isGuest && (
-                <div className="m-4 p-4 rounded-2xl bg-linear-to-br from-blue-600/20 to-indigo-600/20 border border-blue-500/30 shadow-lg shadow-blue-500/10">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center shrink-0 shadow-xl">
-                      <Sparkles className="w-5 h-5 text-black" />
-                    </div>
-                    <div className="flex flex-col">
-                      <h3 className="text-[13px] font-bold tracking-tight text-white">Unlock Infinite Flow</h3>
-                      <p className="text-[11px] text-(--apple-gray) font-medium leading-relaxed mt-1">
-                        Persistent history, intelligent AI memory, and cross-device sync.
-                      </p>
-                      <button 
-                        onClick={() => { router.push('/auth'); }}
-                        className="mt-4 w-full py-2.5 bg-(--apple-blue) hover:bg-blue-600 text-white text-[11px] font-bold tracking-tight rounded-xl transition-all active:scale-95 shadow-lg"
-                      >
-                        Claim My Workspace
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Identity & Memory Card */}
-              <div id="tutorial-memory" className="p-6 border-b border-white/5 bg-white/2">
-                <div className="flex items-center justify-between mb-6">
+              {/* Identity & Memory Section */}
+              <div id="tutorial-memory" className="p-8 border-b border-white/8 bg-[#09090b]">
+                <div className="flex items-center justify-between mb-8">
                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 squircle bg-(--apple-blue) flex items-center justify-center font-bold text-white shadow-xl uppercase overflow-hidden">
+                      <div className="w-14 h-14 rounded-full bg-[#1c1c1e] border border-white/8 flex items-center justify-center font-bold text-white shadow-xl uppercase overflow-hidden shrink-0">
                          {user?.user_metadata?.avatar_url ? (
                             <img src={user.user_metadata.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
                          ) : (
-                            user?.email?.[0] || 'U'
+                            user?.email?.[0]?.toUpperCase() || 'U'
                          )}
                       </div>
-                      <div className="flex flex-col">
-                         <span className="text-[14px] font-bold tracking-tight text-white truncate max-w-[140px]">
+                      <div className="flex flex-col min-w-0">
+                         <span className="text-base font-bold tracking-tight text-white truncate">
                             {user?.user_metadata?.full_name || user?.email?.split('@')[0]}
                          </span>
-                         <span className="text-[11px] font-medium tracking-tight text-(--apple-gray)">System Operator</span>
+                         <span className="text-[12px] font-medium text-white/48 tracking-tight">System Operator</span>
                       </div>
                    </div>
-                   <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(false)} className="rounded-xl"><X className="w-4 h-4" /></Button>
+                   <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(false)} className="rounded-full hover:bg-white/5"><X className="w-5 h-5 text-white/24" /></Button>
                 </div>
 
-                {profileMemories.length > 0 && (
-                   <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                         <h3 className="text-[11px] font-bold uppercase tracking-widest text-(--apple-blue)">Memory Store</h3>
-                         <span className="text-[10px] font-bold bg-blue-500/10 text-(--apple-blue) px-2.5 py-1 rounded-full">{profileMemories.length} Facts</span>
-                      </div>
-                      <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto custom-scrollbar pr-2">
-                         {profileMemories.slice(0, 5).map((mem, i) => {
-                            const cleaned = mem.includes('|') ? mem.split('|').slice(1).join('|').trim() : mem;
-                            return (
-                               <div key={i} className="px-3 py-1.5 rounded-xl bg-(--surface) text-[10px] font-medium text-(--apple-gray)">
-                                  {cleaned.length > 25 ? cleaned.slice(0, 25) + '...' : cleaned}
-                               </div>
-                            );
-                         })}
-                         {profileMemories.length > 5 && (
-                            <button onClick={() => setShowSettings(true)} className="text-[8px] font-bold text-blue-500 hover:underline pl-1">+ More</button>
-                         )}
-                      </div>
+                <div className="space-y-4">
+                   <div className="flex items-center justify-between">
+                      <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#0a84ff]">Memory Store</h3>
+                      <span className="text-[10px] font-bold bg-[#0a84ff]/10 text-[#0a84ff] px-3 py-1 rounded-full">{profileMemories.length} FACTS</span>
                    </div>
-                )}
+                   <div className="flex flex-wrap gap-2 pr-2">
+                      {profileMemories.length > 0 ? profileMemories.slice(0, 4).map((mem, i) => {
+                         const cleaned = mem.includes('|') ? mem.split('|').slice(1).join('|').trim() : mem;
+                         return (
+                            <div key={i} className="px-3 py-2 rounded-xl bg-[#1c1c1e] border border-white/5 text-[11px] font-bold text-white/72 tracking-tight">
+                               {cleaned.length > 22 ? cleaned.slice(0, 22) + '...' : cleaned}
+                            </div>
+                         );
+                      }) : (
+                        <p className="text-[11px] text-white/24 font-medium italic">No facts indexed yet.</p>
+                      )}
+                      {profileMemories.length > 4 && (
+                         <button onClick={() => setShowSettings(true)} className="text-[10px] font-bold text-[#0a84ff] hover:underline px-1">+ Explore All</button>
+                      )}
+                   </div>
+                </div>
               </div>
 
-              {/* Chat Index (Session Data) */}
-              <div id="tutorial-history" className="p-5 border-b border-white/5 flex flex-col shrink-0 gap-3">
+              {/* Session Intelligence Section */}
+              <div id="tutorial-history" className="p-8 border-b border-white/8 flex flex-col shrink-0 gap-5">
                 <div className="flex items-center justify-between">
-                  <h2 className="font-black text-[9px] uppercase tracking-[0.4em] text-gray-600 pt-1 flex items-center gap-2">
-                     <Activity className="w-3 h-3" />
+                  <h2 className="font-bold text-sm tracking-tight text-white flex items-center gap-3">
+                     <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center">
+                        <Activity className="w-4 h-4 text-white/48" />
+                     </div>
                      Session {sidebarMode === 'map' ? 'Map' : 'Flow'}
                   </h2>
-                  <div className="flex bg-white/5 p-1 rounded-lg">
-                    <button onClick={() => setSidebarMode('flow')} className={`p-1 rounded-md transition-colors ${sidebarMode === 'flow' ? 'bg-white/10 text-white shadow-sm' : 'text-gray-500 hover:text-white'}`}><List className="w-3.5 h-3.5" /></button>
-                    <button onClick={() => setSidebarMode('map')} className={`p-1 rounded-md transition-colors ${sidebarMode === 'map' ? 'bg-white/10 text-blue-400 shadow-sm' : 'text-gray-500 hover:text-white'}`}><Map className="w-3.5 h-3.5" /></button>
+                  <div className="flex bg-[#1c1c1e] p-1 rounded-full border border-white/5">
+                    <button onClick={() => setSidebarMode('flow')} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${sidebarMode === 'flow' ? 'bg-[#0a84ff] text-white shadow-lg shadow-[#0a84ff]/20' : 'text-white/24 hover:text-white'}`}><List className="w-4 h-4" /></button>
+                    <button onClick={() => setSidebarMode('map')} className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${sidebarMode === 'map' ? 'bg-[#0a84ff] text-white shadow-lg shadow-[#0a84ff]/20' : 'text-white/24 hover:text-white'}`}><Map className="w-4 h-4" /></button>
                   </div>
                 </div>
                 {sidebarMode === 'flow' && (
-                  <div className="relative">
-                    <Search className="w-3 h-3 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                  <div className="relative group">
+                    <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-white/24 group-focus-within:text-[#0a84ff] transition-colors" />
                     <input
                       id="sidebar-search"
                       type="text"
-                      placeholder="Search flow (Ctrl/Cmd+K)"
+                      placeholder="Filter flow..."
                       value={sidebarSearch}
                       onChange={(e) => setSidebarSearch(e.target.value)}
-                      className="w-full bg-white/5 border border-white/5 rounded-lg py-2 pl-8 pr-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 transition-colors"
+                      className="w-full bg-[#1c1c1e] border border-white/5 rounded-full py-3 pl-11 pr-4 text-xs font-medium text-white placeholder-white/24 focus:outline-none focus:border-[#0a84ff]/30 transition-all"
                     />
                   </div>
                 )}
               </div>
-              <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+
+              <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
                 {sidebarMode === 'map' ? (
                    chatMap.map((section, sidx) => (
-                      <div key={sidx} className="space-y-3 mb-6">
-                         <h3 className="text-[10px] font-black uppercase tracking-widest text-blue-500 flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                      <div key={sidx} className="space-y-4 mb-8">
+                         <h3 className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#0a84ff] flex items-center gap-3">
+                            <div className="w-1.5 h-1.5 rounded-full bg-[#0a84ff]" />
                             {section.title}
                          </h3>
-                         <div className="space-y-2 border-l border-white/10 ml-0.5 pl-3">
+                         <div className="space-y-3 border-l-2 border-white/5 ml-0.5 pl-5">
                             {section.messages.map((msg) => (
                                <button
                                  key={msg.id}
                                  onClick={() => { scrollToMessage(msg.id); if (isMobile) setIsSidebarOpen(false); }}
-                                 className="w-full text-left p-2 rounded-xl hover:bg-white/5 transition-all group flex items-center gap-2"
+                                 className="w-full text-left p-3 rounded-xl hover:bg-white/5 transition-all group flex items-center gap-3"
                                >
-                                  <span className="w-1 h-1 rounded-full bg-gray-600 group-hover:bg-white transition-colors shrink-0" />
-                                  <span className="text-[11px] font-medium text-gray-400 group-hover:text-white truncate transition-colors">
+                                  <span className="text-[12px] font-bold text-white/48 group-hover:text-white truncate transition-colors leading-tight">
                                     {msg.content}
                                   </span>
                                </button>
@@ -1391,40 +1373,44 @@ export default function ChatPage() {
                       </div>
                    ))
                 ) : (
-                   messages
-                     .filter(m => m.role === 'user')
-                     .filter(m => sidebarSearch.trim() === '' || m.content.toLowerCase().includes(sidebarSearch.toLowerCase()))
-                     .map((msg, idx) => {
-                       const isBookmarked = bookmarkedMessages.has(msg.id)
-                       const isActive = highlightedMessageId === msg.id
-                       return (
-                         <button
-                           key={msg.id}
-                           onClick={() => { scrollToMessage(msg.id); if (isMobile) setIsSidebarOpen(false); }}
-                           className={`w-full text-left p-4 rounded-2xl border transition-all group active:scale-[0.98] relative overflow-hidden ${isActive ? 'bg-blue-600/10 border-blue-500/30' : 'border-white/3 bg-white/1 hover:bg-blue-600/5 hover:border-blue-500/20'}`}
-                         >
-                           <div className="flex items-center justify-between gap-4 relative z-10">
-                             <div className="flex items-center gap-3 min-w-0 flex-1">
-                               <span className={`text-[10px] font-black w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border transition-colors ${isActive || isBookmarked ? 'text-blue-400 bg-blue-500/20 border-blue-500/30' : 'text-gray-500 bg-white/5 border-white/5 group-hover:text-blue-500'}`}>
-                                  {idx + 1}
-                               </span>
-                               <span className={`text-xs font-bold truncate transition-colors ${isActive || isBookmarked ? 'text-gray-200' : 'text-gray-500 group-hover:text-white'}`}>
-                                 {msg.content}
-                               </span>
-                             </div>
-                             <button onClick={(e) => toggleBookmark(msg.id, e)} className={`p-1 rounded-md transition-all ${isBookmarked ? 'opacity-100 text-yellow-500' : 'opacity-0 group-hover:opacity-100 text-gray-600 hover:text-white hover:bg-white/10'}`}>
-                                <Star className="w-3.5 h-3.5" fill={isBookmarked ? "currentColor" : "none"} />
-                             </button>
-                           </div>
-                           <div className={`absolute inset-y-0 left-0 w-1 bg-blue-600 transition-opacity ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
-                         </button>
-                       )
-                   })
+                  <div className="space-y-2">
+                    {messages
+                      .filter(m => m.role === 'user')
+                      .filter(m => sidebarSearch.trim() === '' || m.content.toLowerCase().includes(sidebarSearch.toLowerCase()))
+                      .map((msg, idx) => {
+                        const isBookmarked = bookmarkedMessages.has(msg.id)
+                        const isActive = highlightedMessageId === msg.id
+                        return (
+                          <button
+                            key={msg.id}
+                            onClick={() => { scrollToMessage(msg.id); if (isMobile) setIsSidebarOpen(false); }}
+                            className={`w-full text-left p-5 rounded-[20px] border transition-all group relative overflow-hidden ${isActive ? 'bg-[#0a84ff]/10 border-[#0a84ff]/30 shadow-lg' : 'border-white/5 bg-[#1c1c1e]/50 hover:bg-[#1c1c1e] hover:border-white/10'}`}
+                          >
+                            <div className="flex items-center justify-between gap-4 relative z-10">
+                              <div className="flex items-center gap-4 min-w-0 flex-1">
+                                <span className={`text-[11px] font-bold w-7 h-7 rounded-full flex items-center justify-center shrink-0 border transition-all ${isActive || isBookmarked ? 'text-[#0a84ff] bg-[#0a84ff]/10 border-[#0a84ff]/30' : 'text-white/24 bg-white/5 border-white/5 group-hover:text-white group-hover:border-white/10'}`}>
+                                   {idx + 1}
+                                </span>
+                                <span className={`text-[13px] font-bold truncate transition-colors tracking-tight ${isActive || isBookmarked ? 'text-white' : 'text-white/48 group-hover:text-white'}`}>
+                                  {msg.content}
+                                </span>
+                              </div>
+                              <button onClick={(e) => toggleBookmark(msg.id, e)} className={`p-1.5 rounded-full transition-all ${isBookmarked ? 'opacity-100 text-yellow-500' : 'opacity-0 group-hover:opacity-100 text-white/24 hover:text-white hover:bg-white/10'}`}>
+                                 <Star className="w-4 h-4" fill={isBookmarked ? "currentColor" : "none"} />
+                              </button>
+                            </div>
+                            {isActive && <div className="absolute inset-y-0 left-0 w-1 bg-[#0a84ff]" />}
+                          </button>
+                        )
+                    })}
+                  </div>
                 )}
                 {messages.filter(m => m.role === 'user').length === 0 && (
-                  <div className="h-full flex flex-col items-center justify-center text-center p-10 space-y-6 opacity-20 filter grayscale">
-                    <Globe className="w-12 h-12" />
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] leading-loose">Waiting for interaction to index flow...</p>
+                  <div className="h-full flex flex-col items-center justify-center text-center p-12 space-y-8 opacity-24">
+                    <div className="w-16 h-16 rounded-full border-2 border-dashed border-white/20 flex items-center justify-center">
+                        <Globe className="w-8 h-8" />
+                    </div>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.2em] leading-relaxed max-w-[160px]">Waiting for interaction to index flow...</p>
                   </div>
                 )}
               </div>
@@ -1978,7 +1964,7 @@ function EmptyState({ onCreateNew }: { onCreateNew: () => void }) {
             <Plus className="w-5 h-5 mr-3 transition-transform group-hover:rotate-90" />
             Start a New Thread
          </Button>
-         <Button variant="outline" size="lg" onClick={() => (document.getElementById('tutorial-prompts') as HTMLElement)?.click()} className="hidden md:flex px-10 py-7 rounded-full border-white/8 hover:bg-white/5 text-white shadow-xl">
+         <Button variant="ghost" size="lg" onClick={() => (document.getElementById('tutorial-prompts') as HTMLElement)?.click()} className="hidden md:flex px-10 py-7 rounded-full border border-white/10 hover:bg-white/5 text-white shadow-xl backdrop-blur-xl">
             Browse Registry
          </Button>
       </div>
