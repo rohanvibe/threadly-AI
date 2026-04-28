@@ -586,6 +586,7 @@ export default function ChatPage() {
       finalPrompt = `[FILE CONTEXT: ${attachedFile.name}]\n\`\`\`\n${attachedFile.content}\n\`\`\`\n\n${displayContent}`
     }
 
+    let wasJustCreated = false
     let chatId = currentChatId
     
     // Self-healing: If currentChatId is stale or not in history, force create a new one
@@ -606,6 +607,7 @@ export default function ChatPage() {
           .single()
         if (data) {
           chatId = data.id
+          wasJustCreated = true
           skipFetchRef.current = true 
           setCurrentChatId(chatId)
           setChats([data, ...chats])
@@ -767,8 +769,8 @@ export default function ChatPage() {
       }
 
         // Generate AI Title if needed
-        const currentChat = chats.find(c => c.id === chatId)
-        if (currentChat && currentChat.title === 'New Chat' && !isGuest) {
+        const needsNaming = wasJustCreated || chats.find(c => c.id === chatId)?.title === 'New Chat'
+        if (needsNaming && !isGuest && finalContent.length > 30) {
            fetch('/api/chat/title', {
              method: 'POST',
              body: JSON.stringify({ messages: [...messages, { role: 'assistant', content: finalContent }] })
@@ -776,6 +778,7 @@ export default function ChatPage() {
              if (data.title) {
                supabase.from('chats').update({ title: data.title }).eq('id', chatId!).then(() => {
                  setChats(prev => prev.map(c => c.id === chatId ? { ...c, title: data.title } : c))
+                 toast("Thread renamed", "success")
                })
              }
            }).catch(err => console.error("Title generation failed:", err))

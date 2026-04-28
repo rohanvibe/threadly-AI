@@ -47,9 +47,10 @@ export async function POST(req: Request) {
              }
              return { id: i, tag: '', fact: m, raw: m }
           }).filter(item => {
-             if (!item.tag) return true // Include legacy untagged memory
-             // Include if tag keyword is present in recent conversation
-             return userContextStr.includes(item.tag.toLowerCase()) || userContextStr.includes('remember') || userContextStr.includes('forget')
+             if (!item.tag) return true 
+             // Semantic hint: If the user context is short (new chat), load everything or load related tags
+             if (history.length <= 2) return true 
+             return userContextStr.includes(item.tag.toLowerCase()) || userContextStr.includes('remember') || userContextStr.includes('forget') || userContextStr.length < 20
           })
 
           if (filteredMemories.length > 0) {
@@ -60,9 +61,9 @@ export async function POST(req: Request) {
                .filter((val, i, arr) => arr.indexOf(val) === i) // unique tags
                .join(', ')
 
-             memoryPrompt = `ACTIVE MEMORY FACTS (Loaded via related tags):\n${memoryList}`
-             if (tagList) {
-                memoryPrompt += `\n\n(HIDDEN TAGS: ${tagList}. If user mentions these words, facts will load next turn.)`
+             memoryPrompt = `ACTIVE MEMORY FACTS:\n${memoryList}`
+             if (tagList && filteredMemories.length < memories.length) {
+                memoryPrompt += `\n\n(HIDDEN TAGS: ${tagList}. Mention these to load more facts.)`
              }
           }
        }
@@ -86,6 +87,7 @@ ${memoryPrompt}
 MEMORY MANAGEMENT: 
 You have a "Persistent Brain" that allows you to store and retrieve long-term facts about the user.
 IF AND ONLY IF the user explicitly shares a persistent fact, preference, or asks you to remember/update/forget something, you may trigger the memory system.
+CRITICAL: Do NOT save casual conversation, greeting, or temporary context. Only save HIGH-VALUE, LONG-TERM facts (e.g. names, tech stack, deep preferences).
 Do NOT output phrases like "Memory learned" or "I will remember that" in your natural text. Act completely natural.
 Use ONE of these exact tags on a single line at the VERY END of your response to manage memory.
 To ADD: [MEMORY_ADD: <one_word_tag>|<brief concise fact>]
