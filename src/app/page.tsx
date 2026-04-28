@@ -165,6 +165,13 @@ type Prompt = {
 }
 
 export default function ChatPage() {
+  const cleanDisplayContent = (content: string) => {
+    return content
+      .replace(/\[MEMORY_(ADD|LEARNED|EDIT|DELETE):.*?\]/gi, '')
+      .replace(/\n[a-z]+\|.*$/i, '')
+      .trim()
+  }
+
   const [chats, setChats] = useState<Chat[]>([])
   const [currentChatId, setCurrentChatId] = useState<string | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
@@ -594,7 +601,7 @@ export default function ChatPage() {
       } else {
         const { data } = await supabase
           .from('chats')
-          .insert([{ user_id: user.id, title: displayContent.slice(0, 30) }])
+          .insert([{ user_id: user.id, title: 'New Chat' }])
           .select()
           .single()
         if (data) {
@@ -668,12 +675,21 @@ export default function ChatPage() {
         }
         
         let finalContent = accumulatedContent
+        const memoryPatterns = [
+           /\[MEMORY_(ADD|LEARNED|EDIT|DELETE):.*?\]/gi,
+           /\n[a-z]+\|.*$/i, // Catch legacy tag|fact at the very end
+        ]
+        
         const addMatch = finalContent.match(/\[MEMORY_ADD:\s*(.*?)\]/i) || finalContent.match(/\[MEMORY_LEARNED:\s*(.*?)\]/i)
         const editMatch = finalContent.match(/\[MEMORY_EDIT:\s*(\d+)\s*\|\s*(.*?)\]/i)
         const deleteMatch = finalContent.match(/\[MEMORY_DELETE:\s*(\d+)\]/i)
         
         if (addMatch || editMatch || deleteMatch) {
-           finalContent = finalContent.replace(/\[MEMORY_(ADD|LEARNED|EDIT|DELETE):.*?\]/gi, '').trim()
+           // Remove all memory tags
+           memoryPatterns.forEach(pattern => {
+              finalContent = finalContent.replace(pattern, '')
+           })
+           finalContent = finalContent.trim()
            
            // Sync new memory to Supabase
            const { data: { user } } = await supabase.auth.getUser()
@@ -749,7 +765,20 @@ export default function ChatPage() {
         // BYOK logic... (same as before but with abort signal support)
       }
 
-      // Generate AI Title if needed...
+        // Generate AI Title if needed
+        const currentChat = chats.find(c => c.id === chatId)
+        if (currentChat && currentChat.title === 'New Chat' && !isGuest) {
+           fetch('/api/chat/title', {
+             method: 'POST',
+             body: JSON.stringify({ messages: [...messages, { role: 'assistant', content: finalContent }] })
+           }).then(res => res.json()).then(data => {
+             if (data.title) {
+               supabase.from('chats').update({ title: data.title }).eq('id', chatId!).then(() => {
+                 setChats(prev => prev.map(c => c.id === chatId ? { ...c, title: data.title } : c))
+               })
+             }
+           }).catch(err => console.error("Title generation failed:", err))
+        }
     } catch (err: any) {
       if (err.name !== 'AbortError') {
         process.env.NODE_ENV === 'development' && console.error("Fetch error:", err)
@@ -1001,7 +1030,10 @@ export default function ChatPage() {
                      <Share2 className="w-5 h-5" />
                   </button>
                )}
-               <button onClick={() => { setIsSidebarOpen(!isSidebarOpen); }} className={`p-2 rounded-xl transition-all ${isSidebarOpen ? 'text-(--apple-blue)' : 'text-(--apple-gray)'}`}><History className="w-5 h-5" /></button>
+                <button onClick={() => { createNewChat(); if (isMobile) setIsNavOpen(false); }} className="p-2 hover:bg-white/5 rounded-xl text-white transition-all active:scale-95">
+                   <Plus className="w-5 h-5" />
+                </button>
+                <button onClick={() => { setIsSidebarOpen(!isSidebarOpen); }} className={`p-2 rounded-xl transition-all ${isSidebarOpen ? 'text-(--apple-blue)' : 'text-(--apple-gray)'}`}><History className="w-5 h-5" /></button>
             </div>
           </div>
         )}
@@ -1041,7 +1073,7 @@ export default function ChatPage() {
           ) : messages.length === 0 ? (
             <EmptyState onCreateNew={() => createNewChat()} />
           ) : (
-            <div className="max-w-3xl mx-auto p-6 md:p-10 space-y-12 pb-32">
+            <div className="max-w-3xl mx-auto px-4 py-8 md:p-10 space-y-12 pb-32">
               <motion.div layout drag="y" dragConstraints={{ top: 0, bottom: 0 }} dragElastic={0.05} className="space-y-12">
                 <AnimatePresence mode="popLayout">
                   {messages.map((msg, i) => (
@@ -1061,7 +1093,7 @@ export default function ChatPage() {
                     {msg.role === 'assistant' ? <Zap className="w-5 h-5" /> : <Plus className="w-5 h-5 rotate-45" />}
                   </div>
                   <div className="flex-1 space-y-4 min-w-0 overflow-hidden">
-                    <div className={`p-6 md:p-8 rounded-[2.5rem] glass-dark shadow-2xl relative overflow-hidden border border-white/5 ${
+                    <div className={`p-5 md:p-8 rounded-3xl md:rounded-[2.5rem] glass-dark shadow-2xl relative overflow-hidden border border-white/5 ${
                       msg.role === 'assistant' ? 'ring-1 ring-blue-500/10' : ''
                     }`}>
                       <div className="flex items-center justify-between mb-6">
@@ -1153,7 +1185,7 @@ export default function ChatPage() {
                                 }
                               }}
                             >
-                              {msg.content}
+                              {cleanDisplayContent(msg.content)}
                             </ReactMarkdown>
                           )}
                         </div>
@@ -1169,7 +1201,7 @@ export default function ChatPage() {
           <div ref={messagesEndRef} className="h-20" />
         </div>
 
-        <div className="p-6 md:p-12 relative z-20">
+        <div className="p-4 md:p-12 relative z-20">
            <div id="tutorial-input" className="w-full max-w-4xl mx-auto relative group">
               <form onSubmit={sendMessage}>
                 <div className="relative glass-dark rounded-4xl p-2 apple-shadow group-focus-within:ring-1 ring-blue-500/20 transition-all">
@@ -1186,7 +1218,7 @@ export default function ChatPage() {
                     }}
                     rows={1}
                     placeholder={loading ? "Generating response..." : "What's on your mind?"}
-                    className="w-full pr-32 py-6 pl-8 bg-transparent text-lg outline-none resize-none custom-scrollbar placeholder:text-gray-600 font-medium tracking-tight"
+                    className="w-full pr-24 md:pr-32 py-4 md:py-6 pl-6 md:pl-8 bg-transparent text-base md:text-lg outline-none resize-none custom-scrollbar placeholder:text-gray-600 font-medium tracking-tight"
                   />
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-3">
                     {loading ? (
@@ -1283,11 +1315,14 @@ export default function ChatPage() {
                          <span className="text-[10px] font-bold bg-blue-500/10 text-(--apple-blue) px-2.5 py-1 rounded-full">{profileMemories.length} Facts</span>
                       </div>
                       <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto custom-scrollbar pr-2">
-                         {profileMemories.slice(0, 5).map((mem, i) => (
-                            <div key={i} className="px-3 py-1.5 rounded-xl bg-(--surface) text-[10px] font-medium text-(--apple-gray)">
-                               {mem.length > 25 ? mem.slice(0, 25) + '...' : mem}
-                            </div>
-                         ))}
+                         {profileMemories.slice(0, 5).map((mem, i) => {
+                            const cleaned = mem.includes('|') ? mem.split('|').slice(1).join('|').trim() : mem;
+                            return (
+                               <div key={i} className="px-3 py-1.5 rounded-xl bg-(--surface) text-[10px] font-medium text-(--apple-gray)">
+                                  {cleaned.length > 25 ? cleaned.slice(0, 25) + '...' : cleaned}
+                               </div>
+                            );
+                         })}
                          {profileMemories.length > 5 && (
                             <button onClick={() => setShowSettings(true)} className="text-[8px] font-bold text-blue-500 hover:underline pl-1">+ More</button>
                          )}

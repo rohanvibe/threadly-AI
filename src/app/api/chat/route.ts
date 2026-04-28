@@ -84,10 +84,10 @@ ${profile?.custom_instructions ? `HOW TO RESPOND: ${profile.custom_instructions}
 ${memoryPrompt}
 
 MEMORY MANAGEMENT: 
+You have a "Persistent Brain" that allows you to store and retrieve long-term facts about the user.
+IF AND ONLY IF the user explicitly shares a persistent fact, preference, or asks you to remember/update/forget something, you may trigger the memory system.
 Do NOT output phrases like "Memory learned" or "I will remember that" in your natural text. Act completely natural.
-IF AND ONLY IF the user explicitly asks you to remember, update, or forget something, or shares a critical persistent fact, you may trigger the memory system.
-Memories use a TAG SYSTEM. When adding a memory, prefix it with a simple 1-word lowercase tag and a pipe symbol (e.g., framework|User uses NextJS).
-Use ONE of these exact tags on a single line at the VERY END of your response to manage memory. Keep usages extremely rare.
+Use ONE of these exact tags on a single line at the VERY END of your response to manage memory.
 To ADD: [MEMORY_ADD: <one_word_tag>|<brief concise fact>]
 To EDIT an existing fact by ID: [MEMORY_EDIT: <ID> | <new updated raw string including tag>]
 To DELETE an existing fact by ID: [MEMORY_DELETE: <ID>]`
