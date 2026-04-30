@@ -1327,6 +1327,21 @@ export default function ChatPage() {
                                 ul: ({ children }) => <ul className="list-disc pl-5 space-y-2 mb-4 wrap-break-word">{children}</ul>,
                                 ol: ({ children }) => <ol className="list-decimal pl-5 space-y-2 mb-4 wrap-break-word">{children}</ol>,
                                 li: ({ children }) => <li className="leading-relaxed wrap-break-word">{children}</li>,
+                                img: ({ src, alt }) => (
+                                   <div className="my-6 rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-white/2 group/img">
+                                     <img 
+                                       src={src} 
+                                       alt={alt || 'Visual content'} 
+                                       className="w-full h-auto max-h-[500px] object-contain transition-transform duration-700 group-hover/img:scale-105" 
+                                       loading="lazy"
+                                     />
+                                     {alt && (
+                                       <div className="px-4 py-2 bg-black/40 border-t border-white/5">
+                                         <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">{alt}</p>
+                                       </div>
+                                     )}
+                                   </div>
+                                 ),
                                 code: ({ node, className, children, ...props }: any) => {
                                   const match = /language-(\w+)/.exec(className || '');
                                   if (match?.[1] === 'mermaid') {
