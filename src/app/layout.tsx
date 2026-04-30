@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Threadly AI",
-  description: "Next-gen AI chatbot workspace with SambaNova streaming.",
+  description: "Next-gen AI chatbot workspace with high-performance streaming.",
   manifest: "/manifest.json?v=3",
   appleWebApp: {
     capable: true,

@@ -124,6 +124,16 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
       apiMessages.push({ role: 'user', content: message })
     }
 
+    // Tier-Based Model Routing Logic
+    const prompt = (message || '').toLowerCase()
+    const complexKeywords = ['code', 'math', 'mermaid', 'diagram', 'draw', 'visualize', 'prove', 'solve', 'complex', 'analyze', 'search', 'latest', 'news', 'calculate', 'architecture']
+    const isComplex = complexKeywords.some(k => prompt.includes(k)) || prompt.length > 600
+    
+    // Model Selection
+    const model70B = 'meta-llama/Llama-3.3-70B-Instruct-Turbo'
+    const model8B = 'meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo'
+    const primaryModel = isComplex ? model70B : model8B
+
     const tools = [
       {
         type: 'function',
@@ -142,44 +152,44 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
     ]
 
     // Step 1: Initial call to check for tools (Non-streaming)
-    let aiResponse = await fetch('https://api.sambanova.ai/v1/chat/completions', {
+    let aiResponse = await fetch('https://api.together.xyz/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.SAMBANOVA_API_KEY}`
+        'Authorization': `Bearer ${process.env.TOGETHER_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'Meta-Llama-3.3-70B-Instruct',
+        model: primaryModel,
         messages: apiMessages,
         tools: tools,
         tool_choice: 'auto',
-        temperature: 0.1, // Lower temperature for tool selection stability
+        temperature: 0.1,
       })
     })
 
     if (!aiResponse.ok) {
         const errorText = await aiResponse.text()
-        console.error('SambaNova Initial Error:', errorText)
-        // Fallback: try one more time without tools if initial call failed
-        aiResponse = await fetch('https://api.sambanova.ai/v1/chat/completions', {
+        console.error('Together AI Error:', errorText)
+        
+        // Final fallback to 8B if everything fails
+        aiResponse = await fetch('https://api.together.xyz/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.SAMBANOVA_API_KEY}`
+            'Authorization': `Bearer ${process.env.TOGETHER_API_KEY}`
           },
           body: JSON.stringify({
-            model: 'Meta-Llama-3.3-70B-Instruct',
+            model: model8B,
             messages: apiMessages,
             stream: requestedStream
           })
         })
         if (!aiResponse.ok) {
-           if (aiResponse.status === 429) {
-             return NextResponse.json({ error: "The AI is currently at capacity. Please wait a moment before sending another message." }, { status: 429 })
-           }
            const finalError = await aiResponse.text()
-           console.error('Final Fallback Error:', finalError)
-           return NextResponse.json({ error: `SambaNova Error: ${finalError.slice(0, 150)}` }, { status: 500 })
+           if (aiResponse.status === 429) {
+             return NextResponse.json({ error: "The AI is currently at capacity. Please wait a moment." }, { status: 429 })
+           }
+           return NextResponse.json({ error: `Provider Error: ${finalError.slice(0, 150)}` }, { status: 500 })
         }
         if (requestedStream) return handleStreaming(aiResponse)
         const data = await aiResponse.json()
@@ -206,14 +216,14 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
             content: searchResult,
           })
 
-          const finalResponse = await fetch('https://api.sambanova.ai/v1/chat/completions', {
+          const finalResponse = await fetch('https://api.together.xyz/v1/chat/completions', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${process.env.SAMBANOVA_API_KEY}`
+              'Authorization': `Bearer ${process.env.TOGETHER_API_KEY}`
             },
             body: JSON.stringify({
-              model: 'Meta-Llama-3.3-70B-Instruct',
+              model: model70B, // Upgrade to 70B for search synthesis
               messages: apiMessages,
               stream: true
             })

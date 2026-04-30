@@ -1397,7 +1397,7 @@ export default function ChatPage() {
               </form>
               <div className="hidden md:flex justify-between items-center mt-6 px-4">
                  <div className="flex items-center gap-3">
-                    <span className="text-[9px] font-black text-gray-700 uppercase tracking-[0.4em]">SambaNova Llama-3</span>
+                    <span className="text-[9px] font-black text-gray-700 uppercase tracking-[0.4em]">Together AI Llama-3</span>
                     <div className="w-1 h-1 rounded-full bg-gray-800" />
                     <span className="text-[9px] font-black text-gray-700 uppercase tracking-[0.4em]">Optimized Inference</span>
                  </div>
@@ -2094,7 +2094,7 @@ function BigSignupModal({ onClose, onAction }: { onClose: () => void, onAction: 
                     <div className="mt-8 pt-6 border-t border-white/5">
                         <p className="text-[8px] font-black text-gray-700 uppercase tracking-[0.3em] mb-4">Powered by Infrastructure From</p>
                         <div className="flex justify-center gap-8 opacity-20 grayscale brightness-200">
-                             <span className="text-[10px] font-black tracking-tighter text-white italic">SambaNova</span>
+                             <span className="text-[10px] font-black tracking-tighter text-white italic">Together AI</span>
                              <span className="text-[10px] font-black tracking-tighter text-white italic">Vercel</span>
                              <span className="text-[10px] font-black tracking-tighter text-white italic">Supabase</span>
                         </div>

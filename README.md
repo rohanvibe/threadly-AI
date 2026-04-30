@@ -43,7 +43,7 @@ Every traditional AI chat app has the same flaw: **long conversations become unu
 | **Persistent Memory** | "Custom Instructions" (Limited) | **Semantic, Tag-Based Fact Store** |
 | **Data Control** | Their server, their rules | **Your Keys (BYOK), Your Database** |
 | **Interface** | One-size-fits-all | **Pro-Grade Workspace (Shortcuts, Maps)** |
-| **Latency** | Perceptible cloud delay | **Zero-Delay Streaming (SambaNova)** |
+| **Latency** | Perceptible cloud delay | **Zero-Delay Streaming (Together AI)** |
 
 ---
 
@@ -53,7 +53,7 @@ Every traditional AI chat app has the same flaw: **long conversations become unu
 > **See it in action.** Threadly isn't just a shell; it's a high-performance inference engine.
 
 ![Chat Interface](public/Screenshot%202026-04-17%20at%2021-35-58%20Threadly%20AI.png)
-*Real-time streaming powered by Llama 3.3 70B via SambaNova Cloud.*
+*Real-time streaming powered by Llama 3.3 70B via Together AI.*
 
 ---
 
@@ -66,7 +66,7 @@ Every user message becomes a clickable anchor. Instantly jump to any point in a 
 Threadly intelligently remembers facts across sessions. Using a tag-based system, it only injects facts when contextually relevant — keeping your context window clean and your AI focused.
 
 ### 🔑 Bring Your Own Key (BYOK)
-Total sovereignty. Use your own OpenAI or SambaNova keys. Keys are stored in your browser's local storage — they never touch our servers.
+Total sovereignty. Use your own OpenAI or Together AI keys. Keys are stored in your browser's local storage — they never touch our servers.
 
 ### 📱 PWA & Offline Shell
 Install Threadly on your desktop or mobile. The UI shell is fully offline-capable, ensuring your workspace is always ready when the spark hits.
@@ -77,7 +77,7 @@ Install Threadly on your desktop or mobile. The UI shell is fully offline-capabl
 
 - **Framework:** Next.js 16 (App Router, Turbopack)
 - **Database/Auth:** Supabase (PostgreSQL + RLS)
-- **AI Engine:** SambaNova Cloud (LLaMA 3.3 70B)
+- **AI Engine:** Together AI (LLaMA 3.3 70B)
 - **Styling:** Tailwind CSS v4 + Apple Design Language
 - **Animations:** Framer Motion
 
@@ -99,7 +99,7 @@ Create a `.env.local` file:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-SAMBANOVA_API_KEY=your_api_key
+TOGETHER_API_KEY=your_api_key
 ```
 
 ### 3. Run
