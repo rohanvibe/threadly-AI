@@ -67,19 +67,19 @@ export default function AuthPage() {
         transition={{ type: 'spring', damping: 28, stiffness: 220 }}
         className="w-full max-w-lg relative z-20"
       >
-        <div className="flex flex-col items-center gap-3 mb-12">
-          <div className="w-12 h-12 squircle bg-(--apple-blue) flex items-center justify-center shadow-2xl shadow-blue-500/20">
-            <Globe className="w-6 h-6 text-white" />
+        <div className="flex flex-col items-center gap-3 mb-10">
+          <div className="w-10 h-10 rounded-xl bg-(--apple-blue) flex items-center justify-center shadow-lg shadow-blue-500/10">
+            <Globe className="w-5 h-5 text-white" />
           </div>
-          <span className="text-2xl font-bold tracking-tight text-white">Threadly</span>
+          <span className="text-xl font-semibold tracking-tight text-white">Threadly</span>
         </div>
 
-        <div className="glass-dark rounded-[2.5rem] p-8 md:p-12 apple-shadow space-y-10 border border-white/5">
-          <div className="space-y-3 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
+        <div className="bg-(--surface) rounded-(--radius-lg) p-8 md:p-10 space-y-8 border border-white/5 shadow-xl">
+          <div className="space-y-2 text-center">
+            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-white">
               {isSignUp ? 'Create Account' : 'Sign In'}
             </h2>
-            <p className="text-(--apple-gray) font-medium text-sm md:text-base leading-relaxed">
+            <p className="text-(--apple-gray) font-medium text-[15px] leading-relaxed">
               {isSignUp ? 'Join the next generation of intelligent workspace.' : 'Welcome back to your refined workspace.'}
             </p>
           </div>
@@ -88,7 +88,7 @@ export default function AuthPage() {
             <Button
               onClick={handleGoogleLogin}
               disabled={loading}
-              className="w-full py-7 rounded-2xl bg-white text-black font-bold tracking-tight text-[14px] hover:bg-gray-100 transition-all active:scale-[0.98] shadow-2xl no-border flex items-center justify-center gap-3"
+              className="w-full py-6 rounded-(--radius-pill) bg-white text-black font-semibold tracking-tight text-[14px] hover:bg-gray-100 transition-all active:scale-[0.98] border-none flex items-center justify-center gap-3"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -106,26 +106,26 @@ export default function AuthPage() {
 
             <form onSubmit={handleAuth} className="space-y-6">
               <div className="space-y-5">
-                <div className="space-y-2.5">
-                  <label className="text-[12px] font-bold tracking-tight text-(--apple-gray) pl-1">Email Address</label>
+                <div className="space-y-2">
+                  <label className="text-[12px] font-semibold tracking-tight text-(--apple-gray) pl-1">Email Address</label>
                   <Input
                     type="email"
                     placeholder="name@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full bg-(--surface) border-none rounded-2xl py-7 px-6 text-sm font-medium text-white placeholder-gray-700 focus:ring-1 focus:ring-blue-500/30 outline-none transition-all"
+                    className="w-full bg-(--surface-tertiary) border-none rounded-(--radius-md) py-6 px-6 text-[15px] font-medium text-white placeholder-gray-700 focus:ring-1 focus:ring-blue-500/30 outline-none transition-all"
                   />
                 </div>
-                <div className="space-y-2.5">
-                  <label className="text-[12px] font-bold tracking-tight text-(--apple-gray) pl-1">Password</label>
+                <div className="space-y-2">
+                  <label className="text-[12px] font-semibold tracking-tight text-(--apple-gray) pl-1">Password</label>
                   <Input
                     type="password"
                     placeholder="••••••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="w-full bg-(--surface) border-none rounded-2xl py-7 px-6 text-sm font-medium text-white placeholder-gray-700 focus:ring-1 focus:ring-blue-500/30 outline-none transition-all"
+                    className="w-full bg-(--surface-tertiary) border-none rounded-(--radius-md) py-6 px-6 text-[15px] font-medium text-white placeholder-gray-700 focus:ring-1 focus:ring-blue-500/30 outline-none transition-all"
                   />
                 </div>
               </div>
@@ -144,7 +144,7 @@ export default function AuthPage() {
                 <Button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-7 rounded-2xl bg-(--apple-blue) text-white font-bold tracking-tight text-[14px] hover:bg-blue-600 transition-all active:scale-[0.98] shadow-2xl no-border"
+                  className="w-full py-6 rounded-(--radius-pill) bg-(--apple-blue) text-white font-semibold tracking-tight text-[15px] hover:bg-blue-600 transition-all active:scale-[0.98] border-none"
                 >
                   {loading ? 'Processing...' : isSignUp ? 'Create Workspace' : 'Enter Workspace'}
                 </Button>

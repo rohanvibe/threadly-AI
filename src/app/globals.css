@@ -9,17 +9,17 @@
 :root {
   --background: #000000;
   --foreground: #FFFFFF;
-  --surface: #1C1C1E;
-  --surface-secondary: #2C2C2E;
-  --surface-tertiary: #3A3A3C;
-  --apple-blue: #007AFF;
-  --apple-green: #34C759;
-  --apple-orange: #FF9500;
-  --apple-red: #FF3B30;
-  --apple-yellow: #FFCC00;
-  --apple-gray: #8E8E93;
-  --apple-gray-light: #E5E5EA;
-  --radius: 1.25rem;
+  --surface: #272729;
+  --surface-secondary: #2a2a2c;
+  --surface-tertiary: #252527;
+  --apple-blue: #0066cc;
+  --apple-blue-dark: #004499;
+  --apple-gray: #86868b;
+  --apple-gray-light: #f5f5f7;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-pill: 9999px;
 }
 
 /* Apple Design Language - Clarity & Breathing Room */
@@ -30,15 +30,11 @@
 .surface-interactive { background-color: var(--surface-tertiary); }
 
 .glass {
-  background: rgba(28, 28, 30, 0.7);
-  backdrop-filter: blur(50px) saturate(210%);
-  -webkit-backdrop-filter: blur(50px) saturate(210%);
+  background: rgba(39, 39, 41, 0.8);
 }
 
 .glass-dark {
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(60px) saturate(200%);
-  -webkit-backdrop-filter: blur(60px) saturate(200%);
+  background: rgba(0, 0, 0, 0.9);
 }
 
 .squircle {
@@ -49,7 +45,7 @@
 }
 
 .apple-shadow {
-  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .grain-texture {
@@ -68,10 +64,17 @@
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: "SF Pro Display", "SF Pro Text", "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-  letter-spacing: -0.015em;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.45;
+  letter-spacing: -0.022em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  letter-spacing: -0.03em;
 }
 
 /* Smooth Transitions */

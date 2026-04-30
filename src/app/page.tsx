@@ -113,7 +113,7 @@ function LandingPage({ onEnter }: { onEnter: () => void }) {
         <div className="pt-8">
           <Button 
             onClick={() => { onEnter(); }} 
-            className="px-12 py-8 rounded-2xl bg-white text-black font-bold tracking-tight text-lg hover:bg-gray-100 transition-all active:scale-95 shadow-2xl"
+            className="px-12 py-8 rounded-(--radius-pill) bg-white text-black font-semibold tracking-tight text-[17px] hover:bg-gray-100 transition-all active:scale-[0.98] shadow-xl"
           >
             Enter Workspace
           </Button>
@@ -131,11 +131,11 @@ function LandingPage({ onEnter }: { onEnter: () => void }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 + i * 0.1 }}
-            className="p-8 rounded-3xl surface-elevated text-left space-y-4"
+            className="p-8 rounded-(--radius-lg) bg-(--surface) text-left space-y-4 border border-white/5"
           >
-            <f.icon className="w-6 h-6 text-blue-500" />
-            <h3 className="text-lg font-black uppercase tracking-widest text-white">{f.title}</h3>
-            <p className="text-sm text-gray-500 font-medium leading-relaxed">{f.desc}</p>
+            <f.icon className="w-5 h-5 text-(--apple-blue)" />
+            <h3 className="text-[13px] font-semibold uppercase tracking-widest text-white">{f.title}</h3>
+            <p className="text-[15px] text-gray-500 font-medium leading-relaxed">{f.desc}</p>
           </motion.div>
         ))}
       </div>
@@ -993,9 +993,9 @@ export default function ChatPage() {
               )}
             </div>
 
-            <div className="p-4 border-t border-white/5 space-y-2 bg-black/20">
-              <div className="flex items-center gap-3 p-4 bg-(--surface) rounded-2xl border border-white/5 mb-4">
-                <div className="w-10 h-10 squircle bg-(--apple-blue) flex items-center justify-center text-xs font-bold shadow-lg overflow-hidden">
+            <div className="p-4 border-t border-white/5 space-y-2">
+              <div className="flex items-center gap-3 p-4 bg-(--surface) rounded-(--radius-md) border border-white/5 mb-4">
+                <div className="w-10 h-10 rounded-lg bg-(--apple-blue) flex items-center justify-center text-xs font-semibold text-white shadow-lg overflow-hidden">
                   {user?.user_metadata?.avatar_url ? (
                      <img src={user.user_metadata.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
@@ -1003,8 +1003,8 @@ export default function ChatPage() {
                   )}
                 </div>
                 <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-(--apple-gray) mb-0.5">Session Identity</span>
-                  <span className="text-[12px] font-bold text-white truncate">{user?.email}</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-(--apple-gray) mb-0.5">Session Identity</span>
+                  <span className="text-[13px] font-semibold text-white truncate">{user?.email}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <AppleTooltip text="Sign Out">
@@ -1017,7 +1017,7 @@ export default function ChatPage() {
               </div>
               <Button id="tutorial-prompts" variant="ghost" className="w-full justify-start gap-4 rounded-xl py-6 hover:bg-white/5" onClick={() => { setShowPrompts(true); }} onContextMenu={e => openContextMenu(e, 'openPrompts')}>
                 <Command className="w-4 h-4 text-(--apple-blue)" />
-                <span className="text-[12px] font-bold tracking-tight">Prompt Library</span>
+                <span className="text-[13px] font-semibold tracking-tight">Prompt Library</span>
                 <span className="ml-auto text-[8px] font-mono text-(--apple-gray)">{getShortcutLabel('openPrompts')}</span>
               </Button>
               <Button id="tutorial-settings" variant="ghost" className="w-full justify-start gap-4 rounded-xl py-6 hover:bg-white/5" onClick={() => { 
@@ -1025,7 +1025,7 @@ export default function ChatPage() {
                 setShowSettings(true); 
               }} onContextMenu={e => openContextMenu(e, 'openSettings')}>
                 <Settings className="w-4 h-4 text-(--apple-blue)" />
-                <span className="text-[12px] font-bold tracking-tight">System Preferences</span>
+                <span className="text-[13px] font-semibold tracking-tight">System Preferences</span>
                 <span className="ml-auto text-[8px] font-mono text-(--apple-gray)">{getShortcutLabel('openSettings')}</span>
               </Button>
             </div>
@@ -1091,23 +1091,23 @@ export default function ChatPage() {
 
         {/* Desktop Header Actions */}
         {!isMobile && (
-           <div className="absolute top-8 right-8 z-40 flex items-center gap-3">
+               <div className="absolute top-8 right-8 z-40 flex items-center gap-3">
               {currentChatId && (
                  <Button 
                    variant="ghost" 
                    size="sm" 
                    onClick={() => { shareChat(); }}
                    onContextMenu={e => openContextMenu(e, 'shareChat')}
-                   className="rounded-2xl px-5 py-5 flex items-center gap-2 border-none bg-white text-black hover:bg-gray-100 shadow-xl"
+                   className="rounded-(--radius-pill) px-5 py-5 flex items-center gap-2 border-none bg-white text-black hover:bg-gray-100 shadow-xl font-semibold text-[13px]"
                  >
                    <Share2 className="w-3.5 h-3.5" />
-                   <span className="text-[12px] font-bold tracking-tight">Share Flow</span>
+                   <span>Share Flow</span>
                  </Button>
               )}
               <button 
                onContextMenu={e => openContextMenu(e, 'toggleSidebar')} 
                onClick={() => { setIsSidebarOpen(!isSidebarOpen); }} 
-               className={`p-3 rounded-2xl transition-all shadow-xl ${isSidebarOpen ? 'bg-(--apple-blue) text-white' : 'bg-(--surface) text-(--apple-gray) hover:text-white'}`}
+               className={`p-3 rounded-(--radius-pill) transition-all shadow-xl ${isSidebarOpen ? 'bg-(--apple-blue) text-white' : 'bg-(--surface) text-(--apple-gray) hover:text-white'}`}
               >
                 <History className="w-5 h-5" />
               </button>
@@ -1138,18 +1138,18 @@ export default function ChatPage() {
                       id={`msg-${msg.id}`}
                   className={`group relative ${highlightedAnchor === msg.id ? 'highlight-bg p-4 -m-4 rounded-2xl bg-blue-500/5 ring-1 ring-blue-500/20' : ''} transition-all duration-700`}
                 >
-                  <div className={`w-10 h-10 squircle flex items-center justify-center shrink-0 shadow-lg ${
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 shadow-lg ${
                     msg.role === 'assistant' ? 'bg-(--apple-blue) text-white' : 'bg-(--surface) text-(--apple-gray)'
                   }`}>
                     {msg.role === 'assistant' ? <Zap className="w-5 h-5" /> : <Plus className="w-5 h-5 rotate-45" />}
                   </div>
                   <div className="flex-1 space-y-4 min-w-0 overflow-hidden">
-                    <div className={`p-5 md:p-8 rounded-3xl md:rounded-[2.5rem] glass-dark shadow-2xl relative overflow-hidden border border-white/5 ${
+                    <div className={`p-6 md:p-8 rounded-(--radius-lg) bg-(--surface) shadow-xl relative overflow-hidden border border-white/5 ${
                       msg.role === 'assistant' ? 'ring-1 ring-blue-500/10' : ''
                     }`}>
                       <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
-                          <span className="font-bold text-[12px] tracking-tight text-(--apple-gray) pt-1">
+                          <span className="font-semibold text-[13px] tracking-tight text-(--apple-gray) pt-1">
                             {msg.role === 'assistant' ? 'Threadly Assistant' : 'Current Thought'}
                           </span>
                           <AnimatePresence>
@@ -1192,7 +1192,7 @@ export default function ChatPage() {
                            </div>
                         </div>
                       ) : (
-                        <div className="text-gray-100 leading-relaxed text-[15px] prose prose-invert prose-sm max-w-none prose-p:leading-[1.7] prose-pre:rounded-2xl prose-code:text-blue-400 break-all wrap-break-word selection:bg-blue-500/40 glass-text">
+                        <div className="text-gray-100 leading-relaxed text-[17px] prose prose-invert prose-sm max-w-none prose-p:leading-[1.45] prose-pre:rounded-(--radius-md) prose-code:text-blue-400 break-all wrap-break-word selection:bg-blue-500/40">
                           {msg.content === '' && loading ? (
                              <div className="flex items-center gap-4 py-2">
                                 <div className="flex gap-1.5 item-center">
@@ -1255,7 +1255,7 @@ export default function ChatPage() {
         <div className="p-4 md:p-12 relative z-20">
            <div id="tutorial-input" className="w-full max-w-4xl mx-auto relative group">
               <form onSubmit={sendMessage}>
-                <div className="relative glass-dark rounded-4xl p-2 apple-shadow group-focus-within:ring-1 ring-blue-500/20 transition-all">
+                <div className="relative bg-(--surface) rounded-(--radius-lg) p-2 shadow-xl group-focus-within:ring-1 ring-blue-500/20 transition-all border border-white/5">
                   <textarea 
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
@@ -1269,15 +1269,15 @@ export default function ChatPage() {
                     }}
                     rows={1}
                     placeholder={loading ? "Generating response..." : "What's on your mind?"}
-                    className="w-full pr-24 md:pr-32 py-4 md:py-6 pl-6 md:pl-8 bg-transparent text-base md:text-lg outline-none resize-none custom-scrollbar placeholder:text-gray-600 font-medium tracking-tight"
+                    className="w-full pr-24 md:pr-32 py-4 md:py-5 pl-6 md:pl-8 bg-transparent text-base md:text-[17px] outline-none resize-none custom-scrollbar placeholder:text-gray-600 font-medium tracking-tight"
                   />
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-3">
                     {loading ? (
-                      <Button onClick={stopResponding} variant="ghost" size="icon" className="w-12 h-12 rounded-2xl bg-white/5 hover:bg-red-500/10 hover:text-red-500 transition-all">
+                      <Button onClick={stopResponding} variant="ghost" size="icon" className="w-12 h-12 rounded-(--radius-pill) bg-white/5 hover:bg-red-500/10 hover:text-red-500 transition-all">
                         <Square className="w-5 h-5 fill-current" />
                       </Button>
                     ) : (
-                      <Button type="submit" disabled={!input.trim()} size="icon" className="w-12 h-12 rounded-2xl bg-(--apple-blue) text-white shadow-2xl active:scale-90 disabled:opacity-20 transition-all no-border" >
+                      <Button type="submit" disabled={!input.trim()} size="icon" className="w-12 h-12 rounded-(--radius-pill) bg-(--apple-blue) text-white shadow-lg active:scale-90 disabled:opacity-20 transition-all border-none" >
                         <ArrowRight className="w-6 h-6" />
                       </Button>
                     )}
@@ -1890,7 +1890,7 @@ function OnboardingTutorial({ step, onNext, onComplete }: { step: number, onNext
           height: rect.height + 16,
         }}
         transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-        className="absolute border-2 border-blue-500 rounded-2xl shadow-[0_0_30px_rgba(59,130,246,0.5)] z-101"
+        className="absolute border-2 border-(--apple-blue) rounded-(--radius-lg) shadow-[0_0_20px_rgba(0,102,204,0.3)] z-101"
       />
 
       {/* The Tooltip */}
@@ -1915,7 +1915,7 @@ function OnboardingTutorial({ step, onNext, onComplete }: { step: number, onNext
             </div>
             <button 
                 onClick={isLast ? onComplete : onNext}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-blue-600/20 active:scale-95 transition-all"
+                className="px-4 py-2 bg-(--apple-blue) hover:bg-blue-600 text-white text-[10px] font-semibold uppercase tracking-widest rounded-(--radius-pill) shadow-md active:scale-95 transition-all"
             >
                 {isLast ? 'Finish Tour' : 'Next Step'}
             </button>
@@ -1938,17 +1938,17 @@ function BigSignupModal({ onClose, onAction }: { onClose: () => void, onAction: 
                 animate={{ opacity: 1, scale: 1, y: 0 }} 
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
                 transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-                className="relative w-full max-w-lg bg-[#0d0d0f]/90 backdrop-blur-3xl border border-white/10 rounded-[3rem] overflow-hidden apple-shadow"
+                className="relative w-full max-w-lg bg-(--surface) border border-white/5 rounded-(--radius-lg) overflow-hidden shadow-2xl"
             >
                 <div className="absolute top-0 inset-x-0 h-1 bg-linear-to-r from-blue-600 via-indigo-600 to-purple-600" />
                 
                 <div className="p-10 text-center">
-                    <div className="w-16 h-16 bg-blue-600 squircle flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-blue-600/40 rotate-3 animate-pulse">
+                    <div className="w-16 h-16 bg-(--apple-blue) rounded-xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-blue-600/20">
                         <Sparkles className="w-8 h-8 text-white" />
                     </div>
                     
-                    <h2 className="text-4xl font-bold text-white tracking-tight mb-4">Claim Your Pro Flow</h2>
-                    <p className="text-(--apple-gray) leading-relaxed mb-8">
+                    <h2 className="text-3xl font-semibold text-white tracking-tight mb-4">Claim Your Pro Flow</h2>
+                    <p className="text-(--apple-gray) leading-relaxed mb-8 text-[15px]">
                         Join the world's most elite builders using Threadly to supercharge their output. Unlock infinite flow, smart memory, and lightning-fast inference.
                     </p>
                     
@@ -1958,9 +1958,9 @@ function BigSignupModal({ onClose, onAction }: { onClose: () => void, onAction: 
                             { icon: <Zap className="w-5 h-5 text-(--apple-orange)" />, text: "Self-Learning AI Memory" },
                             { icon: <Globe className="w-5 h-5 text-(--apple-green)" />, text: "Priority System Infrastructure" }
                         ].map((feat, i) => (
-                            <div key={i} className="flex items-center gap-4 p-5 rounded-3xl bg-(--surface) border-none">
+                            <div key={i} className="flex items-center gap-4 p-5 rounded-(--radius-md) bg-white/2 border border-white/5">
                                 {feat.icon}
-                                <span className="text-[13px] font-bold text-gray-100">{feat.text}</span>
+                                <span className="text-[14px] font-semibold text-gray-100">{feat.text}</span>
                             </div>
                         ))}
                     </div>
@@ -1968,7 +1968,7 @@ function BigSignupModal({ onClose, onAction }: { onClose: () => void, onAction: 
                     <div className="flex flex-col gap-4">
                         <button 
                             onClick={() => { onAction(); }}
-                            className="w-full py-5 bg-white text-black font-bold rounded-2xl shadow-2xl hover:bg-gray-100 transition-all active:scale-95"
+                            className="w-full py-5 bg-white text-black font-semibold rounded-(--radius-pill) shadow-xl hover:bg-gray-100 transition-all active:scale-[0.98]"
                         >
                             Claim Workspace
                         </button>
@@ -2008,14 +2008,13 @@ function EmptyState({ onCreateNew }: { onCreateNew: () => void }) {
       className="h-full flex flex-col items-center justify-center text-center space-y-6 md:space-y-8 px-6 max-w-2xl mx-auto py-10"
     >
       <div className="relative group hidden md:block">
-        <div className="w-24 h-24 squircle bg-(--apple-blue) flex items-center justify-center shadow-2xl relative z-10">
+        <div className="w-20 h-20 rounded-xl bg-(--apple-blue) flex items-center justify-center shadow-xl relative z-10">
           <Sparkles className="w-10 h-10 text-white" />
         </div>
-        <div className="absolute inset-0 squircle bg-blue-500 blur-2xl opacity-20 group-hover:opacity-40 transition-opacity animate-pulse" />
       </div>
 
       <div className="space-y-2 md:space-y-4">
-        <h2 className="text-4xl md:text-6xl font-bold tracking-tight text-white leading-tight">
+        <h2 className="text-4xl md:text-5xl font-semibold tracking-tight text-white leading-tight">
           Clear mind. <br/> <span className="text-(--apple-gray)">Complex flow.</span>
         </h2>
         <p className="hidden md:block text-base text-(--apple-gray) font-medium leading-relaxed max-w-lg mx-auto">
@@ -2024,11 +2023,11 @@ function EmptyState({ onCreateNew }: { onCreateNew: () => void }) {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
-         <Button onClick={onCreateNew} className="px-8 py-5 md:py-6 rounded-2xl bg-white text-black hover:bg-gray-200 font-bold transition-all active:scale-95 group shadow-xl">
+         <Button onClick={onCreateNew} className="px-8 py-5 md:py-6 rounded-(--radius-pill) bg-white text-black hover:bg-gray-200 font-semibold transition-all active:scale-[0.98] group shadow-xl">
             <Plus className="w-4 h-4 mr-2 transition-transform group-hover:rotate-90" />
             Start a New Thread
          </Button>
-         <Button variant="outline" onClick={() => (document.getElementById('tutorial-prompts') as HTMLElement)?.click()} className="hidden md:flex px-8 py-6 rounded-2xl border-white/10 hover:bg-white/5 text-white font-bold transition-all">
+         <Button variant="outline" onClick={() => (document.getElementById('tutorial-prompts') as HTMLElement)?.click()} className="hidden md:flex px-8 py-6 rounded-(--radius-pill) border-white/10 hover:bg-white/5 text-white font-semibold transition-all">
             Browse Registry
          </Button>
       </div>
