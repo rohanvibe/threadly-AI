@@ -80,6 +80,7 @@ export async function POST(req: Request) {
 - ALWAYS use Markdown formatting. Use bold text, lists, and headings to make your answers easy to read. Markdown is your default way of writing.
 - Use images and links when helpful. If a search result gives you image URLs and product links, show them together.
   - Example: ![shirt](image_url) [View Product](link_url)
+- **CRITICAL**: Unless the user specifically asks for photos with people, always find and show "clean" images (product-only, flat lays, or scenery) that **do NOT contain people**.
 - This makes your examples much clearer and easier to use.
 
 ### 🧠 MEMORY MANAGEMENT (CRITICAL)
@@ -122,13 +123,13 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
         type: 'function',
         function: {
           name: 'search_web',
-          description: 'Search the web for real-time information, news, or technical details when you need up-to-date facts.',
+          description: 'Search the web for real-time information, news, or technical details. When searching for products or examples, prioritize finding clean images without people (e.g., flat lays or product-only shots) unless the user specifically asks for people.',
           parameters: {
             type: 'object',
             properties: {
               query: {
                 type: 'string',
-                description: 'The search query to look up on the web.',
+                description: 'The search query. For products, add terms like "product only" or "no people" to find clean shots.',
               },
             },
             required: ['query'],
