@@ -1310,7 +1310,7 @@ export default function ChatPage() {
                                 <div className="flex gap-1.5 item-center">
                                    {[1,2,3].map(d => <motion.div key={d} animate={{ opacity: [0.2, 1, 0.2] }} transition={{ repeat: Infinity, duration: 1, delay: d * 0.2 }} className="w-2 h-2 rounded-full bg-blue-600" />)}
                                 </div>
-                                <span className="text-[10px] font-black tracking-widest uppercase text-blue-500 pt-0.5">Thinking...</span>
+<span className="text-[10px] font-black tracking-widest uppercase text-blue-500 pt-0.5">Thinking...</span>
                              </div>
                           ) : (
                             <ReactMarkdown 
@@ -1324,28 +1324,57 @@ export default function ChatPage() {
                                 ),
                                 th: ({ children }) => <th className="px-6 py-4 text-left text-[11px] font-black uppercase tracking-[0.2em] text-blue-400 bg-white/5 whitespace-nowrap">{children}</th>,
                                 td: ({ children }) => <td className="px-6 py-4 text-sm border-t border-white/5 text-gray-300 whitespace-nowrap min-w-[120px]">{children}</td>,
-                                 ul: ({ children }) => <ul className="list-disc pl-5 space-y-2 mb-4 wrap-break-word">{children}</ul>,
-                                 ol: ({ children }) => <ol className="list-decimal pl-5 space-y-2 mb-4 wrap-break-word">{children}</ol>,
-                                 li: ({ children }) => <li className="leading-relaxed wrap-break-word">{children}</li>,
-                                img: ({ src, alt }) => (
-                                   <div className="my-8 rounded-2xl overflow-hidden border border-white/10 shadow-3xl bg-white/2 group/img w-full max-w-2xl mx-auto transition-all duration-300 hover:border-blue-500/30">
-                                     <div className="relative aspect-video bg-white/5 flex items-center justify-center overflow-hidden">
-                                       <img 
-                                         src={src} 
-                                         alt={alt || 'Visual content'} 
-                                         className="w-full h-full object-contain transition-transform duration-700 group-hover/img:scale-105" 
-                                         loading="lazy"
-                                       />
-                                     </div>
-                                     {alt && (
-                                       <div className="px-6 py-4 bg-black/40 border-t border-white/5 backdrop-blur-md">
-                                         <p className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-400">{alt}</p>
+                                ul: ({ children }) => <ul className="list-disc pl-5 space-y-2 mb-4 wrap-break-word">{children}</ul>,
+                                ol: ({ children }) => <ol className="list-decimal pl-5 space-y-2 mb-4 wrap-break-word">{children}</ol>,
+                                li: ({ children }) => <li className="leading-relaxed wrap-break-word">{children}</li>,
+                                img: ({ src, alt }) => {
+                                   const [isLoaded, setIsLoaded] = useState(false);
+                                   const [hasError, setHasError] = useState(false);
+                                   
+                                   return (
+                                     <div className="my-8 rounded-3xl overflow-hidden border border-white/10 shadow-3xl bg-white/2 group/img w-full max-w-2xl mx-auto transition-all duration-500 hover:border-blue-500/40 hover:shadow-blue-500/10">
+                                       <div className="relative aspect-video bg-white/5 flex items-center justify-center overflow-hidden">
+                                         {/* Loading Skeleton */}
+                                         {!isLoaded && !hasError && (
+                                           <div className="absolute inset-0 flex items-center justify-center animate-pulse bg-white/5">
+                                             <div className="w-12 h-12 rounded-full border-2 border-blue-500/20 border-t-blue-500 animate-spin" />
+                                           </div>
+                                         )}
+                                         
+                                         {/* Error Fallback */}
+                                         {hasError ? (
+                                           <div className="flex flex-col items-center gap-3 opacity-40">
+                                              <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
+                                                <span className="text-2xl">🖼️</span>
+                                              </div>
+                                              <span className="text-[10px] font-black uppercase tracking-[0.3em]">Visual Preview Unavailable</span>
+                                           </div>
+                                         ) : (
+                                           <img 
+                                             src={src} 
+                                             alt={alt || 'Visual content'} 
+                                             onLoad={() => setIsLoaded(true)}
+                                             onError={() => setHasError(true)}
+                                             className={`w-full h-full object-contain transition-all duration-1000 ${isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-110'} group-hover/img:scale-105`} 
+                                             loading="lazy"
+                                           />
+                                         )}
+                                         
+                                         {/* Top Fade overlay */}
+                                         <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/40 to-transparent pointer-events-none opacity-0 group-hover/img:opacity-100 transition-opacity" />
                                        </div>
-                                     )}
-                                   </div>
-                                 ),
-                                code: ({ node, className, children, ...props }: any) => {
-                                  const match = /language-(\w+)/.exec(className || '');
+                                       
+                                       {alt && (
+                                         <div className="px-8 py-5 bg-black/60 border-t border-white/5 backdrop-blur-xl flex justify-between items-center">
+                                           <p className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-400 drop-shadow-sm">{alt}</p>
+                                           <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                                         </div>
+                                       )}
+                                     </div>
+                                   );
+                                 },
+                                 code: ({ node, className, children, ...props }: any) => {
+                                   const match = /language-(\w+)/.exec(className || '');
                                   if (match?.[1] === 'mermaid') {
                                     return <Mermaid chart={String(children).replace(/\n$/, '')} />
                                   }
