@@ -913,7 +913,7 @@ export default function ChatPage() {
     } catch (err: any) {
       if (err.name !== 'AbortError') {
         process.env.NODE_ENV === 'development' && console.error("Fetch error:", err)
-        toast(`Failed to fetch: ${err.message || 'Interrupted'}`, "error")
+        toast(`Failed: ${err.message}`, "error")
         // Remove the empty ghost message since the request failed
         setMessages(prev => prev.filter(m => m.id !== assistantMsgId))
       }
