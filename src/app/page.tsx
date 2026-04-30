@@ -71,6 +71,53 @@ import { FeedbackWidget } from '@/components/FeedbackWidget'
 
 // --- Premium Components ---
 
+function PythonSandbox({ code }: { code: string }) {
+  const [output, setOutput] = useState<string>('')
+  const [isRunning, setIsRunning] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const runCode = async () => {
+    setIsRunning(true)
+    setError(null)
+    try {
+      // @ts-ignore
+      const pyodide = await window.loadPyodide()
+      const result = await pyodide.runPythonAsync(code)
+      setOutput(String(result))
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setIsRunning(false)
+    }
+  }
+
+  return (
+    <div className="my-6 rounded-(--radius-lg) bg-black/40 border border-white/10 overflow-hidden shadow-2xl">
+      <div className="px-4 py-3 bg-white/5 border-b border-white/5 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+           <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+           <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Python Sandbox</span>
+        </div>
+        <Button 
+          size="sm" 
+          onClick={runCode} 
+          disabled={isRunning}
+          className="h-8 rounded-full bg-white text-black hover:bg-gray-200 text-[10px] font-black uppercase px-4"
+        >
+          {isRunning ? 'Running...' : 'Execute Code'}
+        </Button>
+      </div>
+      <div className="p-4 text-[13px] font-mono text-gray-300 bg-black/20 max-h-[300px] overflow-y-auto">
+        {output && <div className="text-blue-400 mb-2">Output:</div>}
+        {output && <pre className="whitespace-pre-wrap">{output}</pre>}
+        {error && <div className="text-red-500 mb-2">Error:</div>}
+        {error && <pre className="whitespace-pre-wrap text-red-400">{error}</pre>}
+        {!output && !error && <span className="text-gray-600 italic">No output yet. Click execute to run.</span>}
+      </div>
+    </div>
+  )
+}
+
 function Mermaid({ chart }: { chart: string }) {
   const ref = useRef<HTMLDivElement>(null)
   const [svg, setSvg] = useState('')
@@ -81,14 +128,11 @@ function Mermaid({ chart }: { chart: string }) {
         mermaid.initialize({ 
           startOnLoad: false, 
           theme: 'dark',
-          themeVariables: {
-            primaryColor: '#0066cc',
-            lineColor: '#0066cc',
-          }
+          securityLevel: 'loose'
         })
         const id = 'mermaid-' + Math.random().toString(36).substring(7)
-        const { svg } = await mermaid.render(id, chart)
-        setSvg(svg)
+        const { svg: renderedSvg } = await mermaid.render(id, chart)
+        setSvg(renderedSvg)
       } catch (err) {
         console.error('Mermaid render error:', err)
       }
@@ -96,9 +140,11 @@ function Mermaid({ chart }: { chart: string }) {
     render()
   }, [chart])
 
+  if (!svg) return <div className="p-4 text-xs text-gray-600 animate-pulse">Drawing diagram...</div>
+
   return (
     <div 
-      className="mermaid-wrapper my-6 p-6 bg-white/2 rounded-(--radius-lg) border border-white/5 flex justify-center overflow-x-auto" 
+      className="mermaid-wrapper my-6 p-6 bg-white/2 rounded-(--radius-lg) border border-white/5 flex justify-center overflow-x-auto shadow-xl" 
       dangerouslySetInnerHTML={{ __html: svg }} 
     />
   )
@@ -1255,6 +1301,25 @@ export default function ChatPage() {
                                   const match = /language-(\w+)/.exec(className || '');
                                   if (match?.[1] === 'mermaid') {
                                     return <Mermaid chart={String(children).replace(/\n$/, '')} />
+                                  }
+                                  if (match?.[1] === 'python' || match?.[1] === 'py') {
+                                    return (
+                                      <div className="space-y-4">
+                                        <div className="relative group my-4 rounded-xl overflow-hidden border border-white/10 bg-[#09090b]">
+                                          <div className="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/5">
+                                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Python Source</span>
+                                            <button onClick={() => copyToClipboard(String(children).replace(/\n$/, ''))} className="text-gray-500 hover:text-white transition-colors flex items-center gap-1.5">
+                                              <Copy className="w-3 h-3" />
+                                              <span className="text-[9px] font-black uppercase tracking-widest">Copy</span>
+                                            </button>
+                                          </div>
+                                          <div className="p-4 overflow-x-auto text-[13px] leading-relaxed custom-scrollbar text-gray-300">
+                                            <code className={className} {...props}>{children}</code>
+                                          </div>
+                                        </div>
+                                        <PythonSandbox code={String(children).replace(/\n$/, '')} />
+                                      </div>
+                                    )
                                   }
                                   if (!className) {
                                     return <code className="bg-white/10 px-1.5 py-0.5 rounded-md text-[13px]" {...props}>{children}</code>

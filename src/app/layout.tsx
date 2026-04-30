@@ -50,6 +50,15 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css"
+          integrity="sha384-G79zG76qix9UMhKu/63CcAX91ScuVqhZe4wugQpkV1beJm2rF71NVGLXJ8z9N97Y"
+          crossOrigin="anonymous"
+        />
+        <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+      </head>
       <body className="min-h-full flex flex-col bg-[#09090b] selection:bg-blue-500/30">
         <ToastProvider>
            <div id="spotlight" />
