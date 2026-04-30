@@ -129,14 +129,11 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
         type: 'function',
         function: {
           name: 'search_web',
-          description: 'Search the web for real-time information, news, or technical details. When searching for products or examples, prioritize finding clean images without people (e.g., flat lays or product-only shots) unless the user specifically asks for people.',
+          description: 'Search the web for real-time information or news.',
           parameters: {
             type: 'object',
             properties: {
-              query: {
-                type: 'string',
-                description: 'The search query. For products, add terms like "product only" or "no people" to find clean shots.',
-              },
+              query: { type: 'string' },
             },
             required: ['query'],
           },
@@ -144,7 +141,8 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
       },
     ]
 
-    let initialResponse = await fetch('https://api.sambanova.ai/v1/chat/completions', {
+    // Step 1: Initial call to check for tools (Non-streaming)
+    let aiResponse = await fetch('https://api.sambanova.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -155,35 +153,15 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
         messages: apiMessages,
         tools: tools,
         tool_choice: 'auto',
+        temperature: 0.1, // Lower temperature for tool selection stability
       })
     })
 
-    if (!initialResponse.ok) {
-        const errorData = await initialResponse.json()
-        return NextResponse.json({ error: 'SambaNova Error', details: errorData.message }, { status: initialResponse.status })
-    }
-
-    const initialData = await initialResponse.json()
-    const firstMessage = initialData.choices[0].message
-
-    if (firstMessage.tool_calls && firstMessage.tool_calls.length > 0) {
-      const toolCall = firstMessage.tool_calls[0]
-      if (toolCall.function.name === 'search_web') {
-        const { query } = JSON.parse(toolCall.function.arguments)
-        const { searchWeb } = await import('@/utils/search')
-        const searchResult = await searchWeb(query)
-
-        // Add assistant tool call and tool response to history
-        apiMessages.push(firstMessage)
-        apiMessages.push({
-          role: 'tool',
-          tool_call_id: toolCall.id,
-          name: 'search_web',
-          content: searchResult,
-        })
-
-        // Call again for final streamed response
-        const finalResponse = await fetch('https://api.sambanova.ai/v1/chat/completions', {
+    if (!aiResponse.ok) {
+        const errorText = await aiResponse.text()
+        console.error('SambaNova Initial Error:', errorText)
+        // Fallback: try one more time without tools if initial call failed
+        aiResponse = await fetch('https://api.sambanova.ai/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -192,41 +170,82 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
           body: JSON.stringify({
             model: 'Meta-Llama-3.3-70B-Instruct',
             messages: apiMessages,
-            stream: true
+            stream: requestedStream
           })
         })
-
-        if (!finalResponse.ok) {
-           const errorData = await finalResponse.json()
-           return NextResponse.json({ error: 'SambaNova Final Error', details: errorData.message }, { status: finalResponse.status })
+        if (!aiResponse.ok) {
+           return NextResponse.json({ error: 'SambaNova Error', details: 'Direct API failure' }, { status: 500 })
         }
+        if (requestedStream) return handleStreaming(aiResponse)
+        const data = await aiResponse.json()
+        return NextResponse.json({ content: data.choices[0].message.content })
+    }
 
-        return handleStreaming(finalResponse)
+    const data = await aiResponse.json()
+    const messageObj = data.choices[0].message
+
+    // Step 2: Handle Tool Calls
+    if (messageObj.tool_calls && messageObj.tool_calls.length > 0) {
+      const toolCall = messageObj.tool_calls[0]
+      if (toolCall.function.name === 'search_web') {
+        try {
+          const { query } = JSON.parse(toolCall.function.arguments)
+          const { searchWeb } = await import('@/utils/search')
+          const searchResult = await searchWeb(query)
+
+          apiMessages.push(messageObj)
+          apiMessages.push({
+            role: 'tool',
+            tool_call_id: toolCall.id,
+            name: 'search_web',
+            content: searchResult,
+          })
+
+          const finalResponse = await fetch('https://api.sambanova.ai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${process.env.SAMBANOVA_API_KEY}`
+            },
+            body: JSON.stringify({
+              model: 'Meta-Llama-3.3-70B-Instruct',
+              messages: apiMessages,
+              stream: true
+            })
+          })
+
+          if (!finalResponse.ok) throw new Error('Final stream failed')
+          return handleStreaming(finalResponse)
+        } catch (e) {
+          console.error('Tool execution failed:', e)
+        }
       }
     }
 
-    // If no tool call, just return the first response or stream it if requested
+    // Step 3: No tool used, just return content or stream
     if (!requestedStream) {
-      return NextResponse.json({ content: firstMessage.content })
+      return NextResponse.json({ content: messageObj.content })
     }
 
-    // Since we already fetched the non-streaming response above to check for tools,
-    // and there were no tools, we can just stream a new call or return the content.
-    // For consistency with streaming UI, let's just create a new streaming call if no tool was used.
-    const streamingResponse = await fetch('https://api.sambanova.ai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.SAMBANOVA_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'Meta-Llama-3.3-70B-Instruct',
-        messages: apiMessages,
-        stream: true
-      })
-    })
+    // If no tool was used but streaming is requested, we already have the full content from the non-streaming call.
+    // To maintain the "typing" effect on the frontend, we'll manually stream the content we already got.
+    const encoder = new TextEncoder()
+    const content = messageObj.content || ''
     
-    return handleStreaming(streamingResponse)
+    const manualStream = new ReadableStream({
+      async start(controller) {
+        const chunks = content.split(' ')
+        for (const chunk of chunks) {
+          controller.enqueue(encoder.encode(chunk + ' '))
+          await new Promise(r => setTimeout(r, 10)) // Simple typing simulation
+        }
+        controller.close()
+      }
+    })
+
+    return new Response(manualStream, {
+      headers: { 'Content-Type': 'text/event-stream' }
+    })
   } catch (error: any) {
     console.error('Chat API Error:', error)
     return NextResponse.json({ error: 'fetch failed', details: error.message }, { status: 500 })
