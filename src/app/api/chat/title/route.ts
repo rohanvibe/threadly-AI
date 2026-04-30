@@ -28,7 +28,7 @@ export async function POST(req: Request) {
         messages: [
           { 
             role: 'system', 
-            content: 'You are a professional session indexer. Generate a concise, 3-5 word high-impact title for this conversation based on the context. If the message is a simple greeting, infer a creative session name. Output ONLY the title. No quotes, no periods, no filler like "Title:".' 
+            content: 'You are a session labeler. Create a short (2-4 words) title for this chat. Example: "Product Research", "Code Review", "App Design". DO NOT use "I can\'t help", "As an AI", or any other refusal. If the chat is empty, return "New Workspace". Output ONLY the short title.' 
           },
           ...messages.slice(0, 5).map((m: any) => ({ role: m.role, content: m.content }))
         ],
