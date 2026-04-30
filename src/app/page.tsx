@@ -122,9 +122,9 @@ function LandingPage({ onEnter }: { onEnter: () => void }) {
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl w-full pt-20">
         {[
-          { icon: Zap, title: "Command Center", desc: "Instant responses with ultra-fast AI." },
-          { icon: Sparkles, title: "AI Memory", desc: "It remembers your preferences and projects." },
-          { icon: List, title: "Smart Sidebar", desc: "Your entire creative session, indexed." }
+          { icon: Zap, title: "Quick Chat", desc: "Fast answers from AI." },
+          { icon: Sparkles, title: "Memory", desc: "It remembers your past chats." },
+          { icon: List, title: "History", desc: "Your past work, saved here." }
         ].map((f, i) => (
           <motion.div 
             key={i}
@@ -1003,21 +1003,21 @@ export default function ChatPage() {
                   )}
                 </div>
                 <div className="flex flex-col min-w-0 flex-1">
-                  <span className="text-[10px] font-semibold uppercase tracking-widest text-(--apple-gray) mb-0.5">Session Identity</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-(--apple-gray) mb-0.5">Account</span>
                   <span className="text-[13px] font-semibold text-white truncate">{user?.email}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <AppleTooltip text="Sign Out">
+                  <AppleTooltip text="Log Out">
                     <button onClick={handleLogout} className="p-2 hover:bg-white/10 rounded-xl transition-all"><LogOut className="w-4 h-4 text-gray-400" /></button>
                   </AppleTooltip>
-                  <AppleTooltip text="Terminate Identity">
+                  <AppleTooltip text="Delete Account">
                     <button onClick={handleDeleteAccount} className="p-2 hover:bg-red-500/10 rounded-xl transition-all group/del"><UserMinus className="w-4 h-4 text-gray-400 group-hover/del:text-red-500" /></button>
                   </AppleTooltip>
                 </div>
               </div>
               <Button id="tutorial-prompts" variant="ghost" className="w-full justify-start gap-4 rounded-xl py-6 hover:bg-white/5" onClick={() => { setShowPrompts(true); }} onContextMenu={e => openContextMenu(e, 'openPrompts')}>
                 <Command className="w-4 h-4 text-(--apple-blue)" />
-                <span className="text-[13px] font-semibold tracking-tight">Prompt Library</span>
+                <span className="text-[13px] font-semibold tracking-tight">Saved Prompts</span>
                 <span className="ml-auto text-[8px] font-mono text-(--apple-gray)">{getShortcutLabel('openPrompts')}</span>
               </Button>
               <Button id="tutorial-settings" variant="ghost" className="w-full justify-start gap-4 rounded-xl py-6 hover:bg-white/5" onClick={() => { 
@@ -1025,7 +1025,7 @@ export default function ChatPage() {
                 setShowSettings(true); 
               }} onContextMenu={e => openContextMenu(e, 'openSettings')}>
                 <Settings className="w-4 h-4 text-(--apple-blue)" />
-                <span className="text-[13px] font-semibold tracking-tight">System Preferences</span>
+                <span className="text-[13px] font-semibold tracking-tight">Settings</span>
                 <span className="ml-auto text-[8px] font-mono text-(--apple-gray)">{getShortcutLabel('openSettings')}</span>
               </Button>
             </div>
@@ -1101,7 +1101,7 @@ export default function ChatPage() {
                    className="rounded-(--radius-pill) px-5 py-5 flex items-center gap-2 border-none bg-white text-black hover:bg-gray-100 shadow-xl font-semibold text-[13px]"
                  >
                    <Share2 className="w-3.5 h-3.5" />
-                   <span>Share Flow</span>
+                   <span>Share Chat</span>
                  </Button>
               )}
               <button 
@@ -1150,7 +1150,7 @@ export default function ChatPage() {
                       <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-3">
                           <span className="font-semibold text-[13px] tracking-tight text-(--apple-gray) pt-1">
-                            {msg.role === 'assistant' ? 'Threadly Assistant' : 'Current Thought'}
+                            {msg.role === 'assistant' ? 'Assistant' : 'You'}
                           </span>
                           <AnimatePresence>
                             {savedMemoryMsgId === msg.id && (
@@ -1198,7 +1198,7 @@ export default function ChatPage() {
                                 <div className="flex gap-1.5 item-center">
                                    {[1,2,3].map(d => <motion.div key={d} animate={{ opacity: [0.2, 1, 0.2] }} transition={{ repeat: Infinity, duration: 1, delay: d * 0.2 }} className="w-2 h-2 rounded-full bg-blue-600" />)}
                                 </div>
-                                <span className="text-[10px] font-black tracking-widest uppercase text-blue-500 pt-0.5">Syncing Stream</span>
+                                <span className="text-[10px] font-black tracking-widest uppercase text-blue-500 pt-0.5">Thinking...</span>
                              </div>
                           ) : (
                             <ReactMarkdown 
@@ -1750,7 +1750,7 @@ function PromptManager({ userId, onClose, onSelect }: { userId: string, onClose:
                     </div>
                 </CardContent>
                 <CardFooter className="shrink-0 justify-end border-t border-white/5 pt-6">
-                    <Button variant="ghost" onClick={onClose} className="rounded-xl">Exit Manager</Button>
+                    <Button variant="ghost" onClick={onClose} className="rounded-xl">Close</Button>
                 </CardFooter>
             </Card>
         </div>
@@ -1796,8 +1796,8 @@ function ShortcutsTab({
 
   const LABELS: Record<string, string> = {
     newChat: 'New Chat', sendMessage: 'Send Message', stopResponse: 'Stop Response',
-    toggleNav: 'Toggle Navigation', toggleSidebar: 'Toggle Thread Sidebar',
-    focusSearch: 'Search Chats', openSettings: 'Open Settings', openPrompts: 'Open Prompt Library',
+    toggleNav: 'Toggle Sidebar', toggleSidebar: 'Toggle History',
+    focusSearch: 'Search Chats', openSettings: 'Open Settings', openPrompts: 'Open Saved Prompts',
     shareChat: 'Share Chat', attachFile: 'Attach File',
   }
 
@@ -1849,11 +1849,11 @@ function ShortcutsTab({
 // ─────────────────────────────────────────────────────────────────────────────
 function OnboardingTutorial({ step, onNext, onComplete }: { step: number, onNext: () => void, onComplete: () => void }) {
   const steps = [
-    { targetId: 'tutorial-input', title: 'The Command Center', text: 'Type any question or code block here. SambaNova AI powers every response with blazing fast speeds.' },
-    { targetId: 'tutorial-memory', title: 'Persistent Brain', text: 'Every fact you save is stored here. Threadly intelligently pulls context during chats so you never have to repeat yourself.' },
-    { targetId: 'tutorial-history', title: 'Deep History', text: 'Tap any message in the sidebar to instantly jump to that point in the conversation. No more endless scrolling.' },
-    { targetId: 'tutorial-prompts', title: 'Prompt Library', text: 'Save your most complex instructions as templates and reuse them with one click.' },
-    { targetId: 'tutorial-settings', title: 'Total Control', text: 'Customize shortcuts, manage your AI keys, and personalize your experience.' },
+    { targetId: 'tutorial-input', title: 'Start Here', text: 'Type anything you want to ask the AI.' },
+    { targetId: 'tutorial-memory', title: 'Memory', text: 'Important facts are saved here to help the AI understand you better.' },
+    { targetId: 'tutorial-history', title: 'History', text: 'Go back to any of your past chats here.' },
+    { targetId: 'tutorial-prompts', title: 'Saved Prompts', text: 'Save instructions you use often to save time.' },
+    { targetId: 'tutorial-settings', title: 'Settings', text: 'Change your keys and how the app works.' },
   ]
 
   const current = steps[step]
@@ -1947,9 +1947,9 @@ function BigSignupModal({ onClose, onAction }: { onClose: () => void, onAction: 
                         <Sparkles className="w-8 h-8 text-white" />
                     </div>
                     
-                    <h2 className="text-3xl font-semibold text-white tracking-tight mb-4">Claim Your Pro Flow</h2>
+                    <h2 className="text-3xl font-semibold text-white tracking-tight mb-4">Get More Power</h2>
                     <p className="text-(--apple-gray) leading-relaxed mb-8 text-[15px]">
-                        Join the world's most elite builders using Threadly to supercharge their output. Unlock infinite flow, smart memory, and lightning-fast inference.
+                        Save your chats, use smarter memory, and get faster answers by creating an account.
                     </p>
                     
                     <div className="grid grid-cols-1 gap-3 mb-8 text-left">
@@ -1970,7 +1970,7 @@ function BigSignupModal({ onClose, onAction }: { onClose: () => void, onAction: 
                             onClick={() => { onAction(); }}
                             className="w-full py-5 bg-white text-black font-semibold rounded-(--radius-pill) shadow-xl hover:bg-gray-100 transition-all active:scale-[0.98]"
                         >
-                            Claim Workspace
+                            Create Account
                         </button>
                         <button 
                             onClick={onClose}
@@ -2015,17 +2015,17 @@ function EmptyState({ onCreateNew }: { onCreateNew: () => void }) {
 
       <div className="space-y-2 md:space-y-4">
         <h2 className="text-4xl md:text-5xl font-semibold tracking-tight text-white leading-tight">
-          Clear mind. <br/> <span className="text-(--apple-gray)">Complex flow.</span>
+          Clear mind. <br/> <span className="text-(--apple-gray)">Simple work.</span>
         </h2>
         <p className="hidden md:block text-base text-(--apple-gray) font-medium leading-relaxed max-w-lg mx-auto">
-          Welcome to your high-performance workspace. Your intelligent session is ready when you are.
+          Welcome to your new workspace. Ask anything to get started.
         </p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
          <Button onClick={onCreateNew} className="px-8 py-5 md:py-6 rounded-(--radius-pill) bg-white text-black hover:bg-gray-200 font-semibold transition-all active:scale-[0.98] group shadow-xl">
             <Plus className="w-4 h-4 mr-2 transition-transform group-hover:rotate-90" />
-            Start a New Thread
+            New Chat
          </Button>
          <Button variant="outline" onClick={() => (document.getElementById('tutorial-prompts') as HTMLElement)?.click()} className="hidden md:flex px-8 py-6 rounded-(--radius-pill) border-white/10 hover:bg-white/5 text-white font-semibold transition-all">
             Browse Registry
