@@ -124,14 +124,14 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
       apiMessages.push({ role: 'user', content: message })
     }
 
-    // Tier-Based Model Routing Logic
+    // Tier-Based Model Routing Logic (Groq Free Tier)
     const prompt = (message || '').toLowerCase()
     const complexKeywords = ['code', 'math', 'mermaid', 'diagram', 'draw', 'visualize', 'prove', 'solve', 'complex', 'analyze', 'search', 'latest', 'news', 'calculate', 'architecture']
     const isComplex = complexKeywords.some(k => prompt.includes(k)) || prompt.length > 600
     
     // Model Selection
-    const model70B = 'meta-llama/Llama-3.3-70B-Instruct-Turbo'
-    const model8B = 'meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo'
+    const model70B = 'llama-3.3-70b-versatile'
+    const model8B = 'llama-3.1-8b-instant'
     const primaryModel = isComplex ? model70B : model8B
 
     const tools = [
@@ -151,12 +151,12 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
       },
     ]
 
-    // Step 1: Initial call to check for tools (Non-streaming)
-    let aiResponse = await fetch('https://api.together.xyz/v1/chat/completions', {
+    // Step 1: Initial call to check for tools (Groq API)
+    let aiResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.TOGETHER_API_KEY}`
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
       },
       body: JSON.stringify({
         model: primaryModel,
@@ -169,14 +169,14 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
 
     if (!aiResponse.ok) {
         const errorText = await aiResponse.text()
-        console.error('Together AI Error:', errorText)
+        console.error('Groq API Error:', errorText)
         
         // Final fallback to 8B if everything fails
-        aiResponse = await fetch('https://api.together.xyz/v1/chat/completions', {
+        aiResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.TOGETHER_API_KEY}`
+            'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
           },
           body: JSON.stringify({
             model: model8B,
@@ -187,9 +187,9 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
         if (!aiResponse.ok) {
            const finalError = await aiResponse.text()
            if (aiResponse.status === 429) {
-             return NextResponse.json({ error: "The AI is currently at capacity. Please wait a moment." }, { status: 429 })
+             return NextResponse.json({ error: "Groq is currently at capacity. Please wait a moment." }, { status: 429 })
            }
-           return NextResponse.json({ error: `Provider Error: ${finalError.slice(0, 150)}` }, { status: 500 })
+           return NextResponse.json({ error: `Groq Error: ${finalError.slice(0, 150)}` }, { status: 500 })
         }
         if (requestedStream) return handleStreaming(aiResponse)
         const data = await aiResponse.json()
@@ -216,20 +216,20 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
             content: searchResult,
           })
 
-          const finalResponse = await fetch('https://api.together.xyz/v1/chat/completions', {
+          const finalResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${process.env.TOGETHER_API_KEY}`
+              'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
             },
             body: JSON.stringify({
-              model: model70B, // Upgrade to 70B for search synthesis
+              model: model70B, 
               messages: apiMessages,
               stream: true
             })
           })
 
-          if (!finalResponse.ok) throw new Error('Final stream failed')
+          if (!finalResponse.ok) throw new Error('Groq final stream failed')
           return handleStreaming(finalResponse)
         } catch (e) {
           console.error('Tool execution failed:', e)

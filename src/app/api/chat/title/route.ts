@@ -17,14 +17,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Messages required' }, { status: 400 })
     }
 
-    const response = await fetch('https://api.together.xyz/v1/chat/completions', {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.TOGETHER_API_KEY}`
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo',
+        model: 'llama-3.1-8b-instant',
         messages: [
           { 
             role: 'system', 
@@ -36,7 +36,7 @@ export async function POST(req: Request) {
       })
     })
 
-    if (!response.ok) throw new Error('Together AI error')
+    if (!response.ok) throw new Error('Groq error')
 
     const data = await response.json()
     let title = data.choices[0].message.content.trim()
