@@ -295,6 +295,20 @@ export default function ChatPage() {
         // Restore last chat
         const lastChat = localStorage.getItem(`threadly_last_chat_${user.id}`)
         if (lastChat) setCurrentChatId(lastChat)
+
+        // Track return visit or google login completion
+        const sessionKey = `threadly_session_${new Date().toISOString().split('T')[0]}`
+        const sessionTracked = sessionStorage.getItem(sessionKey)
+        
+        if (!sessionTracked) {
+          trackEvent('return_visit', { userId: user.id })
+          sessionStorage.setItem(sessionKey, 'true')
+        }
+
+        if (localStorage.getItem('google_login_pending')) {
+          trackEvent('google_login_completed', { userId: user.id })
+          localStorage.removeItem('google_login_pending')
+        }
       }
     }
     checkUser()
@@ -441,6 +455,7 @@ export default function ChatPage() {
     if (data) {
       setChats([data, ...chats])
       setCurrentChatId(data.id)
+      trackEvent('chat_started', { method: 'button' })
       toast("New chat created", "success")
     }
   }
@@ -528,6 +543,8 @@ export default function ChatPage() {
 
      const url = `${window.location.origin}/share/${currentChatId}`
      
+     trackEvent('share_created', { chatId: currentChatId })
+     
      if (navigator.share) {
         try {
            await navigator.share({ title: 'Threadly Chat Session', url })
@@ -596,6 +613,7 @@ export default function ChatPage() {
     }
 
     if (!chatId) {
+      trackEvent('chat_started', { method: 'auto' })
       if (isGuest) {
         chatId = 'guest-session-' + Date.now()
         setCurrentChatId(chatId)
@@ -632,6 +650,9 @@ export default function ChatPage() {
     setInput('')
     setAttachedFile(null)
     setLoading(true)
+    if (messages.length === 0) {
+      trackEvent('first_message_sent', { isGuest, model: modelType })
+    }
     trackEvent('chat_sent', { isGuest, model: modelType })
     abortControllerRef.current = new AbortController()
 
@@ -658,6 +679,11 @@ export default function ChatPage() {
       created_at: new Date().toISOString()
     }
     setMessages(prev => [...prev, tempAssistantMsg])
+
+    if (messages.length === 0) {
+      trackEvent('first_message_sent', { chatId, isGuest })
+    }
+    trackEvent('chat_sent', { chatId, isGuest })
 
     let finalContent = ''
     try {
@@ -812,6 +838,7 @@ export default function ChatPage() {
   const handleEditMessage = (msg: Message) => {
     setEditingMessageId(msg.id)
     setEditValue(msg.content)
+    trackEvent('sidebar_click', { action: 'edit_message' })
   }
 
   const cancelEdit = () => {
@@ -845,7 +872,7 @@ export default function ChatPage() {
     const el = document.getElementById(`msg-${msgId}`)
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      trackEvent('sidebar_jump', { msgId })
+      trackEvent('sidebar_click', { action: 'jump_to_message', msgId })
       // Clear highlight after 2s
       setTimeout(() => setHighlightedAnchor(null), 2000)
     }
@@ -927,7 +954,11 @@ export default function ChatPage() {
                       <motion.button
                         whileHover={{ x: 4 }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => { setCurrentChatId(chat.id); if (isMobile) setIsNavOpen(false); }}
+                        onClick={() => { 
+                          setCurrentChatId(chat.id); 
+                          if (isMobile) setIsNavOpen(false); 
+                          trackEvent('sidebar_click', { action: 'select_chat', chat_id: chat.id });
+                        }}
                         className={`w-full text-left p-4 rounded-2xl text-[13px] font-bold tracking-tight transition-all flex items-center gap-3 group relative overflow-hidden ${
                           currentChatId === chat.id ? 'bg-(--apple-blue)/10 text-(--apple-blue)' : 'text-(--apple-gray) hover:bg-white/5 hover:text-white'
                         }`}
@@ -989,7 +1020,10 @@ export default function ChatPage() {
                 <span className="text-[12px] font-bold tracking-tight">Prompt Library</span>
                 <span className="ml-auto text-[8px] font-mono text-(--apple-gray)">{getShortcutLabel('openPrompts')}</span>
               </Button>
-              <Button id="tutorial-settings" variant="ghost" className="w-full justify-start gap-4 rounded-xl py-6 hover:bg-white/5" onClick={() => { setShowSettings(true); }} onContextMenu={e => openContextMenu(e, 'openSettings')}>
+              <Button id="tutorial-settings" variant="ghost" className="w-full justify-start gap-4 rounded-xl py-6 hover:bg-white/5" onClick={() => { 
+                trackEvent('byok_opened')
+                setShowSettings(true); 
+              }} onContextMenu={e => openContextMenu(e, 'openSettings')}>
                 <Settings className="w-4 h-4 text-(--apple-blue)" />
                 <span className="text-[12px] font-bold tracking-tight">System Preferences</span>
                 <span className="ml-auto text-[8px] font-mono text-(--apple-gray)">{getShortcutLabel('openSettings')}</span>
@@ -1294,7 +1328,10 @@ export default function ChatPage() {
                         Persistent history, intelligent AI memory, and cross-device sync.
                       </p>
                       <button 
-                        onClick={() => { router.push('/auth'); }}
+                        onClick={() => { 
+                          trackEvent('signup_started', { location: 'guest_banner' });
+                          router.push('/auth'); 
+                        }}
                         className="mt-4 w-full py-2.5 bg-(--apple-blue) hover:bg-blue-600 text-white text-[11px] font-bold tracking-tight rounded-xl transition-all active:scale-95 shadow-lg"
                       >
                         Claim My Workspace
@@ -1386,7 +1423,11 @@ export default function ChatPage() {
                             {section.messages.map((msg) => (
                                <button
                                  key={msg.id}
-                                 onClick={() => { scrollToMessage(msg.id); if (isMobile) setIsSidebarOpen(false); }}
+                                 onClick={() => { 
+                                   trackEvent('sidebar_click', { type: 'thread_anchor' });
+                                   scrollToMessage(msg.id); 
+                                   if (isMobile) setIsSidebarOpen(false); 
+                                 }}
                                  className="w-full text-left p-2 rounded-xl hover:bg-white/5 transition-all group flex items-center gap-2"
                                >
                                   <span className="w-1 h-1 rounded-full bg-gray-600 group-hover:bg-white transition-colors shrink-0" />
@@ -1408,7 +1449,11 @@ export default function ChatPage() {
                        return (
                          <button
                            key={msg.id}
-                           onClick={() => { scrollToMessage(msg.id); if (isMobile) setIsSidebarOpen(false); }}
+                           onClick={() => { 
+                             trackEvent('sidebar_click', { type: 'chat_select' });
+                             scrollToMessage(msg.id); 
+                             if (isMobile) setIsSidebarOpen(false); 
+                           }}
                            className={`w-full text-left p-4 rounded-2xl border transition-all group active:scale-[0.98] relative overflow-hidden ${isActive ? 'bg-blue-600/10 border-blue-500/30' : 'border-white/3 bg-white/1 hover:bg-blue-600/5 hover:border-blue-500/20'}`}
                          >
                            <div className="flex items-center justify-between gap-4 relative z-10">

@@ -24,6 +24,7 @@ export default function AuthPage() {
     setError(null)
 
     if (isSignUp) {
+      trackEvent('signup_started', { method: 'email' })
       const { error } = await supabase.auth.signUp({ email, password })
       if (error) setError(error.message)
       else {
@@ -42,6 +43,7 @@ export default function AuthPage() {
     setLoading(true)
     setError(null)
     trackEvent('signup_started', { method: 'google' })
+    localStorage.setItem('google_login_pending', 'true')
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {

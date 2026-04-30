@@ -8,13 +8,19 @@ import { track } from '@vercel/analytics'
 type AnalyticsEvent = 
   | 'signup_started'
   | 'signup_completed'
+  | 'google_login_completed'
+  | 'chat_started'
+  | 'first_message_sent'
   | 'chat_sent'
+  | 'sidebar_click'
   | 'sidebar_jump'
   | 'share_created'
   | 'snapshot_exported'
   | 'tutorial_started'
   | 'tutorial_completed'
   | 'feedback_submitted'
+  | 'byok_opened'
+  | 'return_visit'
 
 export const trackEvent = (event: AnalyticsEvent, metadata: Record<string, any> = {}) => {
   // 1. Log to console in dev for debugging
