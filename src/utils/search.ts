@@ -15,6 +15,7 @@ export async function searchWeb(query: string) {
         query: query,
         search_depth: "basic",
         include_answer: true,
+        include_images: true,
         max_results: 5,
       }),
     });
@@ -30,7 +31,11 @@ export async function searchWeb(query: string) {
       `Source: ${r.title}\nURL: ${r.url}\nContent: ${r.content}`
     ).join('\n\n');
 
-    return `SEARCH RESULTS FOR "${query}":\n\n${results}\n\nSUMMARY: ${data.answer || 'No direct answer available.'}`;
+    const images = data.images && data.images.length > 0 
+      ? `\n\nIMAGES FOUND:\n${data.images.map((img: string) => img).join('\n')}`
+      : '';
+
+    return `SEARCH RESULTS FOR "${query}":\n\n${results}${images}\n\nSUMMARY: ${data.answer || 'No direct answer available.'}`;
   } catch (error) {
     console.error('Search Error:', error);
     return "An error occurred during web search.";
