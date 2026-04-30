@@ -108,7 +108,27 @@ To DELETE an existing fact by ID: [MEMORY_DELETE: <ID>]`
       apiMessages.push({ role: 'user', content: message })
     }
 
-    const response = await fetch('https://api.sambanova.ai/v1/chat/completions', {
+    const tools = [
+      {
+        type: 'function',
+        function: {
+          name: 'search_web',
+          description: 'Search the web for real-time information, news, or technical details when you need up-to-date facts.',
+          parameters: {
+            type: 'object',
+            properties: {
+              query: {
+                type: 'string',
+                description: 'The search query to look up on the web.',
+              },
+            },
+            required: ['query'],
+          },
+        },
+      },
+    ]
+
+    let initialResponse = await fetch('https://api.sambanova.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -117,87 +137,135 @@ To DELETE an existing fact by ID: [MEMORY_DELETE: <ID>]`
       body: JSON.stringify({
         model: 'Meta-Llama-3.3-70B-Instruct',
         messages: apiMessages,
-        stream: requestedStream
+        tools: tools,
+        tool_choice: 'auto',
       })
     })
 
-    if (!response.ok) {
-        let errorData
-        try {
-          errorData = await response.json()
-        } catch {
-          errorData = { message: 'Failed to parse error response' }
-        }
-        console.error('SambaNova API Error Context:', errorData)
-        return NextResponse.json({ 
-          error: 'SambaNova Error', 
-          details: errorData.message || response.statusText 
-        }, { status: response.status })
+    if (!initialResponse.ok) {
+        const errorData = await initialResponse.json()
+        return NextResponse.json({ error: 'SambaNova Error', details: errorData.message }, { status: initialResponse.status })
     }
 
-    if (!requestedStream) {
-        const data = await response.json()
-        const assistantContent = data.choices[0].message.content
-        return NextResponse.json({ content: assistantContent })
-    }
+    const initialData = await initialResponse.json()
+    const firstMessage = initialData.choices[0].message
 
-    // Set up streaming response
-    const encoder = new TextEncoder()
-    const decoder = new TextDecoder()
+    if (firstMessage.tool_calls && firstMessage.tool_calls.length > 0) {
+      const toolCall = firstMessage.tool_calls[0]
+      if (toolCall.function.name === 'search_web') {
+        const { query } = JSON.parse(toolCall.function.arguments)
+        const { searchWeb } = await import('@/utils/search')
+        const searchResult = await searchWeb(query)
 
-    const stream = new ReadableStream({
-      async start(controller) {
-        const reader = response.body?.getReader()
-        if (!reader) {
-          controller.close()
-          return
+        // Add assistant tool call and tool response to history
+        apiMessages.push(firstMessage)
+        apiMessages.push({
+          role: 'tool',
+          tool_call_id: toolCall.id,
+          name: 'search_web',
+          content: searchResult,
+        })
+
+        // Call again for final streamed response
+        const finalResponse = await fetch('https://api.sambanova.ai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.SAMBANOVA_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: 'Meta-Llama-3.3-70B-Instruct',
+            messages: apiMessages,
+            stream: true
+          })
+        })
+
+        if (!finalResponse.ok) {
+           const errorData = await finalResponse.json()
+           return NextResponse.json({ error: 'SambaNova Final Error', details: errorData.message }, { status: finalResponse.status })
         }
 
-        let fullAssistantContent = ''
-        let buffer = ''
-
-        try {
-          while (true) {
-            const { done, value } = await reader.read()
-            if (done) break
-
-            buffer += decoder.decode(value, { stream: true })
-            const lines = buffer.split('\n')
-            buffer = lines.pop() || '' // Keep the incomplete line in the buffer
-
-            for (const line of lines) {
-              const trimmed = line.trim()
-              if (!trimmed || trimmed === 'data: [DONE]') continue
-              
-              if (trimmed.startsWith('data: ')) {
-                try {
-                  const json = JSON.parse(trimmed.slice(6))
-                  const content = json.choices[0]?.delta?.content || ''
-                  if (content) {
-                    fullAssistantContent += content
-                    controller.enqueue(encoder.encode(content))
-                  }
-                } catch (e) {
-                  // Buffer likely split mid-JSON, will catch on next chunk
-                }
-              }
-            }
-          }
-        } catch (error) {
-          controller.error(error)
-        } finally {
-          controller.close()
-        }
+        return handleStreaming(finalResponse)
       }
-    })
+    }
 
-    return new Response(stream, {
-      headers: { 'Content-Type': 'text/event-stream' }
-    })
+    // If no tool call, just return the first response or stream it if requested
+    if (!requestedStream) {
+      return NextResponse.json({ content: firstMessage.content })
+    }
 
+    // Since we already fetched the non-streaming response above to check for tools,
+    // and there were no tools, we can just stream a new call or return the content.
+    // For consistency with streaming UI, let's just create a new streaming call if no tool was used.
+    const streamingResponse = await fetch('https://api.sambanova.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.SAMBANOVA_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'Meta-Llama-3.3-70B-Instruct',
+        messages: apiMessages,
+        stream: true
+      })
+    })
+    
+    return handleStreaming(streamingResponse)
   } catch (error: any) {
     console.error('Chat API Error:', error)
-    const errDetails = error.cause ? error.cause.message || error.cause.code : error.message
-    return NextResponse.json({ error: 'fetch failed', details: errDetails }, { status: 500 })
+    return NextResponse.json({ error: 'fetch failed', details: error.message }, { status: 500 })
   }
 }
+
+// Helper to handle streaming logic
+async function handleStreaming(response: Response) {
+  const encoder = new TextEncoder()
+  const decoder = new TextDecoder()
+
+  const stream = new ReadableStream({
+    async start(controller) {
+      const reader = response.body?.getReader()
+      if (!reader) {
+        controller.close()
+        return
+      }
+
+      let buffer = ''
+      try {
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+
+          buffer += decoder.decode(value, { stream: true })
+          const lines = buffer.split('\n')
+          buffer = lines.pop() || ''
+
+          for (const line of lines) {
+            const trimmed = line.trim()
+            if (!trimmed || trimmed === 'data: [DONE]') continue
+            
+            if (trimmed.startsWith('data: ')) {
+              try {
+                const json = JSON.parse(trimmed.slice(6))
+                const content = json.choices[0]?.delta?.content || ''
+                if (content) {
+                  controller.enqueue(encoder.encode(content))
+                }
+              } catch (e) {}
+            }
+          }
+        }
+      } catch (error) {
+        controller.error(error)
+      } finally {
+        controller.close()
+      }
+    }
+  })
+
+  return new Response(stream, {
+    headers: { 'Content-Type': 'text/event-stream' }
+  })
+}
+
+
