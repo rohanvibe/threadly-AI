@@ -174,7 +174,8 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
           })
         })
         if (!aiResponse.ok) {
-           return NextResponse.json({ error: 'SambaNova Error', details: 'Direct API failure' }, { status: 500 })
+           const finalError = await aiResponse.text()
+           return NextResponse.json({ error: 'SambaNova Error', details: finalError, status: aiResponse.status }, { status: 500 })
         }
         if (requestedStream) return handleStreaming(aiResponse)
         const data = await aiResponse.json()
