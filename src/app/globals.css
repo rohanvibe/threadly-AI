@@ -6,6 +6,7 @@
   --color-foreground: var(--foreground);
 }
 
+@import "katex/dist/katex.min.css";
 :root {
   --background: #000000;
   --foreground: #FFFFFF;

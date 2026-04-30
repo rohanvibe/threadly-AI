@@ -58,6 +58,9 @@ import {
 import { motion, AnimatePresence } from 'framer-motion'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
+import mermaid from 'mermaid'
 import { toPng } from 'html-to-image'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
@@ -67,6 +70,39 @@ import { FeedbackWidget } from '@/components/FeedbackWidget'
 
 
 // --- Premium Components ---
+
+function Mermaid({ chart }: { chart: string }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [svg, setSvg] = useState('')
+
+  useEffect(() => {
+    const render = async () => {
+      try {
+        mermaid.initialize({ 
+          startOnLoad: false, 
+          theme: 'dark',
+          themeVariables: {
+            primaryColor: '#0066cc',
+            lineColor: '#0066cc',
+          }
+        })
+        const id = 'mermaid-' + Math.random().toString(36).substring(7)
+        const { svg } = await mermaid.render(id, chart)
+        setSvg(svg)
+      } catch (err) {
+        console.error('Mermaid render error:', err)
+      }
+    }
+    render()
+  }, [chart])
+
+  return (
+    <div 
+      className="mermaid-wrapper my-6 p-6 bg-white/2 rounded-(--radius-lg) border border-white/5 flex justify-center overflow-x-auto" 
+      dangerouslySetInnerHTML={{ __html: svg }} 
+    />
+  )
+}
 
 function AppleTooltip({ text, children }: { text: string, children: React.ReactNode }) {
   return (
@@ -1202,7 +1238,8 @@ export default function ChatPage() {
                              </div>
                           ) : (
                             <ReactMarkdown 
-                              remarkPlugins={[remarkGfm]}
+                              remarkPlugins={[remarkGfm, remarkMath]}
+                              rehypePlugins={[rehypeKatex]}
                               components={{
                                 table: ({ children }) => (
                                   <div className="w-full overflow-x-auto my-8 rounded-2xl border border-white/10 bg-white/2 shadow-2xl custom-scrollbar">
@@ -1216,6 +1253,9 @@ export default function ChatPage() {
                                 li: ({ children }) => <li className="leading-relaxed wrap-break-word">{children}</li>,
                                 code: ({ node, className, children, ...props }: any) => {
                                   const match = /language-(\w+)/.exec(className || '');
+                                  if (match?.[1] === 'mermaid') {
+                                    return <Mermaid chart={String(children).replace(/\n$/, '')} />
+                                  }
                                   if (!className) {
                                     return <code className="bg-white/10 px-1.5 py-0.5 rounded-md text-[13px]" {...props}>{children}</code>
                                   }
