@@ -174,6 +174,9 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
           })
         })
         if (!aiResponse.ok) {
+           if (aiResponse.status === 429) {
+             return NextResponse.json({ error: "The AI is currently at capacity. Please wait a moment before sending another message." }, { status: 429 })
+           }
            const finalError = await aiResponse.text()
            console.error('Final Fallback Error:', finalError)
            return NextResponse.json({ error: `SambaNova Error: ${finalError.slice(0, 150)}` }, { status: 500 })
