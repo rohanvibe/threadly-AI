@@ -1324,20 +1324,22 @@ export default function ChatPage() {
                                 ),
                                 th: ({ children }) => <th className="px-6 py-4 text-left text-[11px] font-black uppercase tracking-[0.2em] text-blue-400 bg-white/5 whitespace-nowrap">{children}</th>,
                                 td: ({ children }) => <td className="px-6 py-4 text-sm border-t border-white/5 text-gray-300 whitespace-nowrap min-w-[120px]">{children}</td>,
-                                ul: ({ children }) => <ul className="list-disc pl-5 space-y-2 mb-4 wrap-break-word">{children}</ul>,
-                                ol: ({ children }) => <ol className="list-decimal pl-5 space-y-2 mb-4 wrap-break-word">{children}</ol>,
-                                li: ({ children }) => <li className="leading-relaxed wrap-break-word">{children}</li>,
+                                 ul: ({ children }) => <ul className="list-disc pl-5 space-y-2 mb-4 wrap-break-word">{children}</ul>,
+                                 ol: ({ children }) => <ol className="list-decimal pl-5 space-y-2 mb-4 wrap-break-word">{children}</ol>,
+                                 li: ({ children }) => <li className="leading-relaxed wrap-break-word">{children}</li>,
                                 img: ({ src, alt }) => (
-                                   <div className="my-6 rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-white/2 group/img">
-                                     <img 
-                                       src={src} 
-                                       alt={alt || 'Visual content'} 
-                                       className="w-full h-auto max-h-[500px] object-contain transition-transform duration-700 group-hover/img:scale-105" 
-                                       loading="lazy"
-                                     />
+                                   <div className="my-8 rounded-2xl overflow-hidden border border-white/10 shadow-3xl bg-white/2 group/img w-full max-w-2xl mx-auto transition-all duration-300 hover:border-blue-500/30">
+                                     <div className="relative aspect-video bg-white/5 flex items-center justify-center overflow-hidden">
+                                       <img 
+                                         src={src} 
+                                         alt={alt || 'Visual content'} 
+                                         className="w-full h-full object-contain transition-transform duration-700 group-hover/img:scale-105" 
+                                         loading="lazy"
+                                       />
+                                     </div>
                                      {alt && (
-                                       <div className="px-4 py-2 bg-black/40 border-t border-white/5">
-                                         <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">{alt}</p>
+                                       <div className="px-6 py-4 bg-black/40 border-t border-white/5 backdrop-blur-md">
+                                         <p className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-400">{alt}</p>
                                        </div>
                                      )}
                                    </div>
@@ -1436,7 +1438,7 @@ export default function ChatPage() {
               </form>
               <div className="hidden md:flex justify-between items-center mt-6 px-4">
                  <div className="flex items-center gap-3">
-                    <span className="text-[9px] font-black text-gray-700 uppercase tracking-[0.4em]">Together AI Llama-3</span>
+                    <span className="text-[9px] font-black text-gray-700 uppercase tracking-[0.4em]">Groq Llama-3.3</span>
                     <div className="w-1 h-1 rounded-full bg-gray-800" />
                     <span className="text-[9px] font-black text-gray-700 uppercase tracking-[0.4em]">Optimized Inference</span>
                  </div>
