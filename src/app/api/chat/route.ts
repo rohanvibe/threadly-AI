@@ -199,6 +199,11 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
     const data = await aiResponse.json()
     const messageObj = data.choices[0].message
 
+    // Fallback for empty content (common with some tool-calling models)
+    if (!messageObj.content && (!messageObj.tool_calls || messageObj.tool_calls.length === 0)) {
+       messageObj.content = "I'm ready. What would you like to build or analyze?"
+    }
+
     // Step 2: Handle Tool Calls
     if (messageObj.tool_calls && messageObj.tool_calls.length > 0) {
       const toolCall = messageObj.tool_calls[0]
