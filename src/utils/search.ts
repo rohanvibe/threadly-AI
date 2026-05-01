@@ -90,7 +90,8 @@ export async function searchImages(query: string) {
     const data = await response.json();
     
     if (!data.photos || data.photos.length === 0) {
-      return "No images found for this query.";
+      console.log(`[Pexels] No results for "${query}". Falling back to Web Search...`);
+      return await searchWeb(query);
     }
 
     const imagesStr = data.photos.map((photo: any) => {
