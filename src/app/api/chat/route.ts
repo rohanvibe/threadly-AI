@@ -86,7 +86,7 @@ export async function POST(req: Request) {
 - **Markdown First**: ALWAYS use bold text, lists, and headings to structure your thoughts. 
 - **Visuals**: ALWAYS use Markdown syntax for images: \`![alt text](url)\`.
 - **CRITICAL**: Place every image on its own **SEPARATE NEW LINE** for maximum visibility.
-- **Tool Selection**: ALWAYS use the \`search_images\` tool when the user asks for a picture, photo, or visual of something. DO NOT use \`search_web\` for image requests.
+- **Tool Selection**: ALWAYS use the \`search_images\` tool when the user asks for a picture, photo, or visual of something (including specific cars, brands, or aesthetic shots). DO NOT use \`search_web\` for image requests.
 - **Visual Sourcing**: Only use URLs from the \`[VERIFIED IMAGES FOUND]\` or \`[VERIFIED IMAGES FOUND FROM PEXELS]\` section of your search results for your Markdown image tags \`![alt](image_url)\`. Never use a standard webpage URL for an image.
 - **Product Links**: Always pair the image with the corresponding webpage URL from the search results as the direct source/purchase link.
 - **Visual Fallback**: If multiple images exist, choose ones that end in \`.jpg\` or \`.png\` for better reliability.
@@ -116,7 +116,7 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
 - [MEMORY_DELETE: <ID>]`
 
     // Construct full message history for the AI
-    const apiMessages = [
+    const apiMessages: any[] = [
       { role: 'system', content: systemPrompt },
       ...history.map((m: any) => ({ role: m.role, content: m.content })),
     ]
@@ -128,7 +128,7 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
 
     // Tier-Based Model Routing Logic (Groq Free Tier)
     const prompt = (message || '').toLowerCase()
-    const complexKeywords = ['code', 'math', 'mermaid', 'diagram', 'draw', 'visualize', 'prove', 'solve', 'complex', 'analyze', 'search', 'latest', 'news', 'calculate', 'architecture', 'show', 'find']
+    const complexKeywords = ['code', 'math', 'mermaid', 'diagram', 'draw', 'visualize', 'prove', 'solve', 'complex', 'analyze', 'search', 'latest', 'news', 'calculate', 'architecture', 'show', 'find', 'bugatti']
     
     // Simple greetings should NEVER use tools or 70B to save quota and prevent "empty" responses
     const isSimpleGreeting = (prompt.length < 15 && (prompt.includes('hello') || prompt.includes('hi') || prompt.includes('hey') || prompt.includes('hola'))) || prompt.length < 5
@@ -158,7 +158,7 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
         type: 'function',
         function: {
           name: 'search_images',
-          description: 'Search for high-quality, professional images or product photos. Always use this instead of search_web when the user explicitly asks to see an image.',
+          description: 'Search for high-quality, professional images or product photos using Pexels. ALWAYS use this instead of search_web whenever the user explicitly asks to see an image, picture, or photo.',
           parameters: {
             type: 'object',
             properties: {
