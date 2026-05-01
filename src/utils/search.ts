@@ -69,3 +69,37 @@ export async function searchWeb(query: string) {
     return "An error occurred during web search.";
   }
 }
+
+export async function searchImages(query: string) {
+  const apiKey = process.env.PEXELS_API_KEY;
+  if (!apiKey) {
+    return "Image search is disabled. Please add PEXELS_API_KEY to your environment variables.";
+  }
+
+  try {
+    const response = await fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=3`, {
+      headers: {
+        Authorization: apiKey
+      }
+    });
+
+    if (!response.ok) {
+      return `Image search failed with status ${response.status}`;
+    }
+
+    const data = await response.json();
+    
+    if (!data.photos || data.photos.length === 0) {
+      return "No images found for this query.";
+    }
+
+    const imagesStr = data.photos.map((photo: any) => 
+      `![${photo.alt || query}](${photo.src.large})\nSource: ${photo.url}`
+    ).join('\n\n');
+
+    return `[VERIFIED IMAGES FOUND FROM PEXELS]:\n\n${imagesStr}`;
+  } catch (error) {
+    console.error('Pexels API Error:', error);
+    return "An error occurred during image search.";
+  }
+}

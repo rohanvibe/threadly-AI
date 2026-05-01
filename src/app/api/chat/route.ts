@@ -153,6 +153,20 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
           },
         },
       },
+      {
+        type: 'function',
+        function: {
+          name: 'search_images',
+          description: 'Search for high-quality, professional images or product photos. Always use this instead of search_web when the user explicitly asks to see an image.',
+          parameters: {
+            type: 'object',
+            properties: {
+              query: { type: 'string' },
+            },
+            required: ['query'],
+          },
+        },
+      },
     ]
 
     // Step 1: Initial call to check for tools (Groq API)
@@ -229,6 +243,21 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
             })
           } catch (e) {
             console.error('Tool execution failed:', e)
+          }
+        } else if (toolCall.function.name === 'search_images') {
+          try {
+            const { query } = JSON.parse(toolCall.function.arguments)
+            const { searchImages } = await import('@/utils/search')
+            const searchResult = await searchImages(query)
+
+            apiMessages.push({
+              role: 'tool',
+              tool_call_id: toolCall.id,
+              name: 'search_images',
+              content: searchResult,
+            })
+          } catch (e) {
+            console.error('Image Tool execution failed:', e)
           }
         }
       }
