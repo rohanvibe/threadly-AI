@@ -93,9 +93,12 @@ export async function searchImages(query: string) {
       return "No images found for this query.";
     }
 
-    const imagesStr = data.photos.map((photo: any) => 
-      `![${photo.alt || query}](${photo.src.large})\nSource: ${photo.url}`
-    ).join('\n\n');
+    const imagesStr = data.photos.map((photo: any) => {
+      // Markdown parsers often break on URLs with complex & parameters. 
+      // Stripping everything after '?' guarantees a clean, working URL.
+      const cleanImageUrl = photo.src.large.split('?')[0];
+      return `Image URL: ${cleanImageUrl}\nSource Page: ${photo.url}\nAlt Text: ${photo.alt || query}`;
+    }).join('\n\n');
 
     return `[VERIFIED IMAGES FOUND FROM PEXELS]:\n\n${imagesStr}`;
   } catch (error) {
