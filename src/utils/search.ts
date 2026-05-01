@@ -31,11 +31,39 @@ export async function searchWeb(query: string) {
       `Source: ${r.title}\nURL: ${r.url}\nContent: ${r.content}`
     ).join('\n\n');
 
-    const images = data.images && data.images.length > 0 
-      ? `\n\nIMAGES FOUND:\n${data.images.map((img: string) => img).join('\n')}`
+    // Step 2: Validate Image URLs (CRITICAL PRODUCTION FIX)
+    let validImages: string[] = [];
+    if (data.images && data.images.length > 0) {
+      const validationPromises = data.images.map(async (imgUrl: string) => {
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 1500); // Fast timeout
+          
+          const headRes = await fetch(imgUrl, { 
+            method: 'HEAD',
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+
+          const contentType = headRes.headers.get('content-type');
+          if (headRes.ok && contentType && contentType.startsWith('image/')) {
+            return imgUrl;
+          }
+        } catch (e) {
+          return null; // Silent fail for bad URLs
+        }
+        return null;
+      });
+
+      const results = await Promise.all(validationPromises);
+      validImages = results.filter((url): url is string => url !== null).slice(0, 3); // Max 3 verified images
+    }
+
+    const imagesStr = validImages.length > 0 
+      ? `\n\n[VERIFIED IMAGES FOUND - USE THESE EXACT URLS FOR VISUALS]:\n${validImages.join('\n')}`
       : '';
 
-    return `SEARCH RESULTS FOR "${query}":\n\n${results}${images}\n\nSUMMARY: ${data.answer || 'No direct answer available.'}`;
+    return `SEARCH RESULTS FOR "${query}":\n\n${results}${imagesStr}\n\nSUMMARY: ${data.answer || 'No direct answer available.'}`;
   } catch (error) {
     console.error('Search Error:', error);
     return "An error occurred during web search.";
