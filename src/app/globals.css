@@ -8,44 +8,33 @@
 
 @import "katex/dist/katex.min.css";
 :root {
-  /* Default Dark Mode (per DESIGN.md) */
-  --background: #000000;
-  --foreground: #ffffff;
-  --surface: #272729;
-  --surface-secondary: #2a2a2c;
-  --surface-tertiary: #252527;
+  --background: #f5f5f7;
+  --foreground: #1d1d1f;
+  --surface: #ffffff;
+  --surface-secondary: #f5f5f7;
+  --surface-tertiary: #e5e5ea;
   --apple-blue: #0066cc;
-  --apple-blue-dark: #004499;
+  --apple-blue-hover: #004499;
   --apple-gray: #86868b;
   --apple-gray-light: #f5f5f7;
-  --link-color: #2997ff;
-  --glass-bg: rgba(39, 39, 41, 0.8);
-  --glass-dark-bg: rgba(0, 0, 0, 0.9);
-  --scrollbar-thumb: rgba(255, 255, 255, 0.1);
-  --shadow-color: rgba(0, 0, 0, 0.3);
-  --border-color: rgba(255, 255, 255, 0.1);
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 18px;
   --radius-pill: 9999px;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --border-color: rgba(0, 0, 0, 0.05);
 }
 
-[data-theme="light"] {
-  --background: #f5f5f7;
-  --foreground: #1d1d1f;
-  --surface: #ffffff;
-  --surface-secondary: #ffffff;
-  --surface-tertiary: #f5f5f7;
-  --apple-blue: #0066cc;
-  --apple-blue-dark: #004499;
-  --apple-gray: #86868b;
-  --apple-gray-light: #f5f5f7;
-  --link-color: #0066cc;
-  --glass-bg: rgba(255, 255, 255, 0.8);
-  --glass-dark-bg: rgba(255, 255, 255, 0.95);
-  --scrollbar-thumb: rgba(0, 0, 0, 0.1);
-  --shadow-color: rgba(0, 0, 0, 0.05);
-  --border-color: rgba(0, 0, 0, 0.05);
+.dark {
+  --background: #000000;
+  --foreground: #FFFFFF;
+  --surface: #272729;
+  --surface-secondary: #2a2a2c;
+  --surface-tertiary: #252527;
+  --apple-blue: #2997ff;
+  --apple-blue-hover: #0066cc;
+  --glass-bg: rgba(39, 39, 41, 0.8);
+  --border-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Apple Design Language - Clarity & Breathing Room */
@@ -57,14 +46,8 @@
 
 .glass {
   background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.glass-dark {
-  background: var(--glass-dark-bg);
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
 }
 
 .squircle {
@@ -75,7 +58,7 @@
 }
 
 .apple-shadow {
-  box-shadow: 0 10px 30px var(--shadow-color);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .grain-texture {
@@ -104,22 +87,22 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.03em;
 }
 
 /* Smooth Transitions */
 * {
-  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.4s ease, color 0.4s ease, box-shadow 0.4s ease;
+  transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 20px;
 }
 
@@ -130,28 +113,19 @@ h1, h2, h3, h4, h5, h6 {
   pointer-events: none;
   background: radial-gradient(
     800px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
-    var(--apple-blue),
+    rgba(59, 130, 246, 0.04),
     transparent 80%
   );
   opacity: 0;
   transition: opacity 1s ease;
 }
 
-[data-theme="light"] #spotlight {
-  background: radial-gradient(
-    800px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),
-    rgba(0, 102, 204, 0.08),
-    transparent 80%
-  );
-}
-
 body:hover #spotlight {
-  opacity: 0.05;
+  opacity: 1;
 }
 
 .prose pre {
-  background: var(--surface) !important;
-  border: 1px solid var(--border-color);
+  background: #0d0d0f !important;
   border-radius: 12px;
   margin: 1.5rem 0;
 }

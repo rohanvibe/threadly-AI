@@ -55,7 +55,8 @@ import {
   List,
   Sparkles,
   Sun,
-  Moon
+  Moon,
+  Monitor
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import ReactMarkdown from 'react-markdown'
@@ -94,27 +95,27 @@ function PythonSandbox({ code }: { code: string }) {
   }
 
   return (
-    <div className="my-6 rounded-(--radius-lg) bg-black/40 border border-white/10 overflow-hidden shadow-2xl">
-      <div className="px-4 py-3 bg-white/5 border-b border-white/5 flex items-center justify-between">
+    <div className="my-6 rounded-(--radius-lg) bg-(--surface) border border-(--border-color) overflow-hidden shadow-2xl">
+      <div className="px-4 py-3 bg-(--surface-secondary) border-b border-(--border-color) flex items-center justify-between">
         <div className="flex items-center gap-2">
            <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
-           <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Python Sandbox</span>
+           <span className="text-[10px] font-black uppercase tracking-widest text-(--apple-gray)">Python Sandbox</span>
         </div>
         <Button 
           size="sm" 
           onClick={runCode} 
           disabled={isRunning}
-          className="h-8 rounded-(--radius-pill) bg-(--apple-blue) text-white hover:bg-(--apple-blue-dark) text-[11px] font-semibold uppercase px-4 border-none shadow-none"
+          className="h-8 rounded-full bg-(--foreground) text-(--background) hover:opacity-90 text-[10px] font-black uppercase px-4 transition-all"
         >
           {isRunning ? 'Running...' : 'Execute Code'}
         </Button>
       </div>
-      <div className="p-4 text-[13px] font-mono text-gray-300 bg-black/20 max-h-[300px] overflow-y-auto">
-        {output && <div className="text-blue-400 mb-2">Output:</div>}
+      <div className="p-4 text-[13px] font-mono text-(--foreground) bg-(--background)/20 max-h-[300px] overflow-y-auto">
+        {output && <div className="text-(--apple-blue) mb-2 font-bold uppercase tracking-widest text-[9px]">Output:</div>}
         {output && <pre className="whitespace-pre-wrap">{output}</pre>}
-        {error && <div className="text-red-500 mb-2">Error:</div>}
+        {error && <div className="text-red-500 mb-2 font-bold uppercase tracking-widest text-[9px]">Error:</div>}
         {error && <pre className="whitespace-pre-wrap text-red-400">{error}</pre>}
-        {!output && !error && <span className="text-gray-600 italic">No output yet. Click execute to run.</span>}
+        {!output && !error && <span className="text-(--apple-gray) italic opacity-50">No output yet. Click execute to run.</span>}
       </div>
     </div>
   )
@@ -165,11 +166,11 @@ function Mermaid({ chart }: { chart: string }) {
   }, [chart])
 
   if (error) return <div className="p-4 text-xs text-red-500 bg-red-500/10 rounded-xl border border-red-500/20 my-4">{error}</div>
-  if (!svg) return <div className="p-4 text-xs text-gray-600 animate-pulse bg-white/5 rounded-xl border border-white/5 my-4">Drawing diagram...</div>
+  if (!svg) return <div className="p-4 text-xs text-(--apple-gray) animate-pulse bg-(--surface-secondary) rounded-xl border border-(--border-color) my-4">Drawing diagram...</div>
 
   return (
     <div 
-      className="mermaid-wrapper my-6 p-6 bg-white/2 rounded-(--radius-lg) border border-white/5 flex justify-center overflow-x-auto shadow-xl" 
+      className="mermaid-wrapper my-6 p-6 bg-(--surface) rounded-(--radius-lg) border border-(--border-color) flex justify-center overflow-x-auto shadow-xl" 
       dangerouslySetInnerHTML={{ __html: svg }} 
     />
   )
@@ -210,17 +211,17 @@ function LandingPage({ onEnter }: { onEnter: () => void }) {
              <Sparkles className="w-8 h-8 text-white" />
           </div>
         </div>
-        <h1 className="text-5xl md:text-7xl font-semibold tracking-tight leading-tight text-(--foreground)">
+        <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-tight text-(--foreground)">
           Your Thoughts, <br/> <span className="text-(--apple-gray)">Refined.</span>
         </h1>
-        <p className="text-[19px] text-(--apple-gray) font-normal max-w-xl mx-auto leading-relaxed">
+        <p className="text-lg text-(--apple-gray) font-medium max-w-xl mx-auto leading-relaxed">
           The next evolution of thought infrastructure. <br/>
           Built for clarity, designed for precision.
         </p>
         <div className="pt-8">
           <Button 
             onClick={() => { onEnter(); }} 
-            className="px-12 py-8 rounded-(--radius-pill) bg-(--apple-blue) text-white font-semibold tracking-tight text-[17px] hover:bg-(--apple-blue-dark) transition-all active:scale-[0.98] shadow-none border-none"
+            className="px-12 py-8 rounded-(--radius-pill) bg-(--foreground) text-(--background) font-semibold tracking-tight text-[17px] hover:opacity-90 transition-all active:scale-[0.98] shadow-xl"
           >
             Enter Workspace
           </Button>
@@ -242,7 +243,7 @@ function LandingPage({ onEnter }: { onEnter: () => void }) {
           >
             <f.icon className="w-5 h-5 text-(--apple-blue)" />
             <h3 className="text-[13px] font-semibold uppercase tracking-widest text-(--foreground)">{f.title}</h3>
-            <p className="text-[17px] text-(--apple-gray) font-normal leading-relaxed">{f.desc}</p>
+            <p className="text-[15px] text-(--apple-gray) font-medium leading-relaxed">{f.desc}</p>
           </motion.div>
         ))}
       </div>
@@ -300,13 +301,41 @@ export default function ChatPage() {
   const [showBigSignup, setShowBigSignup] = useState(false)
   const [editingTitle, setEditingTitle] = useState('')
   const [isMobile, setIsMobile] = useState(false)
+  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system')
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('threadly_theme') as any
+    if (savedTheme) setTheme(savedTheme)
+    
+    const root = window.document.documentElement
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    
+    const applyTheme = (t: string) => {
+      root.classList.remove('light', 'dark')
+      if (t === 'system') {
+        const actual = mediaQuery.matches ? 'dark' : 'light'
+        root.classList.add(actual)
+      } else {
+        root.classList.add(t)
+      }
+    }
+
+    applyTheme(theme)
+    localStorage.setItem('threadly_theme', theme)
+
+    const handleChange = () => {
+      if (theme === 'system') applyTheme('system')
+    }
+    
+    mediaQuery.addEventListener('change', handleChange)
+    return () => mediaQuery.removeEventListener('change', handleChange)
+  }, [theme])
   const [isPublic, setIsPublic] = useState(false)
   const [sharing, setSharing] = useState(false)
   const [wowPhase, setWowPhase] = useState(false)
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
   const [highlightedAnchor, setHighlightedAnchor] = useState<string | null>(null)
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark')
   
   const [profileMemories, setProfileMemories] = useState<string[]>([])
   const [attachedFile, setAttachedFile] = useState<{ name: string, content: string } | null>(null)
@@ -332,26 +361,6 @@ export default function ChatPage() {
   useEffect(() => {
     if (user || chats.length > 0) setShowLanding(false)
   }, [user, chats])
-
-  // Theme Initialization
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('threadly-theme') as 'light' | 'dark' | null
-    if (savedTheme) {
-      setTheme(savedTheme)
-      document.documentElement.setAttribute('data-theme', savedTheme)
-    } else {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-      setTheme(systemTheme)
-      document.documentElement.setAttribute('data-theme', systemTheme)
-    }
-  }, [])
-
-  const toggleTheme = () => {
-    const newTheme = theme === 'dark' ? 'light' : 'dark'
-    setTheme(newTheme)
-    document.documentElement.setAttribute('data-theme', newTheme)
-    localStorage.setItem('threadly-theme', newTheme)
-  }
   const abortControllerRef = useRef<AbortController | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const skipFetchRef = useRef(false)
@@ -1042,7 +1051,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex h-dvh surface-foundation text-white overflow-hidden relative font-sans selection:bg-blue-500/30">
+    <div className="flex h-dvh surface-foundation text-(--foreground) overflow-hidden relative font-sans selection:bg-blue-500/30">
       <div id="spotlight" />
       <div className="fixed inset-0 pointer-events-none z-10 grain-texture opacity-[0.03]" />
 
@@ -1054,7 +1063,7 @@ export default function ChatPage() {
             animate={isMobile ? { x: 0 } : { width: 280, opacity: 1 }}
             exit={isMobile ? { x: -300 } : { width: 0, opacity: 0 }}
             transition={{ type: 'spring', damping: 32, stiffness: 180 }}
-            className={`${isMobile ? 'absolute inset-y-0 left-0 w-80 z-50' : 'w-72 relative'} border-r border-(--border-color) flex flex-col bg-(--surface-secondary) glass h-full shadow-2xl overflow-hidden`}
+            className={`${isMobile ? 'absolute inset-y-0 left-0 w-80 z-50' : 'w-72 relative'} border-r border-(--border-color) flex flex-col bg-(--surface-secondary)/80 backdrop-blur-2xl h-full shadow-2xl overflow-hidden`}
           >
             <div className="p-8 flex items-center justify-between shrink-0">
               <h1 className="font-bold text-xl flex items-center gap-3 tracking-tight text-white">
@@ -1072,7 +1081,7 @@ export default function ChatPage() {
 
             <div className="px-8 mb-8 space-y-4">
               <motion.div whileTap={{ scale: 0.98 }}>
-                <Button onClick={() => { createNewChat(); }} className="w-full py-7 rounded-(--radius-lg) flex items-center gap-2 group shadow-none bg-(--foreground) text-(--background) hover:opacity-90 no-border font-semibold text-[13px] tracking-tight">
+                <Button onClick={() => { createNewChat(); }} className="w-full py-7 rounded-2xl flex items-center gap-2 group shadow-2xl bg-white text-black hover:bg-gray-100 no-border font-bold text-[13px] tracking-tight">
                   <Plus className="w-4 h-4 transition-transform group-hover:rotate-90" />
                   New Session
                 </Button>
@@ -1084,7 +1093,7 @@ export default function ChatPage() {
                   placeholder="Search thoughts..."
                   value={chatSearch}
                   onChange={(e) => setChatSearch(e.target.value)}
-                  className="w-full bg-(--surface) border-none rounded-(--radius-lg) py-3.5 pl-11 pr-4 text-[13px] font-normal text-(--foreground) placeholder-(--apple-gray) focus:ring-1 focus:ring-blue-500/30 outline-none transition-all"
+                  className="w-full bg-(--surface) border-none rounded-2xl py-3.5 pl-11 pr-4 text-[13px] font-medium text-white placeholder-(--apple-gray) focus:ring-1 focus:ring-blue-500/30 outline-none transition-all"
                 />
               </div>
             </div>
@@ -1092,9 +1101,9 @@ export default function ChatPage() {
             <div className="flex-1 overflow-y-auto px-3 space-y-1.5 py-2 custom-scrollbar">
               {chats.length === 0 ? (
                 <div className="flex flex-col items-center justify-center text-center p-6 space-y-4 opacity-50 mt-10">
-                  <MessageSquare className="w-8 h-8 text-gray-500" />
+                  <MessageSquare className="w-8 h-8 text-(--apple-gray)" />
                   <p className="text-xs font-bold text-(--apple-gray)">Empty workspace.</p>
-                  <p className="text-[10px] text-(--apple-gray) opacity-60">Kick off a new intelligent session.</p>
+                  <p className="text-[10px] text-(--apple-gray)/60">Kick off a new intelligent session.</p>
                 </div>
               ) : (
                 chats.filter(c => chatSearch.trim() === '' || c.title.toLowerCase().includes(chatSearch.toLowerCase())).map(chat => (
@@ -1118,8 +1127,8 @@ export default function ChatPage() {
                           if (isMobile) setIsNavOpen(false); 
                           trackEvent('sidebar_click', { action: 'select_chat', chat_id: chat.id });
                         }}
-                        className={`w-full text-left p-4 rounded-(--radius-lg) text-[13px] font-semibold tracking-tight transition-all flex items-center gap-3 group relative overflow-hidden ${
-                          currentChatId === chat.id ? 'bg-(--apple-blue)/10 text-(--apple-blue)' : 'text-(--apple-gray) hover:bg-white/5 hover:text-(--foreground)'
+                        className={`w-full text-left p-4 rounded-2xl text-[13px] font-bold tracking-tight transition-all flex items-center gap-3 group relative overflow-hidden ${
+                          currentChatId === chat.id ? 'bg-(--apple-blue)/10 text-(--apple-blue)' : 'text-(--apple-gray) hover:bg-(--surface-tertiary) hover:text-(--foreground)'
                         }`}
                       >
                         <MessageSquare className={`w-4 h-4 shrink-0 transition-all ${currentChatId === chat.id ? 'text-(--apple-blue) scale-110' : 'text-(--apple-gray) group-hover:text-gray-300'}`} />
@@ -1187,6 +1196,32 @@ export default function ChatPage() {
                 <span className="text-[13px] font-semibold tracking-tight">Settings</span>
                 <span className="ml-auto text-[8px] font-mono text-(--apple-gray)">{getShortcutLabel('openSettings')}</span>
               </Button>
+
+              <div className="pt-4 mt-2 border-t border-white/5">
+                <div className="flex bg-(--surface-tertiary) p-1 rounded-xl items-center border border-white/5">
+                  <button 
+                    onClick={() => setTheme('light')} 
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${theme === 'light' ? 'bg-white text-black shadow-sm' : 'text-(--apple-gray) hover:text-(--foreground)'}`}
+                  >
+                    <Sun className="w-3.5 h-3.5" />
+                    Light
+                  </button>
+                  <button 
+                    onClick={() => setTheme('dark')} 
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${theme === 'dark' ? 'bg-(--surface) text-white shadow-sm' : 'text-(--apple-gray) hover:text-(--foreground)'}`}
+                  >
+                    <Moon className="w-3.5 h-3.5" />
+                    Dark
+                  </button>
+                  <button 
+                    onClick={() => setTheme('system')} 
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${theme === 'system' ? 'bg-(--surface) text-white shadow-sm' : 'text-(--apple-gray) hover:text-(--foreground)'}`}
+                  >
+                    <Monitor className="w-3.5 h-3.5" />
+                    Auto
+                  </button>
+                </div>
+              </div>
             </div>
           </motion.div>
         )}
@@ -1217,7 +1252,7 @@ export default function ChatPage() {
 
       <FeedbackWidget />
 
-      <motion.div layout transition={{ type: 'spring', damping: 32, stiffness: 180 }} className={`flex-1 flex flex-col relative bg-[#000000] ${isMobile ? 'pt-14' : ''}`}>
+      <motion.div layout transition={{ type: 'spring', damping: 32, stiffness: 180 }} className={`flex-1 flex flex-col relative bg-(--background) ${isMobile ? 'pt-14' : ''}`}>
         <AnimatePresence>
           {isMobile && (isNavOpen || isSidebarOpen) && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => { setIsNavOpen(false); setIsSidebarOpen(false); }} className="absolute inset-0 bg-black/60 backdrop-blur-sm z-40" />
@@ -1231,9 +1266,9 @@ export default function ChatPage() {
           </div>
 
         {isMobile && (
-          <div className="absolute top-0 left-0 right-0 h-14 border-b border-white/5 bg-black/40 backdrop-blur-xl flex items-center justify-between px-4 z-40">
-            <button onClick={() => { setIsNavOpen(true); }} className="p-2 hover:bg-white/5 rounded-xl"><Menu className="w-5 h-5 text-(--apple-gray)" /></button>
-            <h1 className="font-bold text-[13px] tracking-tight text-white">Threadly</h1>
+          <div className="absolute top-0 left-0 right-0 h-14 border-b border-(--border-color) bg-(--surface-secondary)/40 backdrop-blur-xl flex items-center justify-between px-4 z-40">
+            <button onClick={() => { setIsNavOpen(true); }} className="p-2 hover:bg-(--surface-tertiary) rounded-xl"><Menu className="w-5 h-5 text-(--apple-gray)" /></button>
+            <h1 className="font-bold text-[13px] tracking-tight text-(--foreground)">Threadly</h1>
             <div className="flex items-center gap-1">
                {currentChatId && (
                   <button onClick={() => { shareChat(); }} className="p-2 hover:bg-white/5 rounded-xl text-(--apple-blue) transition-all active:scale-95">
@@ -1257,7 +1292,7 @@ export default function ChatPage() {
                    size="sm" 
                    onClick={() => { shareChat(); }}
                    onContextMenu={e => openContextMenu(e, 'shareChat')}
-                   className="rounded-(--radius-pill) px-5 py-5 flex items-center gap-2 border-none bg-(--foreground) text-(--background) hover:opacity-90 shadow-none font-semibold text-[13px]"
+                   className="rounded-(--radius-pill) px-5 py-5 flex items-center gap-2 border-none bg-white text-black hover:bg-gray-100 shadow-xl font-semibold text-[13px]"
                  >
                    <Share2 className="w-3.5 h-3.5" />
                    <span>Share Chat</span>
@@ -1303,7 +1338,7 @@ export default function ChatPage() {
                     {msg.role === 'assistant' ? <Zap className="w-5 h-5" /> : <Plus className="w-5 h-5 rotate-45" />}
                   </div>
                   <div className="flex-1 space-y-4 min-w-0 overflow-hidden">
-                    <div className={`p-6 md:p-8 rounded-(--radius-lg) bg-(--surface) shadow-none relative overflow-hidden border border-(--border-color) ${
+                    <div className={`p-6 md:p-8 rounded-(--radius-lg) bg-(--surface) shadow-xl relative overflow-hidden border border-white/5 ${
                       msg.role === 'assistant' ? 'ring-1 ring-blue-500/10' : ''
                     }`}>
                       <div className="flex items-center justify-between mb-6">
@@ -1439,7 +1474,7 @@ export default function ChatPage() {
                                           className="w-full h-full object-cover transition-all duration-700 group-hover/img:scale-110"
                                           loading="lazy"
                                         />
-                                        <div className="absolute inset-0 bg-black/20 transition-opacity" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover/img:opacity-40 transition-opacity" />
                                       </div>
                                       <div className="absolute bottom-0 inset-x-0 p-5 backdrop-blur-md bg-black/40 border-t border-white/5 flex flex-col gap-1 translate-y-2 group-hover/img:translate-y-0 transition-transform">
                                         <p className="text-[11px] font-black uppercase tracking-widest text-white drop-shadow-md truncate">{img.alt}</p>
@@ -1476,7 +1511,7 @@ export default function ChatPage() {
         <div className="p-4 md:p-12 relative z-20">
            <div id="tutorial-input" className="w-full max-w-4xl mx-auto relative group">
               <form onSubmit={sendMessage}>
-                <div className="relative bg-(--surface) rounded-(--radius-lg) p-2 shadow-none group-focus-within:ring-1 ring-blue-500/20 transition-all border border-(--border-color)">
+                <div className="relative bg-(--surface) rounded-(--radius-lg) p-2 shadow-xl group-focus-within:ring-1 ring-blue-500/20 transition-all border border-white/5">
                   <textarea 
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
@@ -1490,7 +1525,7 @@ export default function ChatPage() {
                     }}
                     rows={1}
                     placeholder={loading ? "Generating response..." : "What's on your mind?"}
-                    className="w-full pr-24 md:pr-32 py-4 md:py-5 pl-6 md:pl-8 bg-transparent text-base md:text-[17px] outline-none resize-none custom-scrollbar placeholder-(--apple-gray) font-normal tracking-tight"
+                    className="w-full pr-24 md:pr-32 py-4 md:py-5 pl-6 md:pl-8 bg-transparent text-base md:text-[17px] outline-none resize-none custom-scrollbar placeholder:text-gray-600 font-medium tracking-tight"
                   />
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-3">
                     {loading ? (
@@ -1533,12 +1568,12 @@ export default function ChatPage() {
             animate={isMobile ? { x: 0 } : { width: 320, opacity: 1 }}
             exit={isMobile ? { x: '100%' } : { width: 0, opacity: 0 }}
             transition={{ type: 'spring', damping: 32, stiffness: 180 }}
-            className={`${isMobile ? 'absolute inset-y-0 right-0 w-[85%] z-50' : 'w-80 relative'} border-l border-(--border-color) flex flex-col bg-(--surface-secondary) glass h-full shadow-2xl`}
+            className={`${isMobile ? 'absolute inset-y-0 right-0 w-[85%] z-50' : 'w-80 relative'} border-l border-white/5 flex flex-col bg-[#09090b]/60 backdrop-blur-3xl h-full shadow-2xl sidebar-tint`}
           >
             <div className="flex flex-col h-full">
               {/* Guest Banner */}
               {isGuest && (
-                <div className="m-4 p-4 rounded-(--radius-lg) bg-(--apple-blue)/10 border border-(--apple-blue)/20 shadow-none">
+                <div className="m-4 p-4 rounded-2xl bg-linear-to-br from-blue-600/20 to-indigo-600/20 border border-blue-500/30 shadow-lg shadow-blue-500/10">
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center shrink-0 shadow-xl">
                       <Sparkles className="w-5 h-5 text-black" />
@@ -1553,7 +1588,7 @@ export default function ChatPage() {
                           trackEvent('signup_started', { location: 'guest_banner' });
                           router.push('/auth'); 
                         }}
-                        className="mt-4 w-full py-2.5 bg-(--apple-blue) hover:bg-blue-600 text-white text-[11px] font-semibold tracking-tight rounded-(--radius-pill) transition-all active:scale-95 shadow-none"
+                        className="mt-4 w-full py-2.5 bg-(--apple-blue) hover:bg-blue-600 text-white text-[11px] font-bold tracking-tight rounded-xl transition-all active:scale-95 shadow-lg"
                       >
                         Claim My Workspace
                       </button>
@@ -1563,7 +1598,7 @@ export default function ChatPage() {
               )}
 
               {/* Identity & Memory Card */}
-              <div id="tutorial-memory" className="p-6 border-b border-(--border-color) bg-(--surface-tertiary)">
+              <div id="tutorial-memory" className="p-6 border-b border-white/5 bg-white/2">
                 <div className="flex items-center justify-between mb-6">
                    <div className="flex items-center gap-4">
                       <div className="w-12 h-12 squircle bg-(--apple-blue) flex items-center justify-center font-bold text-white shadow-xl uppercase overflow-hidden">
@@ -1574,18 +1609,13 @@ export default function ChatPage() {
                          )}
                       </div>
                       <div className="flex flex-col">
-                         <span className="text-[14px] font-bold tracking-tight text-(--foreground) truncate max-w-[140px]">
+                         <span className="text-[14px] font-bold tracking-tight text-white truncate max-w-[140px]">
                             {user?.user_metadata?.full_name || user?.email?.split('@')[0]}
                          </span>
                          <span className="text-[11px] font-medium tracking-tight text-(--apple-gray)">System Operator</span>
                       </div>
                    </div>
-                    <div className="flex items-center gap-1">
-                       <Button variant="ghost" size="icon" onClick={toggleTheme} title={theme === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode"} className="rounded-xl text-(--apple-gray) hover:text-(--foreground)">
-                          {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                       </Button>
-                       <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(false)} className="rounded-xl"><X className="w-4 h-4" /></Button>
-                    </div>
+                   <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(false)} className="rounded-xl"><X className="w-4 h-4" /></Button>
                 </div>
 
                 {profileMemories.length > 0 && (
