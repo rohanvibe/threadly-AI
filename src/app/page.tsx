@@ -1104,7 +1104,7 @@ export default function ChatPage() {
 
             <div className="flex-1 overflow-y-auto px-3 space-y-1.5 py-2 custom-scrollbar">
               {chats.length === 0 ? (
-                <div className="flex flex-col items-center justify-center text-center p-6 space-y-4 opacity-50 mt-10">
+                <div className="flex flex-col items-center justify-center text-center p-6 space-y-4 mt-10">
                   <MessageSquare className="w-8 h-8 text-(--apple-gray)" />
                   <p className="text-xs font-bold text-(--apple-gray)">Empty workspace.</p>
                   <p className="text-[10px] text-(--apple-gray)/60">Kick off a new intelligent session.</p>
@@ -1165,8 +1165,8 @@ export default function ChatPage() {
               )}
             </div>
 
-            <div className="p-4 border-t border-white/5 space-y-2">
-              <div className="flex items-center gap-3 p-4 bg-(--surface) rounded-(--radius-md) border border-white/5 mb-4">
+            <div className="p-4 border-t border-(--border-color) space-y-2">
+              <div className="flex items-center gap-3 p-4 bg-(--surface) rounded-(--radius-md) border border-(--border-color) mb-4 shadow-sm">
                 <div className="w-10 h-10 rounded-lg bg-(--apple-blue) flex items-center justify-center text-xs font-semibold text-white shadow-lg overflow-hidden">
                   {user?.user_metadata?.avatar_url ? (
                      <img src={user.user_metadata.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
@@ -1180,19 +1180,19 @@ export default function ChatPage() {
                 </div>
                 <div className="flex items-center gap-1">
                   <AppleTooltip text="Log Out">
-                    <button onClick={handleLogout} className="p-2 hover:bg-white/10 rounded-xl transition-all"><LogOut className="w-4 h-4 text-gray-400" /></button>
+                    <button onClick={handleLogout} className="p-2 hover:bg-(--surface-tertiary) rounded-xl transition-all"><LogOut className="w-4 h-4 text-(--apple-gray)" /></button>
                   </AppleTooltip>
                   <AppleTooltip text="Delete Account">
-                    <button onClick={handleDeleteAccount} className="p-2 hover:bg-red-500/10 rounded-xl transition-all group/del"><UserMinus className="w-4 h-4 text-gray-400 group-hover/del:text-red-500" /></button>
+                    <button onClick={handleDeleteAccount} className="p-2 hover:bg-red-500/5 rounded-xl transition-all group/del"><UserMinus className="w-4 h-4 text-(--apple-gray) group-hover/del:text-red-500" /></button>
                   </AppleTooltip>
                 </div>
               </div>
-              <Button id="tutorial-prompts" variant="ghost" className="w-full justify-start gap-4 rounded-xl py-6 hover:bg-white/5" onClick={() => { setShowPrompts(true); }} onContextMenu={e => openContextMenu(e, 'openPrompts')}>
+              <Button id="tutorial-prompts" variant="ghost" className="w-full justify-start gap-4 rounded-xl py-6 hover:bg-(--surface-tertiary) text-(--foreground)" onClick={() => { setShowPrompts(true); }} onContextMenu={e => openContextMenu(e, 'openPrompts')}>
                 <Command className="w-4 h-4 text-(--apple-blue)" />
                 <span className="text-[13px] font-semibold tracking-tight">Saved Prompts</span>
                 <span className="ml-auto text-[8px] font-mono text-(--apple-gray)">{getShortcutLabel('openPrompts')}</span>
               </Button>
-              <Button id="tutorial-settings" variant="ghost" className="w-full justify-start gap-4 rounded-xl py-6 hover:bg-white/5" onClick={() => { 
+              <Button id="tutorial-settings" variant="ghost" className="w-full justify-start gap-4 rounded-xl py-6 hover:bg-(--surface-tertiary) text-(--foreground)" onClick={() => { 
                 trackEvent('byok_opened')
                 setShowSettings(true); 
               }} onContextMenu={e => openContextMenu(e, 'openSettings')}>
@@ -1390,7 +1390,7 @@ export default function ChatPage() {
                            </div>
                         </div>
                       ) : (
-                        <div className="text-gray-100 leading-relaxed text-[17px] prose prose-invert prose-sm max-w-none prose-p:leading-[1.45] prose-pre:rounded-(--radius-md) prose-code:text-blue-400 break-all wrap-break-word selection:bg-blue-500/40">
+                        <div className="text-(--foreground) leading-relaxed text-[17px] prose prose-sm max-w-none prose-p:leading-[1.45] prose-pre:rounded-(--radius-md) prose-code:text-(--apple-blue) break-all wrap-break-word selection:bg-blue-500/40 dark:prose-invert">
                           {msg.content === '' && loading ? (
                              <div className="flex items-center gap-4 py-2">
                                 <div className="flex gap-1.5 item-center">
@@ -1515,7 +1515,7 @@ export default function ChatPage() {
         <div className="p-4 md:p-12 relative z-20">
            <div id="tutorial-input" className="w-full max-w-4xl mx-auto relative group">
               <form onSubmit={sendMessage}>
-                <div className="relative bg-(--surface) rounded-(--radius-lg) p-2 shadow-xl group-focus-within:ring-1 ring-blue-500/20 transition-all border border-white/5">
+                <div className="relative bg-(--surface) rounded-(--radius-lg) p-2 shadow-xl group-focus-within:ring-1 ring-blue-500/20 transition-all border border-(--border-color)">
                   <textarea 
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
@@ -1529,11 +1529,11 @@ export default function ChatPage() {
                     }}
                     rows={1}
                     placeholder={loading ? "Generating response..." : "What's on your mind?"}
-                    className="w-full pr-24 md:pr-32 py-4 md:py-5 pl-6 md:pl-8 bg-transparent text-base md:text-[17px] outline-none resize-none custom-scrollbar placeholder:text-gray-600 font-medium tracking-tight"
+                    className="w-full pr-24 md:pr-32 py-4 md:py-5 pl-6 md:pl-8 bg-transparent text-base md:text-[17px] outline-none resize-none custom-scrollbar placeholder:text-(--apple-gray) font-medium tracking-tight text-(--foreground)"
                   />
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-3">
                     {loading ? (
-                      <Button onClick={stopResponding} variant="ghost" size="icon" className="w-12 h-12 rounded-(--radius-pill) bg-white/5 hover:bg-red-500/10 hover:text-red-500 transition-all">
+                      <Button onClick={stopResponding} variant="ghost" size="icon" className="w-12 h-12 rounded-(--radius-pill) bg-(--surface-tertiary) hover:bg-red-500/10 hover:text-red-500 transition-all">
                         <Square className="w-5 h-5 fill-current" />
                       </Button>
                     ) : (
@@ -1546,11 +1546,11 @@ export default function ChatPage() {
               </form>
               <div className="hidden md:flex justify-between items-center mt-6 px-4">
                  <div className="flex items-center gap-3">
-                    <span className="text-[9px] font-black text-gray-700 uppercase tracking-[0.4em]">Groq Llama-3.3</span>
-                    <div className="w-1 h-1 rounded-full bg-gray-800" />
-                    <span className="text-[9px] font-black text-gray-700 uppercase tracking-[0.4em]">Optimized Inference</span>
+                    <span className="text-[9px] font-black text-(--apple-gray) uppercase tracking-[0.4em]">Groq Llama-3.3</span>
+                    <div className="w-1 h-1 rounded-full bg-(--apple-gray)" />
+                    <span className="text-[9px] font-black text-(--apple-gray) uppercase tracking-[0.4em]">Optimized Inference</span>
                  </div>
-                 <p className="text-[9px] font-bold text-gray-700 uppercase tracking-widest opacity-50">⌘ + Enter to dispatch</p>
+                 <p className="text-[9px] font-bold text-(--apple-gray) uppercase tracking-widest opacity-50">⌘ + Enter to dispatch</p>
               </div>
            </div>
         </div>
@@ -1572,7 +1572,7 @@ export default function ChatPage() {
             animate={isMobile ? { x: 0 } : { width: 320, opacity: 1 }}
             exit={isMobile ? { x: '100%' } : { width: 0, opacity: 0 }}
             transition={{ type: 'spring', damping: 32, stiffness: 180 }}
-            className={`${isMobile ? 'absolute inset-y-0 right-0 w-[85%] z-50' : 'w-80 relative'} border-l border-white/5 flex flex-col bg-[#09090b]/60 backdrop-blur-3xl h-full shadow-2xl sidebar-tint`}
+            className={`${isMobile ? 'absolute inset-y-0 right-0 w-[85%] z-50' : 'w-80 relative'} border-l border-(--border-color) flex flex-col bg-(--surface-secondary)/80 backdrop-blur-3xl h-full shadow-2xl sidebar-tint`}
           >
             <div className="flex flex-col h-full">
               {/* Guest Banner */}
@@ -2274,7 +2274,7 @@ function EmptyState({ onCreateNew }: { onCreateNew: () => void }) {
       </div>
 
       <div className="space-y-2 md:space-y-4">
-        <h2 className="text-4xl md:text-5xl font-semibold tracking-tight text-white leading-tight">
+        <h2 className="text-4xl md:text-5xl font-semibold tracking-tight text-(--foreground) leading-tight">
           Clear mind. <br/> <span className="text-(--apple-gray)">Simple work.</span>
         </h2>
         <p className="hidden md:block text-base text-(--apple-gray) font-medium leading-relaxed max-w-lg mx-auto">
@@ -2283,13 +2283,13 @@ function EmptyState({ onCreateNew }: { onCreateNew: () => void }) {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
-         <Button onClick={onCreateNew} className="px-8 py-5 md:py-6 rounded-(--radius-pill) bg-white text-black hover:bg-gray-200 font-semibold transition-all active:scale-[0.98] group shadow-xl">
+          <Button onClick={onCreateNew} className="px-8 py-5 md:py-6 rounded-(--radius-pill) bg-(--foreground) text-(--background) hover:opacity-90 font-semibold transition-all active:scale-[0.98] group shadow-xl border-none">
             <Plus className="w-4 h-4 mr-2 transition-transform group-hover:rotate-90" />
             New Chat
-         </Button>
-         <Button variant="outline" onClick={() => (document.getElementById('tutorial-prompts') as HTMLElement)?.click()} className="hidden md:flex px-8 py-6 rounded-(--radius-pill) border-white/10 hover:bg-white/5 text-white font-semibold transition-all">
+          </Button>
+          <Button variant="outline" onClick={() => (document.getElementById('tutorial-prompts') as HTMLElement)?.click()} className="hidden md:flex px-8 py-6 rounded-(--radius-pill) border-(--border-color) hover:bg-(--surface-tertiary) text-(--foreground) font-semibold transition-all">
             Browse Registry
-         </Button>
+          </Button>
       </div>
     </motion.div>
   )
