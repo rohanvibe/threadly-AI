@@ -187,8 +187,8 @@ function AppleTooltip({ text, children }: { text: string, children: React.ReactN
           transition={{ type: 'spring', damping: 20, stiffness: 300 }}
           className="absolute bottom-full left-1/2 mb-2 pointer-events-none z-100 opacity-0 group-hover:opacity-100"
         >
-          <div className="bg-[#18181b] border border-white/10 px-3 py-1.5 rounded-xl shadow-2xl glass-dark no-border">
-            <p className="text-[10px] font-black uppercase tracking-widest text-white whitespace-nowrap">{text}</p>
+          <div className="bg-(--surface-tertiary) border border-(--border-color) px-3 py-1.5 rounded-xl shadow-2xl glass no-border">
+            <p className="text-[10px] font-black uppercase tracking-widest text-(--foreground) whitespace-nowrap">{text}</p>
           </div>
           <div className="w-2 h-2 bg-[#18181b] rotate-45 mx-auto -mt-1" />
         </motion.div>
@@ -303,10 +303,14 @@ export default function ChatPage() {
   const [isMobile, setIsMobile] = useState(false)
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system')
 
+  // Initial load
   useEffect(() => {
     const savedTheme = localStorage.getItem('threadly_theme') as any
     if (savedTheme) setTheme(savedTheme)
-    
+  }, [])
+
+  // Apply and Persist
+  useEffect(() => {
     const root = window.document.documentElement
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
     
@@ -1066,9 +1070,9 @@ export default function ChatPage() {
             className={`${isMobile ? 'absolute inset-y-0 left-0 w-80 z-50' : 'w-72 relative'} border-r border-(--border-color) flex flex-col bg-(--surface-secondary)/80 backdrop-blur-2xl h-full shadow-2xl overflow-hidden`}
           >
             <div className="p-8 flex items-center justify-between shrink-0">
-              <h1 className="font-bold text-xl flex items-center gap-3 tracking-tight text-white">
+              <h1 className="font-bold text-xl flex items-center gap-3 tracking-tight text-(--foreground)">
                 <div className="w-8 h-8 squircle bg-(--apple-blue) flex items-center justify-center shadow-lg shadow-blue-500/20">
-                   <Globe className="w-4 h-4 text-white" />
+                   <Globe className="w-4 h-4 text-(--background)" />
                 </div>
                 Threadly
               </h1>
@@ -1093,7 +1097,7 @@ export default function ChatPage() {
                   placeholder="Search thoughts..."
                   value={chatSearch}
                   onChange={(e) => setChatSearch(e.target.value)}
-                  className="w-full bg-(--surface) border-none rounded-2xl py-3.5 pl-11 pr-4 text-[13px] font-medium text-white placeholder-(--apple-gray) focus:ring-1 focus:ring-blue-500/30 outline-none transition-all"
+                  className="w-full bg-(--surface) border border-(--border-color) rounded-2xl py-3.5 pl-11 pr-4 text-[13px] font-medium text-(--foreground) placeholder-(--apple-gray) focus:ring-1 focus:ring-blue-500/30 outline-none transition-all shadow-sm"
                 />
               </div>
             </div>
@@ -1172,7 +1176,7 @@ export default function ChatPage() {
                 </div>
                 <div className="flex flex-col min-w-0 flex-1">
                   <span className="text-[10px] font-semibold uppercase tracking-widest text-(--apple-gray) mb-0.5">Account</span>
-                  <span className="text-[13px] font-semibold text-white truncate">{user?.email}</span>
+                  <span className="text-[13px] font-semibold text-(--foreground) truncate">{user?.email}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <AppleTooltip text="Log Out">
@@ -1201,21 +1205,21 @@ export default function ChatPage() {
                 <div className="flex bg-(--surface-tertiary) p-1 rounded-xl items-center border border-white/5">
                   <button 
                     onClick={() => setTheme('light')} 
-                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${theme === 'light' ? 'bg-white text-black shadow-sm' : 'text-(--apple-gray) hover:text-(--foreground)'}`}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${theme === 'light' ? 'bg-(--foreground) text-(--background) shadow-sm' : 'text-(--apple-gray) hover:text-(--foreground)'}`}
                   >
                     <Sun className="w-3.5 h-3.5" />
                     Light
                   </button>
                   <button 
                     onClick={() => setTheme('dark')} 
-                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${theme === 'dark' ? 'bg-(--surface) text-white shadow-sm' : 'text-(--apple-gray) hover:text-(--foreground)'}`}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${theme === 'dark' ? 'bg-(--foreground) text-(--background) shadow-sm' : 'text-(--apple-gray) hover:text-(--foreground)'}`}
                   >
                     <Moon className="w-3.5 h-3.5" />
                     Dark
                   </button>
                   <button 
                     onClick={() => setTheme('system')} 
-                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${theme === 'system' ? 'bg-(--surface) text-white shadow-sm' : 'text-(--apple-gray) hover:text-(--foreground)'}`}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${theme === 'system' ? 'bg-(--foreground) text-(--background) shadow-sm' : 'text-(--apple-gray) hover:text-(--foreground)'}`}
                   >
                     <Monitor className="w-3.5 h-3.5" />
                     Auto
@@ -1275,7 +1279,7 @@ export default function ChatPage() {
                      <Share2 className="w-5 h-5" />
                   </button>
                )}
-                <button onClick={() => { createNewChat(); if (isMobile) setIsNavOpen(false); }} className="p-2 hover:bg-white/5 rounded-xl text-white transition-all active:scale-95">
+                <button onClick={() => { createNewChat(); if (isMobile) setIsNavOpen(false); }} className="p-2 hover:bg-(--surface-tertiary) rounded-xl text-(--foreground) transition-all active:scale-95">
                    <Plus className="w-5 h-5" />
                 </button>
                 <button onClick={() => { setIsSidebarOpen(!isSidebarOpen); }} className={`p-2 rounded-xl transition-all ${isSidebarOpen ? 'text-(--apple-blue)' : 'text-(--apple-gray)'}`}><History className="w-5 h-5" /></button>
@@ -1301,7 +1305,7 @@ export default function ChatPage() {
               <button 
                onContextMenu={e => openContextMenu(e, 'toggleSidebar')} 
                onClick={() => { setIsSidebarOpen(!isSidebarOpen); }} 
-               className={`p-3 rounded-(--radius-pill) transition-all shadow-xl ${isSidebarOpen ? 'bg-(--apple-blue) text-white' : 'bg-(--surface) text-(--apple-gray) hover:text-white'}`}
+               className={`p-3 rounded-(--radius-pill) transition-all shadow-xl ${isSidebarOpen ? 'bg-(--apple-blue) text-white' : 'bg-(--surface) text-(--apple-gray) hover:text-(--foreground)'}`}
               >
                 <History className="w-5 h-5" />
               </button>
@@ -1573,13 +1577,13 @@ export default function ChatPage() {
             <div className="flex flex-col h-full">
               {/* Guest Banner */}
               {isGuest && (
-                <div className="m-4 p-4 rounded-2xl bg-linear-to-br from-blue-600/20 to-indigo-600/20 border border-blue-500/30 shadow-lg shadow-blue-500/10">
+                <div className="m-4 p-4 rounded-2xl bg-(--surface) border border-blue-500/30 shadow-lg shadow-blue-500/10">
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center shrink-0 shadow-xl">
                       <Sparkles className="w-5 h-5 text-black" />
                     </div>
                     <div className="flex flex-col">
-                      <h3 className="text-[13px] font-bold tracking-tight text-white">Unlock Infinite Flow</h3>
+                      <h3 className="text-[13px] font-bold tracking-tight text-(--foreground)">Unlock Infinite Flow</h3>
                       <p className="text-[11px] text-(--apple-gray) font-medium leading-relaxed mt-1">
                         Persistent history, intelligent AI memory, and cross-device sync.
                       </p>
@@ -1598,7 +1602,7 @@ export default function ChatPage() {
               )}
 
               {/* Identity & Memory Card */}
-              <div id="tutorial-memory" className="p-6 border-b border-white/5 bg-white/2">
+              <div id="tutorial-memory" className="p-6 border-b border-(--border-color) bg-(--surface-secondary)">
                 <div className="flex items-center justify-between mb-6">
                    <div className="flex items-center gap-4">
                       <div className="w-12 h-12 squircle bg-(--apple-blue) flex items-center justify-center font-bold text-white shadow-xl uppercase overflow-hidden">
@@ -1609,7 +1613,7 @@ export default function ChatPage() {
                          )}
                       </div>
                       <div className="flex flex-col">
-                         <span className="text-[14px] font-bold tracking-tight text-white truncate max-w-[140px]">
+                         <span className="text-[14px] font-bold tracking-tight text-(--foreground) truncate max-w-[140px]">
                             {user?.user_metadata?.full_name || user?.email?.split('@')[0]}
                          </span>
                          <span className="text-[11px] font-medium tracking-tight text-(--apple-gray)">System Operator</span>
@@ -1648,9 +1652,9 @@ export default function ChatPage() {
                      <Activity className="w-3 h-3" />
                      Session {sidebarMode === 'map' ? 'Map' : 'Flow'}
                   </h2>
-                  <div className="flex bg-white/5 p-1 rounded-lg">
-                    <button onClick={() => setSidebarMode('flow')} className={`p-1 rounded-md transition-colors ${sidebarMode === 'flow' ? 'bg-white/10 text-white shadow-sm' : 'text-gray-500 hover:text-white'}`}><List className="w-3.5 h-3.5" /></button>
-                    <button onClick={() => setSidebarMode('map')} className={`p-1 rounded-md transition-colors ${sidebarMode === 'map' ? 'bg-white/10 text-blue-400 shadow-sm' : 'text-gray-500 hover:text-white'}`}><Map className="w-3.5 h-3.5" /></button>
+                  <div className="flex bg-(--surface-tertiary) p-1 rounded-lg">
+                    <button onClick={() => setSidebarMode('flow')} className={`p-1 rounded-md transition-colors ${sidebarMode === 'flow' ? 'bg-(--foreground) text-(--background) shadow-sm' : 'text-(--apple-gray) hover:text-(--foreground)'}`}><List className="w-3.5 h-3.5" /></button>
+                    <button onClick={() => setSidebarMode('map')} className={`p-1 rounded-md transition-colors ${sidebarMode === 'map' ? 'bg-(--foreground) text-(--background) shadow-sm' : 'text-(--apple-gray) hover:text-(--foreground)'}`}><Map className="w-3.5 h-3.5" /></button>
                   </div>
                 </div>
                 {sidebarMode === 'flow' && (
@@ -1662,7 +1666,7 @@ export default function ChatPage() {
                       placeholder="Search flow (Ctrl/Cmd+K)"
                       value={sidebarSearch}
                       onChange={(e) => setSidebarSearch(e.target.value)}
-                      className="w-full bg-white/5 border border-white/5 rounded-lg py-2 pl-8 pr-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 transition-colors"
+                      className="w-full bg-(--surface) border border-(--border-color) rounded-lg py-2 pl-8 pr-3 text-xs text-(--foreground) placeholder-(--apple-gray) focus:outline-none focus:border-blue-500/50 transition-colors shadow-sm"
                     />
                   </div>
                 )}
@@ -1675,7 +1679,7 @@ export default function ChatPage() {
                             <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
                             {section.title}
                          </h3>
-                         <div className="space-y-2 border-l border-white/10 ml-0.5 pl-3">
+                         <div className="space-y-2 border-l border-(--border-color) ml-0.5 pl-3">
                             {section.messages.map((msg) => (
                                <button
                                  key={msg.id}
@@ -1684,10 +1688,10 @@ export default function ChatPage() {
                                    scrollToMessage(msg.id); 
                                    if (isMobile) setIsSidebarOpen(false); 
                                  }}
-                                 className="w-full text-left p-2 rounded-xl hover:bg-white/5 transition-all group flex items-center gap-2"
+                                 className="w-full text-left p-2 rounded-xl hover:bg-(--surface-tertiary) transition-all group flex items-center gap-2"
                                >
-                                  <span className="w-1 h-1 rounded-full bg-gray-600 group-hover:bg-white transition-colors shrink-0" />
-                                  <span className="text-[11px] font-medium text-gray-400 group-hover:text-white truncate transition-colors">
+                                  <span className="w-1 h-1 rounded-full bg-(--apple-gray) group-hover:bg-(--foreground) transition-colors shrink-0" />
+                                  <span className="text-[11px] font-medium text-(--apple-gray) group-hover:text-(--foreground) truncate transition-colors">
                                     {msg.content}
                                   </span>
                                </button>
@@ -1830,18 +1834,18 @@ function SettingsModal({ onClose, shortcuts, updateShortcut, resetShortcuts }: {
         transition={{ type: 'spring', damping: 28, stiffness: 220 }}
         className="w-full max-w-2xl relative z-20"
       >
-        <div className="glass-dark rounded-[2.5rem] overflow-hidden apple-shadow border border-white/5 flex flex-col max-h-[85vh]">
-          <div className="p-8 border-b border-white/5 flex items-center justify-between">
+        <div className="glass rounded-[2.5rem] overflow-hidden apple-shadow border border-(--border-color) flex flex-col max-h-[85vh]">
+          <div className="p-8 border-b border-(--border-color) flex items-center justify-between">
              <div className="flex items-center gap-4">
                 <div className="w-10 h-10 squircle bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
                    <Settings className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                   <h3 className="text-sm font-black uppercase tracking-[0.3em] text-white">Workspace Infrastructure</h3>
+                    <h3 className="text-sm font-black uppercase tracking-[0.3em] text-(--foreground)">Workspace Infrastructure</h3>
                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Configure your intelligent environment</p>
                 </div>
              </div>
-             <Button variant="ghost" size="icon" onClick={onClose} className="rounded-xl hover:bg-white/5"><X className="w-5 h-5 text-gray-500" /></Button>
+              <Button variant="ghost" size="icon" onClick={onClose} className="rounded-xl hover:bg-(--surface-tertiary)"><X className="w-5 h-5 text-(--apple-gray)" /></Button>
           </div>
 
           <div className="flex bg-white/1 px-8 py-2 gap-8 border-b border-white/5">
@@ -1850,7 +1854,7 @@ function SettingsModal({ onClose, shortcuts, updateShortcut, resetShortcuts }: {
                   key={tab}
                   onClick={() => setActiveTab(tab as any)}
                   className={`py-4 text-[9px] font-black uppercase tracking-[0.4em] transition-all relative ${
-                    activeTab === tab ? 'text-white' : 'text-gray-600 hover:text-gray-400'
+                    activeTab === tab ? 'text-(--foreground)' : 'text-(--apple-gray) hover:text-(--foreground)'
                   }`}
                 >
                   {tab}
