@@ -28,6 +28,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Message or history is required' }, { status: 400 })
     }
 
+    // PHASE 1: Deterministic Intent Detection (Runs BEFORE LLM)
+    const { detectImageIntent, fetchVerifiedImages } = await import('@/utils/image-engine')
+    const imageQuery = detectImageIntent(message || '')
+    let detectedImages: any[] = []
+    
+    if (imageQuery) {
+      console.log(`[Deterministic Flow] Image intent detected for: ${imageQuery}`)
+      detectedImages = await fetchVerifiedImages(imageQuery)
+    }
+
     // Format memory if it exists
     let memoryPrompt = ''
     if (profile?.ai_memory) {
@@ -75,35 +85,19 @@ export async function POST(req: Request) {
 - **Brutal Truth**: 90% of ideas are average. Execution and positioning are everything. If a user's idea is weak, push back and help them refine it into something elite.
 - **Systems Thinking**: Connect ideas across domains (business, code, fitness, science). Focus on high-leverage workflows.
 - **Instant Understandability**: Use simple, direct language. No academic jargon or corporate "speak".
-- **Markdown First**: ALWAYS use bold text, lists, and headings to structure your thoughts. Use ![alt](url) [View Product](url) for visual examples.
-
-### 🗣️ COMMUNICATION STYLE (MANDATORY)
-- Use simple, plain English. 
-- NEVER use complex words, academic jargon, or corporate "speak".
-- Ensure your message is instantly understandable at a first glance.
-- Be direct and concise. Avoid long, winding sentences.
-- If a simpler word exists, use it. (e.g., use "help" instead of "facilitate").
-- **Markdown First**: ALWAYS use bold text, lists, and headings to structure your thoughts. 
-- **Visuals**: ALWAYS use Markdown syntax for images: \`![alt text](url)\`.
-- **CRITICAL**: Place every image on its own **SEPARATE NEW LINE** for maximum visibility.
-- **Tool Selection**: ALWAYS use the \`search_images\` tool when the user asks for a picture, photo, or visual of something (including specific cars, brands, or aesthetic shots). DO NOT use \`search_web\` for image requests.
-- **Visual Sourcing**: Only use URLs from the \`[VERIFIED IMAGES FOUND]\` or \`[VERIFIED IMAGES FOUND FROM PEXELS]\` blocks. For Pexels, ALWAYS include the provided attribution inside the Markdown title attribute: \`![alt](url "Attribution Text")\`. Never use a standard webpage URL for an image.
-- **Product Links**: Always pair the image with the corresponding webpage URL from the search results as the direct source/purchase link.
-- **Visual Fallback**: If multiple images exist, choose ones that end in \`.jpg\` or \`.png\` for better reliability.
+- **Markdown First**: ALWAYS use bold text, lists, and headings to structure your thoughts.
+- **Visuals**: Do NOT generate image markdown. Visuals are handled automatically by the system.
 
 ### 🧠 MEMORY MANAGEMENT (CRITICAL)
 - You MUST be extremely conservative with memory. 
 - DEFAULT ACTION: DO NOT SAVE ANYTHING. 
-- ONLY trigger [MEMORY_ADD: ...] if the user shares a significant, long-term fact (e.g., "My name is John", "I prefer React over Vue", "My project is called Project X").
+- ONLY trigger [MEMORY_ADD: ...] if the user shares a significant, long-term fact.
 - NEVER save greetings, status updates, temporary questions, or casual chat.
-- If you are unsure, DO NOT SAVE IT. Saving "junk" or "small talk" will result in system degradation.
 - PROHIBITED TAGS: "hello", "greeting", "chat", "initial", "session", "status", "ready", "search", "query".
-- Do NOT output phrases like "Memory learned" or "I will remember that" in your natural text. Act completely natural.
 
 ### 👤 USER IDENTITY
 - Current user: ${userName}
 - User Role: ${userRole}
-- Use memory facts below to personalize your response without being creepy.
 
 ### 📜 CONTEXT & INSTRUCTIONS
 ${profile?.custom_instructions ? `Custom Response Style: ${profile.custom_instructions}` : ''}
@@ -145,20 +139,6 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
         function: {
           name: 'search_web',
           description: 'Search the web for real-time information or news.',
-          parameters: {
-            type: 'object',
-            properties: {
-              query: { type: 'string' },
-            },
-            required: ['query'],
-          },
-        },
-      },
-      {
-        type: 'function',
-        function: {
-          name: 'search_images',
-          description: 'Search for high-quality, professional images or product photos using Pexels. ALWAYS use this instead of search_web whenever the user explicitly asks to see an image, picture, or photo.',
           parameters: {
             type: 'object',
             properties: {
@@ -211,9 +191,9 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
            }
            return NextResponse.json({ error: `Groq Error: ${finalError.slice(0, 150)}` }, { status: 500 })
         }
-        if (requestedStream) return handleStreaming(aiResponse)
+        if (requestedStream) return handleStreaming(aiResponse, detectedImages)
         const data = await aiResponse.json()
-        return NextResponse.json({ content: data.choices[0].message.content })
+        return NextResponse.json({ content: data.choices[0].message.content, images: detectedImages })
     }
 
     const data = await aiResponse.json()
@@ -245,21 +225,6 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
           } catch (e) {
             console.error('Tool execution failed:', e)
           }
-        } else if (toolCall.function.name === 'search_images') {
-          try {
-            const { query } = JSON.parse(toolCall.function.arguments)
-            const { searchImages } = await import('@/utils/search')
-            const searchResult = await searchImages(query)
-
-            apiMessages.push({
-              role: 'tool',
-              tool_call_id: toolCall.id,
-              name: 'search_images',
-              content: searchResult,
-            })
-          } catch (e) {
-            console.error('Image Tool execution failed:', e)
-          }
         }
       }
 
@@ -278,7 +243,7 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
       })
 
       if (!finalResponse.ok) throw new Error('Groq final stream failed')
-      return handleStreaming(finalResponse)
+      return handleStreaming(finalResponse, detectedImages)
     }
 
     // Step 2.5: Catch "hallucinated" text-based function calls (Multiple)
@@ -323,13 +288,13 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
               stream: true
             })
           })
-          return handleStreaming(finalResponse)
+          return handleStreaming(finalResponse, detectedImages)
        }
     }
 
     // Step 3: No tool used, just return content or stream
     if (!requestedStream) {
-      return NextResponse.json({ content: messageObj.content })
+      return NextResponse.json({ content: messageObj.content, images: detectedImages })
     }
 
     const encoder = new TextEncoder()
@@ -360,12 +325,21 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
 }
 
 // Helper to handle streaming logic
-async function handleStreaming(response: Response) {
+async function handleStreaming(response: Response, images?: any[]) {
   const encoder = new TextEncoder()
   const decoder = new TextDecoder()
 
   const stream = new ReadableStream({
     async start(controller) {
+      // PHASE 6: Inject structured image data at the start of the stream
+      if (images && images.length > 0) {
+        const imageResult = {
+          type: "image_result",
+          images: images
+        }
+        controller.enqueue(encoder.encode(`[METADATA]:${JSON.stringify(imageResult)}\n`))
+      }
+
       const reader = response.body?.getReader()
       if (!reader) {
         controller.close()

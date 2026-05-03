@@ -255,6 +255,7 @@ type Message = {
   role: 'user' | 'assistant'
   content: string
   created_at: string
+  images?: any[]
 }
 
 type Chat = {
@@ -788,6 +789,7 @@ export default function ChatPage() {
       chat_id: chatId!,
       role: 'assistant',
       content: '', 
+      images: [],
       created_at: new Date().toISOString()
     }
     setMessages(prev => [...prev, tempAssistantMsg])
@@ -820,13 +822,35 @@ export default function ChatPage() {
         const reader = res.body.getReader()
         const decoder = new TextDecoder()
         let accumulatedContent = ''
+        let detectedImages: any[] = []
 
         while (true) {
           const { done, value } = await reader.read()
           if (done) break
           const chunk = decoder.decode(value)
-          accumulatedContent += chunk
-          setMessages(prev => prev.map(m => m.id === assistantMsgId ? { ...m, content: accumulatedContent } : m))
+          
+          // PHASE 6: Parse structured metadata from the start of the stream
+          if (chunk.includes('[METADATA]:')) {
+            const lines = chunk.split('\n')
+            const metadataLine = lines.find(l => l.startsWith('[METADATA]:'))
+            if (metadataLine) {
+              try {
+                const metadata = JSON.parse(metadataLine.replace('[METADATA]:', ''))
+                if (metadata.type === 'image_result') {
+                  detectedImages = metadata.images
+                }
+              } catch (e) {
+                console.error('Metadata parsing failed:', e)
+              }
+            }
+            // Filter out the metadata line from the displayed content
+            const cleanChunk = lines.filter(l => !l.startsWith('[METADATA]:')).join('\n')
+            accumulatedContent += cleanChunk
+          } else {
+            accumulatedContent += chunk
+          }
+
+          setMessages(prev => prev.map(m => m.id === assistantMsgId ? { ...m, content: accumulatedContent, images: detectedImages } : m))
         }
         
         finalContent = accumulatedContent
@@ -1327,66 +1351,6 @@ export default function ChatPage() {
                                  ul: ({ children }) => <ul className="list-disc pl-5 space-y-2 mb-4 wrap-break-word">{children}</ul>,
                                  ol: ({ children }) => <ol className="list-decimal pl-5 space-y-2 mb-4 wrap-break-word">{children}</ol>,
                                  li: ({ children }) => <li className="leading-relaxed wrap-break-word">{children}</li>,
-                                 img: ({ src, alt, title }: any) => {
-                                   const [isLoaded, setIsLoaded] = useState(false);
-                                   const [hasError, setHasError] = useState(false);
-                                   
-                                   return (
-                                     <div className="my-8 rounded-3xl overflow-hidden border border-white/10 shadow-3xl bg-white/2 group/img w-full max-w-2xl mx-auto transition-all duration-500 hover:border-blue-500/40 hover:shadow-blue-500/10">
-                                       <div className="relative aspect-video bg-white/5 flex items-center justify-center overflow-hidden">
-                                         {/* Loading Skeleton */}
-                                         {!isLoaded && !hasError && (
-                                           <div className="absolute inset-0 flex items-center justify-center animate-pulse bg-white/5">
-                                             <div className="w-12 h-12 rounded-full border-2 border-blue-500/20 border-t-blue-500 animate-spin" />
-                                           </div>
-                                         )}
-                                         
-                                         {/* Error Fallback */}
-                                         {hasError ? (
-                                           <div className="flex flex-col items-center gap-3 opacity-40">
-                                              <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
-                                                <span className="text-2xl">🖼️</span>
-                                              </div>
-                                              <span className="text-[10px] font-black uppercase tracking-[0.3em]">Visual Preview Unavailable</span>
-                                           </div>
-                                         ) : (
-                                           <img 
-                                             src={`/api/proxy-image?url=${encodeURIComponent(src as string)}`} 
-                                             alt={alt || 'Visual content'} 
-                                             onLoad={() => setIsLoaded(true)}
-                                             onError={() => setHasError(true)}
-                                             className={`w-full h-full object-contain transition-all duration-1000 ${isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-110'} group-hover/img:scale-105`} 
-                                             loading="lazy"
-                                           />
-                                         )}
-                                         
-                                         {/* Top Fade overlay */}
-                                         <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/40 to-transparent pointer-events-none opacity-0 group-hover/img:opacity-100 transition-opacity" />
-                                       </div>
-                                       
-                                       {alt && (
-                                         <div className="px-8 py-5 bg-black/60 border-t border-white/5 backdrop-blur-xl flex justify-between items-center group/caption">
-                                           <div className="flex flex-col gap-1">
-                                             <p className="text-[11px] font-black uppercase tracking-[0.2em] text-blue-400 drop-shadow-sm line-clamp-1">{alt}</p>
-                                             {title && <p className="text-[8px] font-medium text-white/30 uppercase tracking-widest">{title}</p>}
-                                           </div>
-                                           <div className="flex items-center gap-4">
-                                              <a 
-                                                href={src as string} 
-                                                target="_blank" 
-                                                rel="noopener noreferrer"
-                                                className="text-[9px] font-black uppercase tracking-widest text-gray-500 hover:text-white transition-colors flex items-center gap-1.5"
-                                              >
-                                                <span>Source</span>
-                                                <ExternalLink className="w-2.5 h-2.5" />
-                                              </a>
-                                              <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                                           </div>
-                                         </div>
-                                       )}
-                                     </div>
-                                   );
-                                 },
                                  code: ({ node, className, children, ...props }: any) => {
                                    const match = /language-(\w+)/.exec(className || '');
                                   if (match?.[1] === 'mermaid') {
@@ -1433,6 +1397,45 @@ export default function ChatPage() {
                             >
                               {cleanDisplayContent(msg.content)}
                             </ReactMarkdown>
+                          )}
+
+                          {/* PHASE 7: Deterministic Visual Rendering */}
+                          {msg.role === 'assistant' && msg.images && msg.images.length > 0 && (
+                            <div className="mt-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+                               <div className="flex items-center gap-3 mb-2 px-1">
+                                  <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-400">Verified Visual Assets</span>
+                               </div>
+                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                  {msg.images.map((img: any, idx: number) => (
+                                    <div key={idx} className="group/img relative rounded-3xl overflow-hidden border border-white/10 bg-white/2 shadow-2xl transition-all duration-500 hover:border-blue-500/40 hover:shadow-blue-500/20">
+                                      <div className="relative aspect-video overflow-hidden bg-white/5">
+                                        <img 
+                                          src={`/api/proxy-image?url=${encodeURIComponent(img.url)}`}
+                                          alt={img.alt}
+                                          className="w-full h-full object-cover transition-all duration-700 group-hover/img:scale-110"
+                                          loading="lazy"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover/img:opacity-40 transition-opacity" />
+                                      </div>
+                                      <div className="absolute bottom-0 inset-x-0 p-5 backdrop-blur-md bg-black/40 border-t border-white/5 flex flex-col gap-1 translate-y-2 group-hover/img:translate-y-0 transition-transform">
+                                        <p className="text-[11px] font-black uppercase tracking-widest text-white drop-shadow-md truncate">{img.alt}</p>
+                                        <div className="flex items-center justify-between mt-1">
+                                           <span className="text-[9px] font-medium text-gray-400 uppercase tracking-widest">{img.attribution || 'Visual Resource'}</span>
+                                           <a 
+                                             href={img.source} 
+                                             target="_blank" 
+                                             rel="noopener noreferrer"
+                                             className="text-[9px] font-black text-blue-400 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-1"
+                                           >
+                                             Source <ExternalLink className="w-2.5 h-2.5" />
+                                           </a>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                               </div>
+                            </div>
                           )}
                         </div>
                       )}
