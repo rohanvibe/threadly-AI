@@ -1054,7 +1054,7 @@ export default function ChatPage() {
             animate={isMobile ? { x: 0 } : { width: 280, opacity: 1 }}
             exit={isMobile ? { x: -300 } : { width: 0, opacity: 0 }}
             transition={{ type: 'spring', damping: 32, stiffness: 180 }}
-            className={`${isMobile ? 'absolute inset-y-0 left-0 w-80 z-50' : 'w-72 relative'} border-r border-white/5 flex flex-col bg-[#09090b]/80 backdrop-blur-2xl h-full shadow-2xl overflow-hidden`}
+            className={`${isMobile ? 'absolute inset-y-0 left-0 w-80 z-50' : 'w-72 relative'} border-r border-(--border-color) flex flex-col bg-(--surface-secondary) glass h-full shadow-2xl overflow-hidden`}
           >
             <div className="p-8 flex items-center justify-between shrink-0">
               <h1 className="font-bold text-xl flex items-center gap-3 tracking-tight text-white">
@@ -1093,8 +1093,8 @@ export default function ChatPage() {
               {chats.length === 0 ? (
                 <div className="flex flex-col items-center justify-center text-center p-6 space-y-4 opacity-50 mt-10">
                   <MessageSquare className="w-8 h-8 text-gray-500" />
-                  <p className="text-xs font-bold text-gray-400">Empty workspace.</p>
-                  <p className="text-[10px] text-gray-500">Kick off a new intelligent session.</p>
+                  <p className="text-xs font-bold text-(--apple-gray)">Empty workspace.</p>
+                  <p className="text-[10px] text-(--apple-gray) opacity-60">Kick off a new intelligent session.</p>
                 </div>
               ) : (
                 chats.filter(c => chatSearch.trim() === '' || c.title.toLowerCase().includes(chatSearch.toLowerCase())).map(chat => (
@@ -1533,7 +1533,7 @@ export default function ChatPage() {
             animate={isMobile ? { x: 0 } : { width: 320, opacity: 1 }}
             exit={isMobile ? { x: '100%' } : { width: 0, opacity: 0 }}
             transition={{ type: 'spring', damping: 32, stiffness: 180 }}
-            className={`${isMobile ? 'absolute inset-y-0 right-0 w-[85%] z-50' : 'w-80 relative'} border-l border-white/5 flex flex-col bg-[#09090b]/60 backdrop-blur-3xl h-full shadow-2xl sidebar-tint`}
+            className={`${isMobile ? 'absolute inset-y-0 right-0 w-[85%] z-50' : 'w-80 relative'} border-l border-(--border-color) flex flex-col bg-(--surface-secondary) glass h-full shadow-2xl`}
           >
             <div className="flex flex-col h-full">
               {/* Guest Banner */}
@@ -1563,7 +1563,7 @@ export default function ChatPage() {
               )}
 
               {/* Identity & Memory Card */}
-              <div id="tutorial-memory" className="p-6 border-b border-white/5 bg-white/2">
+              <div id="tutorial-memory" className="p-6 border-b border-(--border-color) bg-(--surface-tertiary)">
                 <div className="flex items-center justify-between mb-6">
                    <div className="flex items-center gap-4">
                       <div className="w-12 h-12 squircle bg-(--apple-blue) flex items-center justify-center font-bold text-white shadow-xl uppercase overflow-hidden">
@@ -1574,7 +1574,7 @@ export default function ChatPage() {
                          )}
                       </div>
                       <div className="flex flex-col">
-                         <span className="text-[14px] font-bold tracking-tight text-white truncate max-w-[140px]">
+                         <span className="text-[14px] font-bold tracking-tight text-(--foreground) truncate max-w-[140px]">
                             {user?.user_metadata?.full_name || user?.email?.split('@')[0]}
                          </span>
                          <span className="text-[11px] font-medium tracking-tight text-(--apple-gray)">System Operator</span>
