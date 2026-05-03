@@ -53,7 +53,9 @@ import {
   Star,
   Map,
   List,
-  Sparkles
+  Sparkles,
+  Sun,
+  Moon
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import ReactMarkdown from 'react-markdown'
@@ -304,6 +306,7 @@ export default function ChatPage() {
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
   const [editValue, setEditValue] = useState('')
   const [highlightedAnchor, setHighlightedAnchor] = useState<string | null>(null)
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark')
   
   const [profileMemories, setProfileMemories] = useState<string[]>([])
   const [attachedFile, setAttachedFile] = useState<{ name: string, content: string } | null>(null)
@@ -329,6 +332,26 @@ export default function ChatPage() {
   useEffect(() => {
     if (user || chats.length > 0) setShowLanding(false)
   }, [user, chats])
+
+  // Theme Initialization
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('threadly-theme') as 'light' | 'dark' | null
+    if (savedTheme) {
+      setTheme(savedTheme)
+      document.documentElement.setAttribute('data-theme', savedTheme)
+    } else {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+      setTheme(systemTheme)
+      document.documentElement.setAttribute('data-theme', systemTheme)
+    }
+  }, [])
+
+  const toggleTheme = () => {
+    const newTheme = theme === 'dark' ? 'light' : 'dark'
+    setTheme(newTheme)
+    document.documentElement.setAttribute('data-theme', newTheme)
+    localStorage.setItem('threadly-theme', newTheme)
+  }
   const abortControllerRef = useRef<AbortController | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const skipFetchRef = useRef(false)
@@ -1557,7 +1580,12 @@ export default function ChatPage() {
                          <span className="text-[11px] font-medium tracking-tight text-(--apple-gray)">System Operator</span>
                       </div>
                    </div>
-                   <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(false)} className="rounded-xl"><X className="w-4 h-4" /></Button>
+                    <div className="flex items-center gap-1">
+                       <Button variant="ghost" size="icon" onClick={toggleTheme} title={theme === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode"} className="rounded-xl text-(--apple-gray) hover:text-(--foreground)">
+                          {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                       </Button>
+                       <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(false)} className="rounded-xl"><X className="w-4 h-4" /></Button>
+                    </div>
                 </div>
 
                 {profileMemories.length > 0 && (
