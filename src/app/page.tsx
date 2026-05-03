@@ -104,7 +104,7 @@ function PythonSandbox({ code }: { code: string }) {
           size="sm" 
           onClick={runCode} 
           disabled={isRunning}
-          className="h-8 rounded-full bg-white text-black hover:bg-gray-200 text-[10px] font-black uppercase px-4"
+          className="h-8 rounded-(--radius-pill) bg-(--apple-blue) text-white hover:bg-(--apple-blue-dark) text-[11px] font-semibold uppercase px-4 border-none shadow-none"
         >
           {isRunning ? 'Running...' : 'Execute Code'}
         </Button>
@@ -210,17 +210,17 @@ function LandingPage({ onEnter }: { onEnter: () => void }) {
              <Sparkles className="w-8 h-8 text-white" />
           </div>
         </div>
-        <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-tight text-white">
+        <h1 className="text-5xl md:text-7xl font-semibold tracking-tight leading-tight text-(--foreground)">
           Your Thoughts, <br/> <span className="text-(--apple-gray)">Refined.</span>
         </h1>
-        <p className="text-lg text-(--apple-gray) font-medium max-w-xl mx-auto leading-relaxed">
+        <p className="text-[19px] text-(--apple-gray) font-normal max-w-xl mx-auto leading-relaxed">
           The next evolution of thought infrastructure. <br/>
           Built for clarity, designed for precision.
         </p>
         <div className="pt-8">
           <Button 
             onClick={() => { onEnter(); }} 
-            className="px-12 py-8 rounded-(--radius-pill) bg-white text-black font-semibold tracking-tight text-[17px] hover:bg-gray-100 transition-all active:scale-[0.98] shadow-xl"
+            className="px-12 py-8 rounded-(--radius-pill) bg-(--apple-blue) text-white font-semibold tracking-tight text-[17px] hover:bg-(--apple-blue-dark) transition-all active:scale-[0.98] shadow-none border-none"
           >
             Enter Workspace
           </Button>
@@ -238,11 +238,11 @@ function LandingPage({ onEnter }: { onEnter: () => void }) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 + i * 0.1 }}
-            className="p-8 rounded-(--radius-lg) bg-(--surface) text-left space-y-4 border border-white/5"
+            className="p-8 rounded-(--radius-lg) bg-(--surface) text-left space-y-4 border border-(--border-color)"
           >
             <f.icon className="w-5 h-5 text-(--apple-blue)" />
-            <h3 className="text-[13px] font-semibold uppercase tracking-widest text-white">{f.title}</h3>
-            <p className="text-[15px] text-gray-500 font-medium leading-relaxed">{f.desc}</p>
+            <h3 className="text-[13px] font-semibold uppercase tracking-widest text-(--foreground)">{f.title}</h3>
+            <p className="text-[17px] text-(--apple-gray) font-normal leading-relaxed">{f.desc}</p>
           </motion.div>
         ))}
       </div>
@@ -1072,7 +1072,7 @@ export default function ChatPage() {
 
             <div className="px-8 mb-8 space-y-4">
               <motion.div whileTap={{ scale: 0.98 }}>
-                <Button onClick={() => { createNewChat(); }} className="w-full py-7 rounded-2xl flex items-center gap-2 group shadow-2xl bg-white text-black hover:bg-gray-100 no-border font-bold text-[13px] tracking-tight">
+                <Button onClick={() => { createNewChat(); }} className="w-full py-7 rounded-(--radius-lg) flex items-center gap-2 group shadow-none bg-(--foreground) text-(--background) hover:opacity-90 no-border font-semibold text-[13px] tracking-tight">
                   <Plus className="w-4 h-4 transition-transform group-hover:rotate-90" />
                   New Session
                 </Button>
@@ -1084,7 +1084,7 @@ export default function ChatPage() {
                   placeholder="Search thoughts..."
                   value={chatSearch}
                   onChange={(e) => setChatSearch(e.target.value)}
-                  className="w-full bg-(--surface) border-none rounded-2xl py-3.5 pl-11 pr-4 text-[13px] font-medium text-white placeholder-(--apple-gray) focus:ring-1 focus:ring-blue-500/30 outline-none transition-all"
+                  className="w-full bg-(--surface) border-none rounded-(--radius-lg) py-3.5 pl-11 pr-4 text-[13px] font-normal text-(--foreground) placeholder-(--apple-gray) focus:ring-1 focus:ring-blue-500/30 outline-none transition-all"
                 />
               </div>
             </div>
@@ -1118,8 +1118,8 @@ export default function ChatPage() {
                           if (isMobile) setIsNavOpen(false); 
                           trackEvent('sidebar_click', { action: 'select_chat', chat_id: chat.id });
                         }}
-                        className={`w-full text-left p-4 rounded-2xl text-[13px] font-bold tracking-tight transition-all flex items-center gap-3 group relative overflow-hidden ${
-                          currentChatId === chat.id ? 'bg-(--apple-blue)/10 text-(--apple-blue)' : 'text-(--apple-gray) hover:bg-white/5 hover:text-white'
+                        className={`w-full text-left p-4 rounded-(--radius-lg) text-[13px] font-semibold tracking-tight transition-all flex items-center gap-3 group relative overflow-hidden ${
+                          currentChatId === chat.id ? 'bg-(--apple-blue)/10 text-(--apple-blue)' : 'text-(--apple-gray) hover:bg-white/5 hover:text-(--foreground)'
                         }`}
                       >
                         <MessageSquare className={`w-4 h-4 shrink-0 transition-all ${currentChatId === chat.id ? 'text-(--apple-blue) scale-110' : 'text-(--apple-gray) group-hover:text-gray-300'}`} />
@@ -1257,7 +1257,7 @@ export default function ChatPage() {
                    size="sm" 
                    onClick={() => { shareChat(); }}
                    onContextMenu={e => openContextMenu(e, 'shareChat')}
-                   className="rounded-(--radius-pill) px-5 py-5 flex items-center gap-2 border-none bg-white text-black hover:bg-gray-100 shadow-xl font-semibold text-[13px]"
+                   className="rounded-(--radius-pill) px-5 py-5 flex items-center gap-2 border-none bg-(--foreground) text-(--background) hover:opacity-90 shadow-none font-semibold text-[13px]"
                  >
                    <Share2 className="w-3.5 h-3.5" />
                    <span>Share Chat</span>
@@ -1303,7 +1303,7 @@ export default function ChatPage() {
                     {msg.role === 'assistant' ? <Zap className="w-5 h-5" /> : <Plus className="w-5 h-5 rotate-45" />}
                   </div>
                   <div className="flex-1 space-y-4 min-w-0 overflow-hidden">
-                    <div className={`p-6 md:p-8 rounded-(--radius-lg) bg-(--surface) shadow-xl relative overflow-hidden border border-white/5 ${
+                    <div className={`p-6 md:p-8 rounded-(--radius-lg) bg-(--surface) shadow-none relative overflow-hidden border border-(--border-color) ${
                       msg.role === 'assistant' ? 'ring-1 ring-blue-500/10' : ''
                     }`}>
                       <div className="flex items-center justify-between mb-6">
@@ -1439,7 +1439,7 @@ export default function ChatPage() {
                                           className="w-full h-full object-cover transition-all duration-700 group-hover/img:scale-110"
                                           loading="lazy"
                                         />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60 group-hover/img:opacity-40 transition-opacity" />
+                                        <div className="absolute inset-0 bg-black/20 transition-opacity" />
                                       </div>
                                       <div className="absolute bottom-0 inset-x-0 p-5 backdrop-blur-md bg-black/40 border-t border-white/5 flex flex-col gap-1 translate-y-2 group-hover/img:translate-y-0 transition-transform">
                                         <p className="text-[11px] font-black uppercase tracking-widest text-white drop-shadow-md truncate">{img.alt}</p>
@@ -1476,7 +1476,7 @@ export default function ChatPage() {
         <div className="p-4 md:p-12 relative z-20">
            <div id="tutorial-input" className="w-full max-w-4xl mx-auto relative group">
               <form onSubmit={sendMessage}>
-                <div className="relative bg-(--surface) rounded-(--radius-lg) p-2 shadow-xl group-focus-within:ring-1 ring-blue-500/20 transition-all border border-white/5">
+                <div className="relative bg-(--surface) rounded-(--radius-lg) p-2 shadow-none group-focus-within:ring-1 ring-blue-500/20 transition-all border border-(--border-color)">
                   <textarea 
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
@@ -1490,7 +1490,7 @@ export default function ChatPage() {
                     }}
                     rows={1}
                     placeholder={loading ? "Generating response..." : "What's on your mind?"}
-                    className="w-full pr-24 md:pr-32 py-4 md:py-5 pl-6 md:pl-8 bg-transparent text-base md:text-[17px] outline-none resize-none custom-scrollbar placeholder:text-gray-600 font-medium tracking-tight"
+                    className="w-full pr-24 md:pr-32 py-4 md:py-5 pl-6 md:pl-8 bg-transparent text-base md:text-[17px] outline-none resize-none custom-scrollbar placeholder-(--apple-gray) font-normal tracking-tight"
                   />
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-3">
                     {loading ? (
@@ -1538,7 +1538,7 @@ export default function ChatPage() {
             <div className="flex flex-col h-full">
               {/* Guest Banner */}
               {isGuest && (
-                <div className="m-4 p-4 rounded-2xl bg-linear-to-br from-blue-600/20 to-indigo-600/20 border border-blue-500/30 shadow-lg shadow-blue-500/10">
+                <div className="m-4 p-4 rounded-(--radius-lg) bg-(--apple-blue)/10 border border-(--apple-blue)/20 shadow-none">
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center shrink-0 shadow-xl">
                       <Sparkles className="w-5 h-5 text-black" />
@@ -1553,7 +1553,7 @@ export default function ChatPage() {
                           trackEvent('signup_started', { location: 'guest_banner' });
                           router.push('/auth'); 
                         }}
-                        className="mt-4 w-full py-2.5 bg-(--apple-blue) hover:bg-blue-600 text-white text-[11px] font-bold tracking-tight rounded-xl transition-all active:scale-95 shadow-lg"
+                        className="mt-4 w-full py-2.5 bg-(--apple-blue) hover:bg-blue-600 text-white text-[11px] font-semibold tracking-tight rounded-(--radius-pill) transition-all active:scale-95 shadow-none"
                       >
                         Claim My Workspace
                       </button>
