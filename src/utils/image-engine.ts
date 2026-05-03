@@ -28,7 +28,7 @@ export function detectImageIntent(message: string): string | null {
   const msg = message.toLowerCase();
   
   const patterns = [
-    /show me (?:a |an |the )?(?:picture|image|photo) of (.+)/i,
+    /show me (?:a |an |the )?(?:picture|image|photo|visual) of (.+)/i,
     /what does (.+) look like/i,
     /find (?:a |an |the )?(?:picture|image|photo) of (.+)/i,
     /search (?:for )?(?:a |an |the )?(?:picture|image|photo) of (.+)/i,
@@ -36,7 +36,10 @@ export function detectImageIntent(message: string): string | null {
     /images? of (.+)/i,
     /photos? of (.+)/i,
     /pictures? of (.+)/i,
-    /^show (.+)$/i, // "show bugatti"
+    /gallery of (.+)/i,
+    /visuals? for (.+)/i,
+    /^show (.+)$/i,
+    /^see (.+)$/i,
   ];
 
   for (const pattern of patterns) {
@@ -47,11 +50,11 @@ export function detectImageIntent(message: string): string | null {
   }
 
   // Fallback for simple "bugatti image" or "bugatti photo"
-  const keywords = ['image', 'photo', 'picture', 'show'];
+  const keywords = ['image', 'photo', 'picture', 'show', 'gallery', 'visual'];
   if (keywords.some(k => msg.includes(k))) {
      // Clean up common noise
      const query = msg
-       .replace(/\b(?:image|photo|picture|show|me|of|a|an|the|find|search|get)\b/gi, '')
+       .replace(/\b(?:image|photo|picture|show|me|of|a|an|the|find|search|get|gallery|visual|visuals)\b/gi, '')
        .trim();
      if (query.length > 2) return query;
   }

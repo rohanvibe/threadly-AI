@@ -302,6 +302,15 @@ Use these tags on a single line at the VERY END of your response ONLY when neces
     
     const manualStream = new ReadableStream({
       async start(controller) {
+        // PHASE 6: Inject structured image data at the start of the stream
+        if (detectedImages && detectedImages.length > 0) {
+          const imageResult = {
+            type: "image_result",
+            images: detectedImages
+          }
+          controller.enqueue(encoder.encode(`[METADATA]:${JSON.stringify(imageResult)}\n`))
+        }
+
         // Stream character by character or word by word for better effect
         const words = content.split(' ')
         for (let i = 0; i < words.length; i++) {
