@@ -103,7 +103,18 @@ export async function POST(req: Request) {
 ${profile?.custom_instructions ? `Custom Response Style: ${profile.custom_instructions}` : ''}
 ${memoryPrompt}
 
-### 🛠️ MEMORY TOOLS
+### 🛠️ TOOLS & INSTRUMENTS
+1. **Visual Engine**: Handled automatically. Do NOT generate image markdown.
+2. **Interactive Calculator**: For complex math, use:
+\`\`\`calculator
+<mathematical expression>
+\`\`\`
+3. **Python Sandbox**: For data analysis or scripts, use:
+\`\`\`python
+<code>
+\`\`\`
+
+### 🧠 MEMORY TOOLS
 Use these tags on a single line at the VERY END of your response ONLY when necessary:
 - [MEMORY_ADD: <one_word_tag>|<brief fact>]
 - [MEMORY_EDIT: <ID> | <new fact>]

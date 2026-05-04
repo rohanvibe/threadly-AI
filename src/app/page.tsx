@@ -68,77 +68,71 @@ import { toPng } from 'html-to-image'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import { trackEvent } from '@/utils/analytics'
+// Feature test
 import { FeedbackWidget } from '@/components/FeedbackWidget'
 
 
 
 // --- Premium Components ---
 
-// Global Pyodide instance to prevent multiple heavy WASM initializations
-let globalPyodide: any = null;
-
 function PythonSandbox({ code }: { code: string }) {
   const [output, setOutput] = useState<string>('')
   const [isRunning, setIsRunning] = useState(false)
-  const [isInitializing, setIsInitializing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const workerRef = useRef<Worker | null>(null)
 
-  const runCode = async () => {
+  const runCode = () => {
     setIsRunning(true)
     setError(null)
-    try {
-      if (!globalPyodide) {
-        setIsInitializing(true)
-        // @ts-ignore
-        if (typeof window.loadPyodide === 'undefined') {
-          throw new Error('Python engine (Pyodide) not loaded yet. Please wait a moment and try again.')
-        }
-        // @ts-ignore
-        globalPyodide = await window.loadPyodide({
-          indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/"
-        })
-        setIsInitializing(false)
-      }
+    setOutput('')
 
-      // Capture stdout
-      let logs = ''
-      globalPyodide.setStdout({
-        batched: (str: string) => { logs += str + '\n' }
-      })
-
-      const result = await globalPyodide.runPythonAsync(code)
-      
-      // If result is not undefined, show it, otherwise show captured logs
-      if (result !== undefined) {
-        setOutput(logs + String(result))
-      } else {
-        setOutput(logs || 'Execution complete (no output).')
-      }
-    } catch (err: any) {
-      console.error('Python execution error:', err)
-      setError(err.message)
-    } finally {
-      setIsRunning(false)
-      setIsInitializing(false)
+    if (!workerRef.current) {
+      workerRef.current = new Worker('/python-worker.js')
     }
+
+    workerRef.current.onmessage = (e) => {
+      const { type, output, error } = e.data
+      if (type === 'success') {
+        setOutput(output)
+      } else {
+        setError(error)
+      }
+      setIsRunning(false)
+    }
+
+    workerRef.current.onerror = (err) => {
+      setError('Worker Error: ' + err.message)
+      setIsRunning(false)
+    }
+
+    workerRef.current.postMessage({ code })
   }
+
+  // Cleanup worker on unmount
+  useEffect(() => {
+    return () => {
+      if (workerRef.current) {
+        workerRef.current.terminate()
+      }
+    }
+  }, [])
 
   return (
     <div className="my-6 rounded-(--radius-lg) bg-(--surface) border border-(--border-color) overflow-hidden shadow-2xl">
       <div className="px-4 py-3 bg-(--surface-secondary) border-b border-(--border-color) flex items-center justify-between">
         <div className="flex items-center gap-2">
-           <div className={`w-2 h-2 rounded-full ${isInitializing ? 'bg-blue-500 animate-pulse' : isRunning ? 'bg-yellow-500 animate-pulse' : 'bg-green-500'}`} />
+           <div className={`w-2 h-2 rounded-full ${isRunning ? 'bg-yellow-500 animate-pulse' : 'bg-green-500'}`} />
            <span className="text-[10px] font-black uppercase tracking-widest text-(--apple-gray)">
-             {isInitializing ? 'Initializing Python...' : isRunning ? 'Python Executing...' : 'Python 3.11 Sandbox'}
+             {isRunning ? 'Python Executing (Background)...' : 'Python 3.11 Sandbox'}
            </span>
         </div>
         <Button 
           size="sm" 
           onClick={runCode} 
-          disabled={isRunning || isInitializing}
+          disabled={isRunning}
           className="h-8 rounded-full bg-(--foreground) text-(--background) hover:opacity-90 text-[10px] font-black uppercase px-4 transition-all shadow-sm active:scale-95"
         >
-          {isInitializing ? 'Loading...' : isRunning ? 'Running...' : 'Execute Code'}
+          {isRunning ? 'Running...' : 'Execute Code'}
         </Button>
       </div>
       <div className="p-5 text-[13px] font-mono text-(--foreground) bg-(--background)/40 max-h-[400px] overflow-y-auto custom-scrollbar">
@@ -149,10 +143,89 @@ function PythonSandbox({ code }: { code: string }) {
         {!output && !error && (
           <div className="flex flex-col items-center justify-center py-8 opacity-30">
             <Zap className="w-8 h-8 mb-2" />
-            <span className="text-[11px] font-bold uppercase tracking-widest">Isolated Environment Ready</span>
+            <span className="text-[11px] font-bold uppercase tracking-widest">Background Worker Ready</span>
           </div>
         )}
       </div>
+    </div>
+  )
+}
+
+function Calculator({ initialExpression = '' }: { initialExpression?: string }) {
+  const [expression, setExpression] = useState(initialExpression)
+  const [result, setResult] = useState<string | null>(null)
+
+  const buttons = [
+    ['f', '(', ')', 'C'],
+    ['7', '8', '9', '÷'],
+    ['4', '5', '6', '×'],
+    ['1', '2', '3', '-'],
+    ['0', '.', '=', '+']
+  ]
+
+  const handleAction = (val: string) => {
+    if (val === 'C') {
+      setExpression('')
+      setResult(null)
+    } else if (val === '=') {
+      try {
+        // Clean and compute
+        const clean = expression.replace(/×/g, '*').replace(/÷/g, '/')
+        // eslint-disable-next-line no-eval
+        const res = eval(clean)
+        setResult(String(res))
+      } catch (e) {
+        setResult('Error')
+      }
+    } else {
+      setExpression(prev => prev + val)
+    }
+  }
+
+  return (
+    <div className="my-8 max-w-sm mx-auto rounded-[32px] bg-[#1c1c1e] border border-white/5 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] overflow-hidden">
+      <div className="p-6 pb-2">
+        <div className="flex items-center gap-2 mb-6 opacity-40">
+           <div className="p-1 rounded-md bg-white/10">
+              <Activity className="w-3 h-3 text-white" />
+           </div>
+           <span className="text-[10px] font-bold uppercase tracking-widest text-white">Threadly Instruments</span>
+        </div>
+        
+        <div className="flex flex-col items-end min-h-[100px] justify-center px-2">
+           <div className="text-[14px] text-white/40 font-medium mb-1 tracking-tight">{expression || '0'}</div>
+           <div className={`text-4xl font-semibold tracking-tighter ${result === 'Error' ? 'text-red-500' : 'text-[#34c759]'} transition-all`}>
+              {result !== null ? result : (expression ? '' : '0')}
+           </div>
+        </div>
+      </div>
+
+      <div className="p-4 grid grid-cols-4 gap-2 bg-black/20">
+         {buttons.flat().map((btn) => (
+           <button
+             key={btn}
+             onClick={() => handleAction(btn)}
+             className={`h-14 rounded-2xl flex items-center justify-center text-lg font-medium transition-all active:scale-90 ${
+               btn === '=' ? 'bg-[#34c759] text-white shadow-[0_8px_16px_rgba(52,199,89,0.3)]' :
+               ['÷', '×', '-', '+'].includes(btn) ? 'bg-white/10 text-[#34c759] hover:bg-white/20' :
+               ['f', '(', ')', 'C'].includes(btn) ? 'bg-white/5 text-white/60 hover:bg-white/10' :
+               'bg-white/5 text-white hover:bg-white/10'
+             }`}
+           >
+             {btn}
+           </button>
+         ))}
+      </div>
+      
+      {result && result !== 'Error' && (
+        <div className="p-4 bg-black/40 flex items-center justify-center gap-2 border-t border-white/5">
+           <span className="text-[12px] font-bold text-white/60">Result:</span>
+           <span className="text-[12px] font-black text-white">{result}</span>
+           <div className="w-4 h-4 rounded-full bg-[#34c759] flex items-center justify-center">
+              <Check className="w-2.5 h-2.5 text-white" />
+           </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -1451,6 +1524,9 @@ export default function ChatPage() {
                                  li: ({ children }) => <li className="leading-relaxed wrap-break-word">{children}</li>,
                                  code: ({ node, className, children, ...props }: any) => {
                                    const match = /language-(\w+)/.exec(className || '');
+                                  if (match?.[1] === 'calculator') {
+                                    return <Calculator initialExpression={String(children).replace(/\n$/, '')} />
+                                  }
                                   if (match?.[1] === 'mermaid') {
                                     return <Mermaid chart={String(children).replace(/\n$/, '')} />
                                   }
