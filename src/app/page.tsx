@@ -155,6 +155,20 @@ function Calculator({ initialExpression = '' }: { initialExpression?: string }) 
   const [expression, setExpression] = useState(initialExpression)
   const [result, setResult] = useState<string | null>(null)
 
+  // Auto-calculate on mount or expression change
+  useEffect(() => {
+    if (expression) {
+      try {
+        const clean = expression.replace(/×/g, '*').replace(/÷/g, '/')
+        // eslint-disable-next-line no-eval
+        const res = eval(clean)
+        setResult(String(res))
+      } catch (e) {
+        setResult(null)
+      }
+    }
+  }, [expression])
+
   const buttons = [
     ['f', '(', ')', 'C'],
     ['7', '8', '9', '÷'],
@@ -217,15 +231,25 @@ function Calculator({ initialExpression = '' }: { initialExpression?: string }) 
          ))}
       </div>
       
-      {result && result !== 'Error' && (
-        <div className="p-4 bg-black/40 flex items-center justify-center gap-2 border-t border-white/5">
-           <span className="text-[12px] font-bold text-white/60">Result:</span>
-           <span className="text-[12px] font-black text-white">{result}</span>
-           <div className="w-4 h-4 rounded-full bg-[#34c759] flex items-center justify-center">
-              <Check className="w-2.5 h-2.5 text-white" />
-           </div>
-        </div>
-      )}
+      <div className="p-4 bg-black/40 flex items-center justify-center gap-2 border-t border-white/5 min-h-[60px]">
+        {result && result !== 'Error' ? (
+          <motion.div 
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-2"
+          >
+             <span className="text-[12px] font-bold text-white/60">Final Result:</span>
+             <span className="text-[14px] font-black text-white">{result}</span>
+             <div className="w-5 h-5 rounded-full bg-[#34c759] flex items-center justify-center shadow-[0_0_12px_rgba(52,199,89,0.4)]">
+                <Check className="w-3 h-3 text-white" />
+             </div>
+          </motion.div>
+        ) : result === 'Error' ? (
+          <span className="text-[12px] font-bold text-red-500 uppercase tracking-widest">Invalid Expression</span>
+        ) : (
+          <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">Awaiting Input...</span>
+        )}
+      </div>
     </div>
   )
 }

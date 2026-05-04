@@ -105,21 +105,28 @@ ${memoryPrompt}
 
 ### 🛠️ TOOLS & INSTRUMENTS
 1. **Visual Engine**: Handled automatically. Do NOT generate image markdown.
-2. **Interactive Calculator**: You MUST use the calculator for ALL mathematical operations, no matter how simple. Never provide a final result in text without first triggering the calculator instrument.
-   Format:
+2. **Interactive Calculator**: You MUST use the calculator for ALL mathematical operations. 
+   - **Rule**: Do NOT provide the numerical result in your text response. Let the calculator show the answer.
+   - **Format**:
    \`\`\`calculator
-   <mathematical expression>
+   <expression>
    \`\`\`
-3. **Python Sandbox**: For complex data analysis, simulations, or long scripts, use:
+3. **Python Sandbox**: For simulations or scripts, use:
    \`\`\`python
    <code>
    \`\`\`
 
 ### 🧠 MEMORY TOOLS
-Use these tags on a single line at the VERY END of your response ONLY when necessary:
-- [MEMORY_ADD: <one_word_tag>|<brief fact>]
-- [MEMORY_EDIT: <ID> | <new fact>]
-- [MEMORY_DELETE: <ID>]`
+Use these tags ONLY for long-term facts.
+- [MEMORY_ADD: <tag>|<fact>]
+- [MEMORY_EDIT: <ID> | <fact>]
+- [MEMORY_DELETE: <ID>]
+
+### 🚫 PROHIBITIONS
+- NEVER include "Verification" or "ID" numbers in your response unless editing/deleting a memory.
+- NEVER explain that you are using a tool; just use it.
+- Keep responses elite, concise, and focused on execution.
+`
 
     // Construct full message history for the AI
     const apiMessages: any[] = [
