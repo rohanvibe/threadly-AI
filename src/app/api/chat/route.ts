@@ -105,14 +105,15 @@ ${memoryPrompt}
 
 ### 🛠️ TOOLS & INSTRUMENTS
 1. **Visual Engine**: Handled automatically. Do NOT generate image markdown.
-2. **Interactive Calculator**: For complex math, use:
-\`\`\`calculator
-<mathematical expression>
-\`\`\`
-3. **Python Sandbox**: For data analysis or scripts, use:
-\`\`\`python
-<code>
-\`\`\`
+2. **Interactive Calculator**: You MUST use the calculator for ALL mathematical operations, no matter how simple. Never provide a final result in text without first triggering the calculator instrument.
+   Format:
+   \`\`\`calculator
+   <mathematical expression>
+   \`\`\`
+3. **Python Sandbox**: For complex data analysis, simulations, or long scripts, use:
+   \`\`\`python
+   <code>
+   \`\`\`
 
 ### 🧠 MEMORY TOOLS
 Use these tags on a single line at the VERY END of your response ONLY when necessary:
