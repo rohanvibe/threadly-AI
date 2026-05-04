@@ -809,7 +809,7 @@ export default function ChatPage() {
   }
 
   const exportAsImage = async (messageId?: string) => {
-    const elementId = messageId ? `message-${messageId}` : 'chat-messages-container'
+    const elementId = messageId ? `msg-${messageId}` : 'chat-messages-container'
     const element = document.getElementById(elementId)
     if (!element) return
 
@@ -818,13 +818,15 @@ export default function ChatPage() {
       // Use a slightly more robust sequence for mobile Browsers
       const dataUrl = await toPng(element, {
         cacheBust: true,
-        backgroundColor: '#09090b',
-        pixelRatio: 2, // High definition
-        fontEmbedCSS: '', // Skip heavy font embedding to prevent timeout/CORS errors
+        backgroundColor: '#000000', // Match pure black dark mode
+        pixelRatio: 2, 
+        skipAutoScale: true,
+        fontEmbedCSS: '', 
         style: {
           padding: '40px',
-          borderRadius: '16px',
-          margin: '0'
+          borderRadius: '32px',
+          margin: '0',
+          background: '#000000'
         }
       })
       
