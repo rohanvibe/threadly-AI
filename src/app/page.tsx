@@ -557,6 +557,7 @@ export default function ChatPage() {
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [showLanding, setShowLanding] = useState(true)
+  const [hasInteracted, setHasInteracted] = useState(false)
 
   useEffect(() => {
     if (user || chats.length > 0) setShowLanding(false)
@@ -1254,7 +1255,12 @@ export default function ChatPage() {
         
         // Auto-advance tutorial if they click during the navigation step
         if (onboardingStep === 1) {
-           setOnboardingStep(2)
+           setHasInteracted(true)
+           // Stay on this step for 2 seconds so they see the result
+           setTimeout(() => {
+              setHasInteracted(false)
+              setOnboardingStep(2)
+           }, 2000)
         }
 
         // Show conversion modal after 3 interactions
@@ -1468,6 +1474,7 @@ export default function ChatPage() {
       <OnboardingTutorial 
         step={onboardingStep} 
         isDemo={isDemo}
+        hasInteracted={hasInteracted}
         onNext={() => {
           trackEvent('sidebar_jump', { step: onboardingStep })
           setOnboardingStep(s => s + 1)
@@ -2386,7 +2393,7 @@ function ShortcutsTab({
 // ─────────────────────────────────────────────────────────────────────────────
 // Onboarding Tutorial Components
 // ─────────────────────────────────────────────────────────────────────────────
-function OnboardingTutorial({ step, onNext, onComplete, isDemo }: { step: number, onNext: () => void, onComplete: () => void, isDemo?: boolean }) {
+function OnboardingTutorial({ step, onNext, onComplete, isDemo, hasInteracted }: { step: number, onNext: () => void, onComplete: () => void, isDemo?: boolean, hasInteracted?: boolean }) {
   const steps = [
     { 
       targetId: 'tutorial-input', 
@@ -2399,6 +2406,7 @@ function OnboardingTutorial({ step, onNext, onComplete, isDemo }: { step: number
       targetId: 'tutorial-history', 
       title: 'Navigation Magic', 
       text: 'Stop scrolling. Click any item in the sidebar to jump instantly to that part of the thread.',
+      successText: 'Did you see that? You just jumped through time.',
       actionHint: 'Waiting for interaction...',
       requireAction: true
     },
@@ -2438,7 +2446,7 @@ function OnboardingTutorial({ step, onNext, onComplete, isDemo }: { step: number
     <div className={`fixed inset-0 z-100 ${isActionStep ? 'pointer-events-none' : 'pointer-events-auto'} overflow-hidden`}>
       <motion.div 
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} 
-        className={`absolute inset-0 bg-black/60 ${isActionStep ? 'opacity-20' : 'backdrop-blur-[4px]'} transition-all duration-700`} 
+        className={`absolute inset-0 bg-black/40 ${isActionStep ? 'backdrop-blur-0' : 'backdrop-blur-[4px]'} transition-all duration-700`} 
         onClick={(e) => !isActionStep && e.stopPropagation()}
       />
       
@@ -2474,7 +2482,9 @@ function OnboardingTutorial({ step, onNext, onComplete, isDemo }: { step: number
             <h4 className="text-[13px] font-black uppercase tracking-widest text-white">{current.title}</h4>
         </div>
         
-        <p className="text-[14px] text-gray-300 leading-relaxed font-medium mb-6">{current.text}</p>
+        <p className="text-[14px] text-gray-300 leading-relaxed font-medium mb-6">
+          {hasInteracted && current.successText ? current.successText : current.text}
+        </p>
         
         <div className="flex flex-col gap-3">
             {!isActionStep ? (
@@ -2486,9 +2496,18 @@ function OnboardingTutorial({ step, onNext, onComplete, isDemo }: { step: number
                   <ArrowRight className="w-4 h-4" />
               </button>
             ) : (
-              <div className="w-full py-4 bg-white/5 border border-white/10 text-gray-400 text-[10px] font-black uppercase tracking-widest rounded-2xl flex items-center justify-center gap-2 animate-pulse">
-                 <MousePointer2 className="w-3 h-3" />
-                 Waiting for Sidebar Click...
+              <div className={`w-full py-4 ${hasInteracted ? 'bg-green-500/20 border-green-500/30 text-green-400' : 'bg-white/5 border-white/10 text-gray-400'} border text-[10px] font-black uppercase tracking-widest rounded-2xl flex items-center justify-center gap-2 transition-all duration-500`}>
+                 {hasInteracted ? (
+                    <>
+                       <CheckCircle2 className="w-3 h-3" />
+                       Action Recorded!
+                    </>
+                 ) : (
+                    <>
+                       <MousePointer2 className="w-3 h-3 animate-pulse" />
+                       Waiting for Sidebar Click...
+                    </>
+                 )}
               </div>
             )}
             {step > 0 && !isActionStep && (
