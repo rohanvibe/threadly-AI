@@ -4,7 +4,7 @@
   "description": "High-performance AI chatbot workspace optimized for long conversations with persistent memory and thread navigation.",
   "keywords": [
     "nextjs",
-    "together-ai",
+    "groq-ai",
     "ai-chatbot",
     "llama3",
     "supabase",

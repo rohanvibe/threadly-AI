@@ -37,7 +37,7 @@ npm install
 
 # Copy env template
 cp .env.example .env.local
-# Fill in your Supabase + Together AI keys
+# Fill in your Supabase + groq AI keys
 
 # Run the database schema in your Supabase SQL Editor
 # File: supabase_schema.sql

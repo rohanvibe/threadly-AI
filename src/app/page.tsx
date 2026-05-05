@@ -359,13 +359,15 @@ function LandingPage({ onEnter, onTryDemo }: { onEnter: () => void, onTryDemo: (
         </div>
 
         <div className="flex flex-col md:flex-row items-center justify-center gap-4 pt-8">
-          <Button 
-            onClick={onTryDemo} 
-            className="w-full md:w-auto px-12 py-8 rounded-full bg-blue-600 text-white font-bold tracking-tight text-[19px] hover:bg-blue-500 transition-all active:scale-[0.98] shadow-2xl shadow-blue-500/30 group"
-          >
-            Try Demo
-            <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </Button>
+          <div className="hidden md:flex">
+            <Button 
+              onClick={onTryDemo} 
+              className="px-12 py-8 rounded-full bg-blue-600 text-white font-bold tracking-tight text-[19px] hover:bg-blue-500 transition-all active:scale-[0.98] shadow-2xl shadow-blue-500/30 group"
+            >
+              Try Demo
+              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Button>
+          </div>
           <Button 
             variant="ghost"
             onClick={onEnter} 
@@ -2577,7 +2579,7 @@ function BigSignupModal({ onClose, onAction }: { onClose: () => void, onAction: 
                     <div className="mt-8 pt-6 border-t border-white/5">
                         <p className="text-[8px] font-black text-gray-700 uppercase tracking-[0.3em] mb-4">Powered by Infrastructure From</p>
                         <div className="flex justify-center gap-8 opacity-20 grayscale brightness-200">
-                             <span className="text-[10px] font-black tracking-tighter text-white italic">Together AI</span>
+                             <span className="text-[10px] font-black tracking-tighter text-white italic">Groq</span>
                              <span className="text-[10px] font-black tracking-tighter text-white italic">Vercel</span>
                              <span className="text-[10px] font-black tracking-tighter text-white italic">Supabase</span>
                         </div>
