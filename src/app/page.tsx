@@ -1256,11 +1256,11 @@ export default function ChatPage() {
         // Auto-advance tutorial if they click during the navigation step
         if (onboardingStep === 1) {
            setHasInteracted(true)
-           // Stay on this step for 2 seconds so they see the result
+           // Stay on this step for 4 seconds so they see the result
            setTimeout(() => {
               setHasInteracted(false)
               setOnboardingStep(2)
-           }, 2000)
+           }, 4000)
         }
 
         // Show conversion modal after 3 interactions
