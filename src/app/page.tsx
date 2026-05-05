@@ -1251,6 +1251,11 @@ export default function ChatPage() {
         setDemoInteractionCount(prev => prev + 1)
         trackEvent('demo_interaction', { msgId, count: demoInteractionCount + 1 })
         
+        // Auto-advance tutorial if they click during the navigation step
+        if (onboardingStep === 1) {
+           setOnboardingStep(2)
+        }
+
         // Show conversion modal after 3 interactions
         if (demoInteractionCount + 1 >= 3) {
            setShowBigSignup(true)
@@ -1270,16 +1275,10 @@ export default function ChatPage() {
     setChats([{ id: 'demo-chat', title: 'Lunar Base Infrastructure', created_at: new Date().toISOString() }])
     trackEvent('demo_opened')
     
-    // Auto-scroll demo after delay
+    // Trigger interactive onboarding for demo
     setTimeout(() => {
-      setShowDemoTooltip(true)
-      const element = document.getElementById('msg-demo-6')
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        setHighlightedAnchor('demo-6')
-        setTimeout(() => setHighlightedAnchor(null), 2000)
-      }
-    }, 2000)
+      setOnboardingStep(0)
+    }, 800)
   }
 
   if (showLanding) {
@@ -1465,6 +1464,7 @@ export default function ChatPage() {
 
       <OnboardingTutorial 
         step={onboardingStep} 
+        isDemo={isDemo}
         onNext={() => {
           trackEvent('sidebar_jump', { step: onboardingStep })
           setOnboardingStep(s => s + 1)
@@ -2383,26 +2383,44 @@ function ShortcutsTab({
 // ─────────────────────────────────────────────────────────────────────────────
 // Onboarding Tutorial Components
 // ─────────────────────────────────────────────────────────────────────────────
-function OnboardingTutorial({ step, onNext, onComplete }: { step: number, onNext: () => void, onComplete: () => void }) {
+function OnboardingTutorial({ step, onNext, onComplete, isDemo }: { step: number, onNext: () => void, onComplete: () => void, isDemo?: boolean }) {
   const steps = [
-    { targetId: 'tutorial-input', title: 'Start Here', text: 'Type anything you want to ask the AI.' },
-    { targetId: 'tutorial-memory', title: 'Memory', text: 'Important facts are saved here to help the AI understand you better.' },
-    { targetId: 'tutorial-history', title: 'History', text: 'Go back to any of your past chats here.' },
-    { targetId: 'tutorial-prompts', title: 'Saved Prompts', text: 'Save instructions you use often to save time.' },
-    { targetId: 'tutorial-settings', title: 'Settings', text: 'Change your keys and how the app works.' },
+    { 
+      targetId: 'tutorial-input', 
+      title: 'Active Intelligence', 
+      text: 'Threadly isn\'t just a chat. It\'s a workspace. Try typing a complex engineering problem.',
+      actionHint: 'Type something to continue...'
+    },
+    { 
+      targetId: 'tutorial-history', 
+      title: 'Navigation Magic', 
+      text: 'Stop scrolling. Use the sidebar to jump instantly between different parts of your thread.',
+      actionHint: 'Click a sidebar item to see it in action'
+    },
+    { 
+      targetId: 'tutorial-memory', 
+      title: 'Long-term Memory', 
+      text: 'I remember your preferences, past work, and style across all sessions.',
+      actionHint: 'I understand'
+    },
   ]
 
   const current = steps[step]
   const [rect, setRect] = useState<DOMRect | null>(null)
 
   useEffect(() => {
-    if (current) {
-      const el = document.getElementById(current.targetId)
-      if (el) {
-        setRect(el.getBoundingClientRect())
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    const updateRect = () => {
+      if (current) {
+        const el = document.getElementById(current.targetId)
+        if (el) {
+          setRect(el.getBoundingClientRect())
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
       }
     }
+    updateRect()
+    window.addEventListener('resize', updateRect)
+    return () => window.removeEventListener('resize', updateRect)
   }, [step, current])
 
   if (step < 0 || step >= steps.length || !rect) return null
@@ -2413,48 +2431,55 @@ function OnboardingTutorial({ step, onNext, onComplete }: { step: number, onNext
     <div className="fixed inset-0 z-100 pointer-events-none overflow-hidden">
       <motion.div 
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} 
-        className="absolute inset-0 bg-black/40 backdrop-blur-[2px] pointer-events-auto" 
+        className="absolute inset-0 bg-black/60 backdrop-blur-[4px] pointer-events-auto" 
         onClick={(e) => e.stopPropagation()}
       />
       
       {/* The Glow Highlight */}
       <motion.div
         animate={{
-          top: rect.top - 8,
-          left: rect.left - 8,
-          width: rect.width + 16,
-          height: rect.height + 16,
+          top: rect.top - 12,
+          left: rect.left - 12,
+          width: rect.width + 24,
+          height: rect.height + 24,
         }}
-        transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-        className="absolute border-2 border-(--apple-blue) rounded-(--radius-lg) shadow-[0_0_20px_rgba(0,102,204,0.3)] z-101"
+        transition={{ type: 'spring', damping: 30, stiffness: 200 }}
+        className="absolute border-2 border-blue-500 rounded-[24px] shadow-[0_0_40px_rgba(59,130,246,0.4)] z-101 will-change-transform"
       />
 
       {/* The Tooltip */}
       <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{
-          top: Math.min(window.innerHeight - 200, rect.top + rect.height + 24),
-          left: Math.min(window.innerWidth - 340, Math.max(20, rect.left + rect.width / 2 - 150)),
+          opacity: 1, scale: 1,
+          top: Math.min(window.innerHeight - 250, rect.top + rect.height + 32),
+          left: Math.min(window.innerWidth - 360, Math.max(20, rect.left + rect.width / 2 - 160)),
         }}
-        transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-        className="absolute w-[300px] bg-[#18181b] border border-white/10 rounded-2xl p-5 shadow-2xl z-102 pointer-events-auto"
+        transition={{ type: 'spring', damping: 25, stiffness: 180 }}
+        className="absolute w-[320px] bg-[#1c1c1e] border border-white/10 rounded-[28px] p-6 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.8)] z-102 pointer-events-auto overflow-hidden"
       >
-        <div className="flex items-center gap-2 mb-2">
-            <div className="px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-widest">Step {step + 1}/{steps.length}</div>
-            <h4 className="text-xs font-black uppercase tracking-widest text-white">{current.title}</h4>
-        </div>
-        <p className="text-[11px] text-gray-400 leading-relaxed mb-4">{current.text}</p>
-        <div className="flex items-center justify-between">
-            <div className="flex gap-1">
-                {steps.map((_, i) => (
-                    <div key={i} className={`w-1 h-1 rounded-full transition-all ${i === step ? 'bg-blue-500 w-3' : 'bg-gray-700'}`} />
-                ))}
+        <div className="absolute top-0 left-0 w-1 h-full bg-blue-600" />
+        
+        <div className="flex items-center gap-3 mb-4">
+            <div className="w-8 h-8 rounded-xl bg-blue-600/20 flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-blue-500" />
             </div>
+            <h4 className="text-[13px] font-black uppercase tracking-widest text-white">{current.title}</h4>
+        </div>
+        
+        <p className="text-[14px] text-gray-300 leading-relaxed font-medium mb-6">{current.text}</p>
+        
+        <div className="flex flex-col gap-3">
             <button 
                 onClick={isLast ? onComplete : onNext}
-                className="px-4 py-2 bg-(--apple-blue) hover:bg-blue-600 text-white text-[10px] font-semibold uppercase tracking-widest rounded-(--radius-pill) shadow-md active:scale-95 transition-all"
+                className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white text-[12px] font-black uppercase tracking-widest rounded-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2"
             >
-                {isLast ? 'Finish Tour' : 'Next Step'}
+                {current.actionHint}
+                <ArrowRight className="w-4 h-4" />
             </button>
+            {step > 0 && (
+               <button onClick={onComplete} className="text-[10px] font-bold text-gray-600 hover:text-white uppercase tracking-widest transition-colors">Skip Workspace Tour</button>
+            )}
         </div>
       </motion.div>
     </div>
