@@ -68,6 +68,7 @@ import { toPng } from 'html-to-image'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import { trackEvent } from '@/utils/analytics'
+import { DEMO_CONVERSATION, DEMO_SIDEBAR_ITEMS } from '@/utils/demo-data'
 // Feature test
 import { FeedbackWidget } from '@/components/FeedbackWidget'
 
@@ -330,57 +331,111 @@ function AppleTooltip({ text, children }: { text: string, children: React.ReactN
   )
 }
 
-function LandingPage({ onEnter }: { onEnter: () => void }) {
+function LandingPage({ onEnter, onTryDemo }: { onEnter: () => void, onTryDemo: () => void }) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center space-y-12 surface-foundation grain-texture">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-        className="max-w-3xl space-y-6"
+        className="max-w-4xl space-y-8"
       >
-        <div className="flex justify-center mb-12">
+        <div className="flex justify-center mb-8">
           <div className="w-16 h-16 squircle bg-(--apple-blue) flex items-center justify-center shadow-2xl shadow-blue-500/20">
              <Sparkles className="w-8 h-8 text-white" />
           </div>
         </div>
-        <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-tight text-(--foreground)">
-          Your Thoughts, <br/> <span className="text-(--apple-gray)">Refined.</span>
-        </h1>
-        <p className="text-lg text-(--apple-gray) font-medium max-w-xl mx-auto leading-relaxed">
-          The next evolution of thought infrastructure. <br/>
-          Built for clarity, designed for precision.
-        </p>
-        <div className="pt-8">
+        
+        <div className="space-y-4">
+          <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-[0.9] text-(--foreground) selection:bg-blue-500/30">
+            Stop scrolling <br/> 
+            <span className="text-(--apple-gray) opacity-40">through long AI chats.</span>
+          </h1>
+          <p className="text-xl md:text-2xl text-(--apple-gray) font-medium max-w-2xl mx-auto leading-relaxed">
+            Jump to any answer instantly with Threadly. <br/>
+            High-leverage thought infrastructure for elite builders.
+          </p>
+        </div>
+
+        <div className="flex flex-col md:flex-row items-center justify-center gap-4 pt-8">
           <Button 
-            onClick={() => { onEnter(); }} 
-            className="px-12 py-8 rounded-(--radius-pill) bg-(--foreground) text-(--background) font-semibold tracking-tight text-[17px] hover:opacity-90 transition-all active:scale-[0.98] shadow-xl"
+            onClick={onTryDemo} 
+            className="w-full md:w-auto px-12 py-8 rounded-full bg-blue-600 text-white font-bold tracking-tight text-[19px] hover:bg-blue-500 transition-all active:scale-[0.98] shadow-2xl shadow-blue-500/30 group"
           >
-            Enter Workspace
+            Try Demo
+            <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </Button>
+          <Button 
+            variant="ghost"
+            onClick={onEnter} 
+            className="w-full md:w-auto px-12 py-8 rounded-full bg-white/5 border border-white/10 text-white font-bold tracking-tight text-[17px] hover:bg-white/10 transition-all active:scale-[0.98]"
+          >
+            Start Chat
           </Button>
         </div>
+
+        {/* Product Preview Mockup */}
+        <motion.div 
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="relative mt-20 pt-10 px-4"
+        >
+          <div className="relative mx-auto max-w-5xl rounded-[32px] overflow-hidden border border-white/10 bg-black/40 shadow-[0_0_100px_rgba(59,130,246,0.15)] aspect-video">
+             <div className="absolute inset-0 flex items-center justify-center bg-[#09090b]">
+                <div className="flex flex-col items-center gap-4 opacity-20">
+                   <Monitor className="w-20 h-20" />
+                   <p className="text-sm font-black uppercase tracking-[0.4em]">Interactive Workspace Preview</p>
+                </div>
+             </div>
+             {/* Subtle overlay gradients */}
+             <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-transparent to-transparent" />
+          </div>
+        </motion.div>
       </motion.div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl w-full pt-20">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl w-full py-32 border-t border-white/5">
         {[
-          { icon: Zap, title: "Quick Chat", desc: "Fast answers from AI." },
-          { icon: Sparkles, title: "Memory", desc: "It remembers your past chats." },
-          { icon: List, title: "History", desc: "Your past work, saved here." }
+          { icon: Map, title: "Thread Navigation", desc: "Instantly jump between prompts with a structured sidebar." },
+          { icon: Activity, title: "Real-time Instruments", desc: "Integrated calculators, diagrams, and background Python execution." },
+          { icon: ShieldCheck, title: "Absolute Privacy", desc: "Local-first mindset. Your thoughts remain your own." }
         ].map((f, i) => (
           <motion.div 
             key={i}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 + i * 0.1 }}
-            className="p-8 rounded-(--radius-lg) bg-(--surface) text-left space-y-4 border border-(--border-color)"
+            className="p-10 rounded-[32px] bg-white/[0.02] text-left space-y-5 border border-white/5 hover:bg-white/[0.04] transition-colors"
           >
-            <f.icon className="w-5 h-5 text-(--apple-blue)" />
-            <h3 className="text-[13px] font-semibold uppercase tracking-widest text-(--foreground)">{f.title}</h3>
-            <p className="text-[15px] text-(--apple-gray) font-medium leading-relaxed">{f.desc}</p>
+            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center">
+              <f.icon className="w-6 h-6 text-blue-500" />
+            </div>
+            <h3 className="text-[15px] font-bold uppercase tracking-widest text-white">{f.title}</h3>
+            <p className="text-[17px] text-(--apple-gray) font-medium leading-relaxed">{f.desc}</p>
           </motion.div>
         ))}
       </div>
     </div>
+  )
+}
+
+function ShieldCheck(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+      <path d="m9 12 2 2 4-4" />
+    </svg>
   )
 }
 
@@ -437,6 +492,11 @@ export default function ChatPage() {
   const [editingTitle, setEditingTitle] = useState('')
   const [isMobile, setIsMobile] = useState(false)
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system')
+  const [isDemo, setIsDemo] = useState(false)
+  const [demoSidebarItems, setDemoSidebarItems] = useState(DEMO_SIDEBAR_ITEMS)
+  const [showDemoTooltip, setShowDemoTooltip] = useState(false)
+  const [demoInteractionCount, setDemoInteractionCount] = useState(0)
+  const [showConversionModal, setShowConversionModal] = useState(false)
 
   // Initial load
   useEffect(() => {
@@ -706,6 +766,10 @@ export default function ChatPage() {
   }
 
   const fetchMessages = async (chatId: string) => {
+    if (isDemo) {
+      setMessages(DEMO_CONVERSATION)
+      return
+    }
     setFetchingMessages(true)
     const { data } = await supabase
       .from('messages')
@@ -1182,13 +1246,44 @@ export default function ChatPage() {
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' })
       trackEvent('sidebar_click', { action: 'jump_to_message', msgId })
+      
+      if (isDemo) {
+        setDemoInteractionCount(prev => prev + 1)
+        trackEvent('demo_interaction', { msgId, count: demoInteractionCount + 1 })
+        
+        // Show conversion modal after 3 interactions
+        if (demoInteractionCount + 1 >= 3) {
+           setShowBigSignup(true)
+        }
+      }
+      
       // Clear highlight after 2s
       setTimeout(() => setHighlightedAnchor(null), 2000)
     }
   }
 
-  if (showLanding && isGuest) {
-    return <LandingPage onEnter={() => setShowLanding(false)} />
+  const enterDemo = () => {
+    setIsDemo(true)
+    setShowLanding(false)
+    setCurrentChatId('demo-chat')
+    setMessages(DEMO_CONVERSATION)
+    setChats([{ id: 'demo-chat', title: 'Lunar Base Infrastructure', created_at: new Date().toISOString() }])
+    trackEvent('demo_opened')
+    
+    // Auto-scroll demo after delay
+    setTimeout(() => {
+      setShowDemoTooltip(true)
+      const element = document.getElementById('msg-demo-6')
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        setHighlightedAnchor('demo-6')
+        setTimeout(() => setHighlightedAnchor(null), 2000)
+      }
+    }, 2000)
+  }
+
+  if (showLanding) {
+    return <LandingPage onEnter={() => { setShowLanding(false); trackEvent('chat_started'); }} onTryDemo={enterDemo} />
   }
 
   return (
@@ -1810,7 +1905,35 @@ export default function ChatPage() {
                     <button onClick={() => setSidebarMode('map')} className={`p-1 rounded-md transition-colors ${sidebarMode === 'map' ? 'bg-(--foreground) text-(--background) shadow-sm' : 'text-(--apple-gray) hover:text-(--foreground)'}`}><Map className="w-3.5 h-3.5" /></button>
                   </div>
                 </div>
-                {sidebarMode === 'flow' && (
+                {isDemo && showDemoTooltip && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-2 p-3 bg-blue-600 rounded-xl shadow-lg relative"
+                  >
+                    <p className="text-[10px] font-black text-white uppercase tracking-widest leading-relaxed">
+                      💡 Click any item below to jump instantly to that part of the conversation.
+                    </p>
+                    <div className="absolute -top-1 left-4 w-2 h-2 bg-blue-600 rotate-45" />
+                  </motion.div>
+                )}
+                {isDemo && (
+                  <div className="space-y-2 mt-4">
+                    {demoSidebarItems.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => scrollToMessage(item.targetId)}
+                        className="w-full text-left p-4 rounded-2xl border border-blue-500/10 bg-blue-500/5 hover:bg-blue-600/10 hover:border-blue-500/30 transition-all group active:scale-[0.98] flex items-center gap-3"
+                      >
+                         <span className="text-[10px] font-black w-6 h-6 rounded-lg flex items-center justify-center shrink-0 bg-blue-500/20 text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-all">
+                            {item.label[0]}
+                         </span>
+                         <span className="text-[11px] font-bold text-gray-400 group-hover:text-white transition-colors">{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {sidebarMode === 'flow' && !isDemo && (
                   <div className="relative">
                     <Search className="w-3 h-3 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
                     <input
