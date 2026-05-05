@@ -56,7 +56,8 @@ import {
   Sparkles,
   Sun,
   Moon,
-  Monitor
+  Monitor,
+  MousePointer2
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import ReactMarkdown from 'react-markdown'
@@ -700,11 +701,11 @@ export default function ChatPage() {
       } else {
          setBookmarkedMessages(new Set())
       }
-    } else {
+    } else if (!isDemo) {
       setMessages([])
       setBookmarkedMessages(new Set())
     }
-  }, [currentChatId])
+  }, [currentChatId, isDemo])
 
   const toggleBookmark = (msgId: string, e: React.MouseEvent) => {
     e.stopPropagation()
@@ -1268,17 +1269,19 @@ export default function ChatPage() {
   }
 
   const enterDemo = () => {
+    // Force set everything at once to avoid race conditions
+    const demoId = 'demo-chat'
     setIsDemo(true)
-    setShowLanding(false)
-    setCurrentChatId('demo-chat')
+    setCurrentChatId(demoId)
     setMessages(DEMO_CONVERSATION)
-    setChats([{ id: 'demo-chat', title: 'Lunar Base Infrastructure', created_at: new Date().toISOString() }])
+    setChats([{ id: demoId, title: 'Lunar Base Infrastructure', created_at: new Date().toISOString() }])
+    setShowLanding(false)
     trackEvent('demo_opened')
     
     // Trigger interactive onboarding for demo
     setTimeout(() => {
       setOnboardingStep(0)
-    }, 800)
+    }, 500)
   }
 
   if (showLanding) {
@@ -2388,20 +2391,23 @@ function OnboardingTutorial({ step, onNext, onComplete, isDemo }: { step: number
     { 
       targetId: 'tutorial-input', 
       title: 'Active Intelligence', 
-      text: 'Threadly isn\'t just a chat. It\'s a workspace. Try typing a complex engineering problem.',
-      actionHint: 'Type something to continue...'
+      text: 'Threadly isn\'t just a chat. It\'s a workspace. Explore the Lunar Base conversation already indexed for you.',
+      actionHint: 'Enter Workspace',
+      requireAction: false
     },
     { 
       targetId: 'tutorial-history', 
       title: 'Navigation Magic', 
-      text: 'Stop scrolling. Use the sidebar to jump instantly between different parts of your thread.',
-      actionHint: 'Click a sidebar item to see it in action'
+      text: 'Stop scrolling. Click any item in the sidebar to jump instantly to that part of the thread.',
+      actionHint: 'Waiting for interaction...',
+      requireAction: true
     },
     { 
       targetId: 'tutorial-memory', 
       title: 'Long-term Memory', 
       text: 'I remember your preferences, past work, and style across all sessions.',
-      actionHint: 'I understand'
+      actionHint: 'I understand',
+      requireAction: false
     },
   ]
 
@@ -2414,25 +2420,26 @@ function OnboardingTutorial({ step, onNext, onComplete, isDemo }: { step: number
         const el = document.getElementById(current.targetId)
         if (el) {
           setRect(el.getBoundingClientRect())
-          el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          if (!isDemo) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
         }
       }
     }
     updateRect()
     window.addEventListener('resize', updateRect)
     return () => window.removeEventListener('resize', updateRect)
-  }, [step, current])
+  }, [step, current, isDemo])
 
   if (step < 0 || step >= steps.length || !rect) return null
 
   const isLast = step === steps.length - 1
+  const isActionStep = current.requireAction && isDemo
 
   return (
-    <div className="fixed inset-0 z-100 pointer-events-none overflow-hidden">
+    <div className={`fixed inset-0 z-100 ${isActionStep ? 'pointer-events-none' : 'pointer-events-auto'} overflow-hidden`}>
       <motion.div 
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} 
-        className="absolute inset-0 bg-black/60 backdrop-blur-[4px] pointer-events-auto" 
-        onClick={(e) => e.stopPropagation()}
+        className={`absolute inset-0 bg-black/60 ${isActionStep ? 'opacity-20' : 'backdrop-blur-[4px]'} transition-all duration-700`} 
+        onClick={(e) => !isActionStep && e.stopPropagation()}
       />
       
       {/* The Glow Highlight */}
@@ -2470,14 +2477,21 @@ function OnboardingTutorial({ step, onNext, onComplete, isDemo }: { step: number
         <p className="text-[14px] text-gray-300 leading-relaxed font-medium mb-6">{current.text}</p>
         
         <div className="flex flex-col gap-3">
-            <button 
-                onClick={isLast ? onComplete : onNext}
-                className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white text-[12px] font-black uppercase tracking-widest rounded-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2"
-            >
-                {current.actionHint}
-                <ArrowRight className="w-4 h-4" />
-            </button>
-            {step > 0 && (
+            {!isActionStep ? (
+              <button 
+                  onClick={isLast ? onComplete : onNext}
+                  className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white text-[12px] font-black uppercase tracking-widest rounded-2xl shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2"
+              >
+                  {current.actionHint}
+                  <ArrowRight className="w-4 h-4" />
+              </button>
+            ) : (
+              <div className="w-full py-4 bg-white/5 border border-white/10 text-gray-400 text-[10px] font-black uppercase tracking-widest rounded-2xl flex items-center justify-center gap-2 animate-pulse">
+                 <MousePointer2 className="w-3 h-3" />
+                 Waiting for Sidebar Click...
+              </div>
+            )}
+            {step > 0 && !isActionStep && (
                <button onClick={onComplete} className="text-[10px] font-bold text-gray-600 hover:text-white uppercase tracking-widest transition-colors">Skip Workspace Tour</button>
             )}
         </div>
