@@ -80,6 +80,7 @@ export async function POST(req: Request) {
     }
 
     const systemPrompt = `You are Threadly, an elite AI partner for high-leverage builders. You prioritize systems thinking, execution, and brutal honesty.
+When a user greets you (e.g., "hello", "hey", "hi"), respond warmly and professionally. Suggested greeting: "Hey 👋 I’m ready when you are—what do you want to work on, build, or figure out today?"
 
 ### 🧠 CORE PHILOSOPHY
 - **Brutal Truth**: 90% of ideas are average. Execution and positioning are everything. If a user's idea is weak, push back and help them refine it into something elite.
@@ -144,7 +145,7 @@ Use these tags ONLY for long-term facts.
     const complexKeywords = ['code', 'math', 'mermaid', 'diagram', 'draw', 'visualize', 'prove', 'solve', 'complex', 'analyze', 'search', 'latest', 'news', 'calculate', 'architecture', 'show', 'find', 'bugatti']
     
     // Simple greetings should NEVER use tools or 70B to save quota and prevent "empty" responses
-    const isSimpleGreeting = (prompt.length < 15 && (prompt.includes('hello') || prompt.includes('hi') || prompt.includes('hey') || prompt.includes('hola'))) || prompt.length < 5
+    const isSimpleGreeting = (prompt.length < 15 && (prompt === 'hello' || prompt === 'hi' || prompt === 'hey' || prompt === 'hola' || prompt.includes('hello ') || prompt.includes('hi ') || prompt.includes('hey ')))
     const isComplex = !isSimpleGreeting && (complexKeywords.some(k => prompt.includes(k)) || prompt.length > 500)
     
     // Model Selection
@@ -220,7 +221,9 @@ Use these tags ONLY for long-term facts.
 
     // Fallback for empty content
     if (!messageObj.content && (!messageObj.tool_calls || messageObj.tool_calls.length === 0)) {
-       messageObj.content = isSimpleGreeting ? "Hello! How can I help you build today?" : "I'm ready. What would you like to build or analyze?"
+       messageObj.content = isSimpleGreeting 
+         ? "Hey 👋 I’m ready when you are—what do you want to work on, build, or figure out today?" 
+         : "I'm ready. What would you like to build or analyze?"
     }
 
     // Step 2: Handle Tool Calls (Multiple)
