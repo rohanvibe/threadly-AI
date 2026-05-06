@@ -1700,7 +1700,7 @@ export default function ChatPage() {
                            </div>
                         </div>
                       ) : (
-                        <div className="text-(--foreground) leading-relaxed text-[17px] prose prose-sm max-w-none prose-p:leading-[1.45] prose-pre:rounded-(--radius-md) prose-code:text-(--apple-blue) break-all wrap-break-word selection:bg-blue-500/40 dark:prose-invert">
+                        <div className="text-(--foreground) leading-relaxed text-[17px] prose prose-sm max-w-none prose-p:leading-[1.45] prose-pre:rounded-(--radius-md) prose-code:text-(--apple-blue) break-words selection:bg-blue-500/40 dark:prose-invert">
                           {msg.content === '' && loading ? (
                              <div className="flex items-center gap-4 py-2">
                                 <div className="flex gap-1.5 item-center">
@@ -1720,9 +1720,9 @@ export default function ChatPage() {
                                 ),
                                 th: ({ children }) => <th className="px-6 py-4 text-left text-[11px] font-black uppercase tracking-[0.2em] text-blue-400 bg-white/5 whitespace-nowrap">{children}</th>,
                                  td: ({ children }) => <td className="px-6 py-4 text-sm border-t border-white/5 text-gray-300 whitespace-nowrap min-w-[120px]">{children}</td>,
-                                 ul: ({ children }) => <ul className="list-disc pl-5 space-y-2 mb-4 wrap-break-word">{children}</ul>,
-                                 ol: ({ children }) => <ol className="list-decimal pl-5 space-y-2 mb-4 wrap-break-word">{children}</ol>,
-                                 li: ({ children }) => <li className="leading-relaxed wrap-break-word">{children}</li>,
+                                 ul: ({ children }) => <ul className="list-disc pl-5 space-y-2 mb-4 break-words">{children}</ul>,
+                                 ol: ({ children }) => <ol className="list-decimal pl-5 space-y-2 mb-4 break-words">{children}</ol>,
+                                 li: ({ children }) => <li className="leading-relaxed break-words">{children}</li>,
                                  code: ({ node, className, children, ...props }: any) => {
                                    const match = /language-(\w+)/.exec(className || '');
                                   if (match?.[1] === 'calculator') {

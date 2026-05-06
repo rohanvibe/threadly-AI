@@ -78,7 +78,7 @@ export default async function SharePage(props: { params: Promise<{ chatId: strin
                       {msg.role === 'assistant' ? 'Threadly Assistant' : 'Shared Thought'}
                     </span>
                   </div>
-                  <div className="text-gray-100 leading-relaxed text-[17px] prose prose-invert prose-lg max-w-none prose-p:leading-[1.8] prose-pre:rounded-3xl prose-code:text-(--apple-blue) wrap-break-word whitespace-pre-wrap">
+                  <div className="text-gray-100 leading-relaxed text-[17px] prose prose-invert prose-lg max-w-none prose-p:leading-[1.8] prose-pre:rounded-3xl prose-code:text-(--apple-blue) break-words whitespace-pre-wrap">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                       {msg.content}
                     </ReactMarkdown>
