@@ -363,7 +363,7 @@ function LandingPage({ onEnter, onTryDemo, mouseX, mouseY }: { onEnter: () => vo
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-        className="max-w-5xl pt-48 space-y-12 relative z-10"
+        className="max-w-5xl pt-24 space-y-12 relative z-10"
       >
         {/* Powered by AI Badge */}
         <div className="flex justify-center">
@@ -413,7 +413,7 @@ function LandingPage({ onEnter, onTryDemo, mouseX, mouseY }: { onEnter: () => vo
         </div>
 
         {/* Action Buttons & Arch Portal Container */}
-        <div className="relative w-full flex flex-col items-center justify-center pt-6">
+        <div className="relative w-full flex flex-col items-center justify-center pt-2">
           
           {/* Curoky Glowing Arch Architecture (Positioned Behind) */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[15%] w-full h-[400px] flex items-center justify-center z-0 pointer-events-none scale-110 md:scale-125">
@@ -421,37 +421,6 @@ function LandingPage({ onEnter, onTryDemo, mouseX, mouseY }: { onEnter: () => vo
             <div className="absolute top-0 w-[800px] h-[400px] border-t-[3px] border-purple-500/40 rounded-t-full shadow-[0_-20px_60px_-15px_rgba(168,85,247,0.3)] opacity-80" />
             <div className="absolute top-20 w-[600px] h-[300px] border-t-[2px] border-magenta-500/30 rounded-t-full shadow-[0_-15px_40px_-10px_rgba(236,72,153,0.2)] opacity-60" />
             <div className="absolute top-40 w-[400px] h-[200px] border-t-[2px] border-pink-500/20 rounded-t-full shadow-[0_-10px_30px_-5px_rgba(244,114,182,0.15)] opacity-40" />
-
-            {/* Badges on Arcs */}
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 1.2 }}
-              className="absolute top-[-10px] left-[15%] flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-black/40 backdrop-blur-md shadow-lg"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-purple-400" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-white/80">Deep Analytics</span>
-            </motion.div>
-
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 1.4 }}
-              className="absolute top-[-10px] right-[15%] flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-black/40 backdrop-blur-md shadow-lg"
-            >
-              <Zap className="w-3.5 h-3.5 text-magenta-400" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-white/80">System Thinking</span>
-            </motion.div>
-
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 1.6 }}
-              className="absolute top-[35px] flex items-center gap-2 px-5 py-2 rounded-full border border-white/10 bg-black/60 backdrop-blur-md shadow-2xl"
-            >
-              <Activity className="w-4 h-4 text-pink-400" />
-              <span className="text-[11px] font-black uppercase tracking-widest text-white/90">Threadly Intelligence</span>
-            </motion.div>
 
             {/* Core Hub Glow */}
             <div className="absolute top-1/2 -translate-y-1/2 w-48 h-48 bg-purple-600/20 blur-[80px] rounded-full" />
