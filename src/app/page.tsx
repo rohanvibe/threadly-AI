@@ -354,14 +354,8 @@ function LandingPage({ onEnter, onTryDemo, mouseX, mouseY }: { onEnter: () => vo
         className="fixed top-8 left-1/2 -translate-x-1/2 z-50 w-full max-w-fit"
       >
         <nav className="flex items-center gap-1 px-2 py-1.5 rounded-full border border-white/10 bg-black/40 backdrop-blur-2xl shadow-2xl">
-          {["Features", "Assets", "Pricing", "FAQ", "Protection"].map((item) => (
-            <button key={item} className="px-5 py-2 rounded-full text-[13px] font-bold text-gray-400 hover:text-white hover:bg-white/5 transition-all">
-              {item}
-            </button>
-          ))}
-          <div className="w-px h-4 bg-white/10 mx-2" />
-          <Button variant="ghost" size="sm" onClick={onEnter} className="rounded-full px-5 text-[13px] text-white hover:bg-white/10 border-none">Log In</Button>
-          <Button size="sm" onClick={onEnter} className="rounded-full px-6 bg-white text-black text-[13px] font-bold border-none">Sign Up</Button>
+          <Button variant="ghost" size="sm" onClick={onEnter} className="rounded-full px-6 text-[13px] text-white hover:bg-white/10 border-none">Log In</Button>
+          <Button size="sm" onClick={onEnter} className="rounded-full px-8 bg-white text-black text-[13px] font-bold border-none shadow-xl">Get Started</Button>
         </nav>
       </motion.header>
 
@@ -369,7 +363,7 @@ function LandingPage({ onEnter, onTryDemo, mouseX, mouseY }: { onEnter: () => vo
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-        className="max-w-5xl pt-32 space-y-10 relative z-10"
+        className="max-w-5xl pt-48 space-y-12 relative z-10"
       >
         {/* Powered by AI Badge */}
         <div className="flex justify-center">
@@ -377,16 +371,16 @@ function LandingPage({ onEnter, onTryDemo, mouseX, mouseY }: { onEnter: () => vo
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="flex items-center gap-2.5 px-5 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md shadow-xl"
+            className="flex items-center gap-2.5 px-6 py-2.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md shadow-xl"
           >
             <Sparkles className="w-4 h-4 text-purple-400" />
-            <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/80">Digital Intelligence Powered by AI</span>
+            <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/80">Intelligent Research Infrastructure</span>
           </motion.div>
         </div>
         
         <div className="space-y-8">
           <h1 className="text-7xl md:text-[110px] font-black tracking-tighter leading-[0.85] text-white selection:bg-purple-500/30">
-            {["Revolutionize", "Your Research"].map((word, i) => (
+            {["Elevate", "Your Thought"].map((word, i) => (
               <motion.span 
                 key={i}
                 initial={{ opacity: 0, y: 40 }}
@@ -404,7 +398,7 @@ function LandingPage({ onEnter, onTryDemo, mouseX, mouseY }: { onEnter: () => vo
               transition={{ delay: 0.6, duration: 1 }}
               className="bg-gradient-to-r from-purple-400 via-magenta-400 to-pink-400 bg-clip-text text-transparent"
             >
-              with AI-Powered Threads
+              with Threadly AI
             </motion.span>
           </h1>
           <motion.p 
@@ -413,8 +407,8 @@ function LandingPage({ onEnter, onTryDemo, mouseX, mouseY }: { onEnter: () => vo
             transition={{ delay: 0.8 }}
             className="text-xl md:text-2xl text-gray-400 font-medium max-w-3xl mx-auto leading-relaxed"
           >
-            Unlock the full potential of your thought process with cutting-edge <br className="hidden md:block" /> 
-            AI technology designed for high-leverage builders.
+            A high-leverage workspace for builders. <br className="hidden md:block" /> 
+            Connect ideas, run simulations, and execute with precision.
           </motion.p>
         </div>
 
@@ -423,32 +417,32 @@ function LandingPage({ onEnter, onTryDemo, mouseX, mouseY }: { onEnter: () => vo
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 1, type: "spring" }}
-          className="flex flex-col md:flex-row items-center justify-center gap-5 pt-4"
+          className="flex flex-col md:flex-row items-center justify-center gap-6 pt-6"
         >
           <Button 
             onClick={onEnter} 
-            className="w-full md:w-auto px-12 py-8 rounded-full bg-white text-black font-black tracking-tight text-[17px] hover:bg-gray-100 transition-all active:scale-[0.98] shadow-[0_0_40px_rgba(255,255,255,0.15)] border-none"
+            className="w-full md:w-auto px-14 py-8 rounded-full bg-white text-black font-black tracking-tight text-[18px] hover:bg-gray-100 transition-all active:scale-[0.98] shadow-[0_0_50px_rgba(255,255,255,0.2)] border-none"
           >
-            Get Started
+            Start Chatting Free
           </Button>
           <Button 
             variant="ghost"
             onClick={onTryDemo} 
-            className="w-full md:w-auto px-12 py-8 rounded-full bg-white/5 border border-white/10 text-white font-black tracking-tight text-[17px] hover:bg-white/10 transition-all active:scale-[0.98] backdrop-blur-xl"
+            className="w-full md:w-auto px-14 py-8 rounded-full bg-white/5 border border-white/10 text-white font-black tracking-tight text-[18px] hover:bg-white/10 transition-all active:scale-[0.98] backdrop-blur-xl"
           >
-            Learn More
+            Explore Demo
           </Button>
         </motion.div>
 
-        {/* Floating Glass Stats Cards */}
-        <div className="absolute -left-20 top-[40%] hidden xl:block">
+        {/* Floating Glass Stats Cards - Repositioned to avoid overlap */}
+        <div className="absolute -left-32 top-[20%] hidden 2xl:block">
           <motion.div 
             style={{ 
               rotateX: useSpring(useTransform(mouseY, [0, 1000], [5, -5])),
               rotateY: useSpring(useTransform(mouseX, [0, 1000], [-5, 5])),
               transformStyle: "preserve-3d"
             }}
-            className="p-6 rounded-3xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl space-y-4 text-left w-64"
+            className="p-6 rounded-3xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl space-y-4 text-left w-64 scale-90"
           >
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-black uppercase tracking-widest text-purple-400">Intelligence Growth</span>
@@ -462,14 +456,14 @@ function LandingPage({ onEnter, onTryDemo, mouseX, mouseY }: { onEnter: () => vo
           </motion.div>
         </div>
 
-        <div className="absolute -right-20 top-[60%] hidden xl:block">
+        <div className="absolute -right-32 top-[70%] hidden 2xl:block">
           <motion.div 
             style={{ 
               rotateX: useSpring(useTransform(mouseY, [0, 1000], [-5, 5])),
               rotateY: useSpring(useTransform(mouseX, [0, 1000], [5, -5])),
               transformStyle: "preserve-3d"
             }}
-            className="p-6 rounded-3xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl space-y-4 text-left w-64"
+            className="p-6 rounded-3xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl space-y-4 text-left w-64 scale-90"
           >
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-black uppercase tracking-widest text-magenta-400">Efficiency Expand</span>
@@ -491,36 +485,6 @@ function LandingPage({ onEnter, onTryDemo, mouseX, mouseY }: { onEnter: () => vo
             </div>
           </motion.div>
         </div>
-
-        {/* Main Product Preview Mockup */}
-        <motion.div 
-          style={{ 
-            rotateX: useSpring(useTransform(mouseY, [0, 2000], [0, -10]), { damping: 20 }),
-            rotateY: useSpring(useTransform(mouseX, [0, 2000], [5, -5]), { damping: 20 }),
-            transformStyle: "preserve-3d"
-          }}
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="relative mt-24 pt-10 px-4 group/preview"
-        >
-          <div className="relative mx-auto max-w-5xl rounded-[40px] overflow-hidden border border-white/10 bg-black/60 shadow-[0_0_120px_rgba(168,85,247,0.15)] aspect-video group-hover/preview:shadow-[0_0_150px_rgba(168,85,247,0.25)] transition-shadow duration-700">
-             <div className="absolute inset-0 flex items-center justify-center bg-[#09090b]">
-                <motion.div 
-                  animate={{ scale: [1, 1.05, 1], opacity: [0.2, 0.3, 0.2] }}
-                  transition={{ duration: 4, repeat: Infinity }}
-                  className="flex flex-col items-center gap-6"
-                >
-                   <div className="w-24 h-24 rounded-3xl bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
-                      <Monitor className="w-10 h-10 text-purple-400" />
-                   </div>
-                   <p className="text-[13px] font-black uppercase tracking-[0.5em] text-purple-400">Interactive Thread Environment</p>
-                </motion.div>
-             </div>
-             {/* Subtle overlay gradients */}
-             <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-transparent to-transparent" />
-          </div>
-        </motion.div>
       </motion.div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl w-full py-40 border-t border-white/5 relative z-10">
