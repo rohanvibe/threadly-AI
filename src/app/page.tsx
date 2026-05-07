@@ -434,56 +434,47 @@ function LandingPage({ onEnter, onTryDemo, mouseX, mouseY }: { onEnter: () => vo
           </Button>
         </motion.div>
 
-        {/* Floating Glass Stats Cards - Repositioned to avoid overlap */}
-        <div className="absolute -left-32 top-[20%] hidden 2xl:block">
-          <motion.div 
-            style={{ 
-              rotateX: useSpring(useTransform(mouseY, [0, 1000], [5, -5])),
-              rotateY: useSpring(useTransform(mouseX, [0, 1000], [-5, 5])),
-              transformStyle: "preserve-3d"
-            }}
-            className="p-6 rounded-3xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl space-y-4 text-left w-64 scale-90"
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-widest text-purple-400">Intelligence Growth</span>
-              <Activity className="w-4 h-4 text-purple-400" />
-            </div>
-            <div className="space-y-1">
-              <div className="text-3xl font-black text-white">+1,321</div>
-              <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Thought Nodes This Week</div>
-            </div>
-            <div className="h-12 w-full bg-gradient-to-t from-purple-500/20 to-transparent rounded-lg border-b-2 border-purple-500/50" />
-          </motion.div>
-        </div>
+        {/* Curoky Glowing Arch Architecture */}
+        <div className="relative w-full h-[300px] mt-24 flex items-center justify-center">
+          
+          {/* Semicircle Arcs */}
+          <div className="absolute top-0 w-[800px] h-[400px] border-t-[3px] border-purple-500/40 rounded-t-full shadow-[0_-20px_60px_-15px_rgba(168,85,247,0.3)] opacity-80" />
+          <div className="absolute top-20 w-[600px] h-[300px] border-t-[2px] border-magenta-500/30 rounded-t-full shadow-[0_-15px_40px_-10px_rgba(236,72,153,0.2)] opacity-60" />
+          <div className="absolute top-40 w-[400px] h-[200px] border-t-[2px] border-pink-500/20 rounded-t-full shadow-[0_-10px_30px_-5px_rgba(244,114,182,0.15)] opacity-40" />
 
-        <div className="absolute -right-32 top-[70%] hidden 2xl:block">
+          {/* Badges on Arcs */}
           <motion.div 
-            style={{ 
-              rotateX: useSpring(useTransform(mouseY, [0, 1000], [-5, 5])),
-              rotateY: useSpring(useTransform(mouseX, [0, 1000], [5, -5])),
-              transformStyle: "preserve-3d"
-            }}
-            className="p-6 rounded-3xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl space-y-4 text-left w-64 scale-90"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.2 }}
+            className="absolute top-[-10px] left-[15%] flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-black/40 backdrop-blur-md shadow-lg"
           >
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase tracking-widest text-magenta-400">Efficiency Expand</span>
-              <Sparkles className="w-4 h-4 text-magenta-400" />
-            </div>
-            <div className="space-y-1">
-              <div className="text-3xl font-black text-white">200%</div>
-              <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Retention Improvement</div>
-            </div>
-            <div className="flex gap-2">
-              {[1,2,3,4,5].map(i => (
-                <div key={i} className="flex-1 h-8 rounded bg-white/5 relative overflow-hidden">
-                   <motion.div 
-                    initial={{ height: 0 }}
-                    animate={{ height: `${i * 20}%` }}
-                    className="absolute bottom-0 inset-x-0 bg-magenta-500/40" />
-                </div>
-              ))}
-            </div>
+            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-white/80">Deep Analytics</span>
           </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.4 }}
+            className="absolute top-[-10px] right-[15%] flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-black/40 backdrop-blur-md shadow-lg"
+          >
+            <Zap className="w-3.5 h-3.5 text-magenta-400" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-white/80">System Thinking</span>
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.6 }}
+            className="absolute top-[35px] flex items-center gap-2 px-5 py-2 rounded-full border border-white/10 bg-black/60 backdrop-blur-md shadow-2xl"
+          >
+            <Activity className="w-4 h-4 text-pink-400" />
+            <span className="text-[11px] font-black uppercase tracking-widest text-white/90">Threadly Intelligence</span>
+          </motion.div>
+
+          {/* Core Hub Glow */}
+          <div className="absolute top-1/2 -translate-y-1/2 w-32 h-32 bg-purple-600/20 blur-[60px] rounded-full" />
         </div>
       </motion.div>
       
