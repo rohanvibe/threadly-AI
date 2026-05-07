@@ -11,7 +11,7 @@ export function VisualShell({ children }: { children: ReactNode }) {
       {/* Scroll Progress Bar */}
       <motion.div 
         style={{ scaleX: scrollYProgress }}
-        className="fixed top-0 left-0 right-0 h-1 bg-blue-600 origin-left z-[100] shadow-[0_0_15px_rgba(59,130,246,0.5)]"
+        className="fixed top-0 left-0 right-0 h-1 bg-purple-600 origin-left z-[100] shadow-[0_0_20px_rgba(168,85,247,0.5)]"
       />
 
       {/* Dynamic Background Elements */}
@@ -23,7 +23,7 @@ export function VisualShell({ children }: { children: ReactNode }) {
             opacity: [0.1, 0.2, 0.1]
           }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-[20%] -left-[10%] w-[60%] aspect-square bg-blue-500/10 rounded-full blur-[120px]"
+          className="absolute -top-[20%] -left-[10%] w-[60%] aspect-square bg-purple-500/15 rounded-full blur-[140px]"
         />
         <motion.div 
           animate={{ 
@@ -32,7 +32,7 @@ export function VisualShell({ children }: { children: ReactNode }) {
             opacity: [0.05, 0.15, 0.05]
           }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute -bottom-[20%] -right-[10%] w-[50%] aspect-square bg-indigo-500/10 rounded-full blur-[120px]"
+          className="absolute -bottom-[20%] -right-[10%] w-[50%] aspect-square bg-indigo-500/15 rounded-full blur-[140px]"
         />
       </div>
 

@@ -334,29 +334,65 @@ function AppleTooltip({ text, children }: { text: string, children: React.ReactN
 
 function LandingPage({ onEnter, onTryDemo, mouseX, mouseY }: { onEnter: () => void, onTryDemo: () => void, mouseX: any, mouseY: any }) {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center space-y-12 overflow-hidden relative">
+    <div className="min-h-screen flex flex-col items-center p-6 text-center overflow-hidden relative bg-[#09090b]">
+      
+      {/* Curoky-inspired Background Accents */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[100%] h-[500px] bg-gradient-to-b from-purple-500/20 via-magenta-500/5 to-transparent blur-[120px] opacity-50" />
+        <div className="absolute top-[10%] left-[10%] w-[30%] aspect-square bg-blue-600/10 rounded-full blur-[140px] animate-pulse" />
+        <div className="absolute top-[20%] right-[5%] w-[25%] aspect-square bg-purple-600/10 rounded-full blur-[140px]" />
+        
+        {/* Subtle Circuit Grid Pattern */}
+        <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay" 
+             style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.2) 1px, transparent 0)', backgroundSize: '40px 40px' }} />
+      </div>
+
+      {/* Centered Pill Nav */}
+      <motion.header 
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="fixed top-8 left-1/2 -translate-x-1/2 z-50 w-full max-w-fit"
+      >
+        <nav className="flex items-center gap-1 px-2 py-1.5 rounded-full border border-white/10 bg-black/40 backdrop-blur-2xl shadow-2xl">
+          {["Features", "Assets", "Pricing", "FAQ", "Protection"].map((item) => (
+            <button key={item} className="px-5 py-2 rounded-full text-[13px] font-bold text-gray-400 hover:text-white hover:bg-white/5 transition-all">
+              {item}
+            </button>
+          ))}
+          <div className="w-px h-4 bg-white/10 mx-2" />
+          <Button variant="ghost" size="sm" onClick={onEnter} className="rounded-full px-5 text-[13px] text-white hover:bg-white/10 border-none">Log In</Button>
+          <Button size="sm" onClick={onEnter} className="rounded-full px-6 bg-white text-black text-[13px] font-bold border-none">Sign Up</Button>
+        </nav>
+      </motion.header>
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-        className="max-w-4xl space-y-8 relative z-10"
+        className="max-w-5xl pt-32 space-y-10 relative z-10"
       >
-        <div className="flex justify-center mb-8">
-          <div className="w-16 h-16 squircle bg-(--apple-blue) flex items-center justify-center shadow-2xl shadow-blue-500/20">
-             <Sparkles className="w-8 h-8 text-white" />
-          </div>
+        {/* Powered by AI Badge */}
+        <div className="flex justify-center">
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="flex items-center gap-2.5 px-5 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-md shadow-xl"
+          >
+            <Sparkles className="w-4 h-4 text-purple-400" />
+            <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/80">Digital Intelligence Powered by AI</span>
+          </motion.div>
         </div>
         
-        <div className="space-y-6">
-          <h1 className="text-6xl md:text-9xl font-black tracking-tighter leading-[0.85] text-(--foreground) selection:bg-blue-500/30">
-            {["Stop", "scrolling"].map((word, i) => (
+        <div className="space-y-8">
+          <h1 className="text-7xl md:text-[110px] font-black tracking-tighter leading-[0.85] text-white selection:bg-purple-500/30">
+            {["Revolutionize", "Your Research"].map((word, i) => (
               <motion.span 
                 key={i}
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 + i * 0.1, type: "spring", damping: 12 }}
-                className="inline-block mr-4"
+                transition={{ delay: 0.3 + i * 0.1, type: "spring", damping: 15 }}
+                className="inline-block mr-5 bg-gradient-to-b from-white via-white to-white/70 bg-clip-text text-transparent"
               >
                 {word}
               </motion.span>
@@ -364,54 +400,99 @@ function LandingPage({ onEnter, onTryDemo, mouseX, mouseY }: { onEnter: () => vo
             <br/> 
             <motion.span 
               initial={{ opacity: 0 }}
-              animate={{ opacity: 0.4 }}
-              transition={{ delay: 0.5, duration: 1 }}
-              className="text-(--apple-gray)"
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6, duration: 1 }}
+              className="bg-gradient-to-r from-purple-400 via-magenta-400 to-pink-400 bg-clip-text text-transparent"
             >
-              through long AI chats.
+              with AI-Powered Threads
             </motion.span>
           </h1>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7 }}
-            className="text-xl md:text-2xl text-(--apple-gray) font-medium max-w-2xl mx-auto leading-relaxed"
+            transition={{ delay: 0.8 }}
+            className="text-xl md:text-2xl text-gray-400 font-medium max-w-3xl mx-auto leading-relaxed"
           >
-            Jump to any answer instantly with Threadly. <br/>
-            High-leverage thought infrastructure for elite builders.
+            Unlock the full potential of your thought process with cutting-edge <br className="hidden md:block" /> 
+            AI technology designed for high-leverage builders.
           </motion.p>
         </div>
 
+        {/* Action Buttons */}
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.9, type: "spring" }}
-          className="flex flex-col md:flex-row items-center justify-center gap-4 pt-8"
+          transition={{ delay: 1, type: "spring" }}
+          className="flex flex-col md:flex-row items-center justify-center gap-5 pt-4"
         >
-          <div className="hidden md:flex">
-            <Button 
-              onClick={onTryDemo} 
-              className="px-12 py-8 rounded-full bg-blue-600 text-white font-bold tracking-tight text-[19px] hover:bg-blue-500 transition-all active:scale-[0.98] shadow-2xl shadow-blue-500/30 group relative overflow-hidden"
-            >
-              <motion.div 
-                animate={{ x: ["-100%", "200%"] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", repeatDelay: 1 }}
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
-              />
-              Try Demo
-              <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Button>
-          </div>
+          <Button 
+            onClick={onEnter} 
+            className="w-full md:w-auto px-12 py-8 rounded-full bg-white text-black font-black tracking-tight text-[17px] hover:bg-gray-100 transition-all active:scale-[0.98] shadow-[0_0_40px_rgba(255,255,255,0.15)] border-none"
+          >
+            Get Started
+          </Button>
           <Button 
             variant="ghost"
-            onClick={onEnter} 
-            className="w-full md:w-auto px-12 py-8 rounded-full bg-white/5 border border-white/10 text-white font-bold tracking-tight text-[17px] hover:bg-white/10 hover:border-white/20 transition-all active:scale-[0.98]"
+            onClick={onTryDemo} 
+            className="w-full md:w-auto px-12 py-8 rounded-full bg-white/5 border border-white/10 text-white font-black tracking-tight text-[17px] hover:bg-white/10 transition-all active:scale-[0.98] backdrop-blur-xl"
           >
-            Start Chat
+            Learn More
           </Button>
         </motion.div>
 
-        {/* Product Preview Mockup */}
+        {/* Floating Glass Stats Cards */}
+        <div className="absolute -left-20 top-[40%] hidden xl:block">
+          <motion.div 
+            style={{ 
+              rotateX: useSpring(useTransform(mouseY, [0, 1000], [5, -5])),
+              rotateY: useSpring(useTransform(mouseX, [0, 1000], [-5, 5])),
+              transformStyle: "preserve-3d"
+            }}
+            className="p-6 rounded-3xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl space-y-4 text-left w-64"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-widest text-purple-400">Intelligence Growth</span>
+              <Activity className="w-4 h-4 text-purple-400" />
+            </div>
+            <div className="space-y-1">
+              <div className="text-3xl font-black text-white">+1,321</div>
+              <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Thought Nodes This Week</div>
+            </div>
+            <div className="h-12 w-full bg-gradient-to-t from-purple-500/20 to-transparent rounded-lg border-b-2 border-purple-500/50" />
+          </motion.div>
+        </div>
+
+        <div className="absolute -right-20 top-[60%] hidden xl:block">
+          <motion.div 
+            style={{ 
+              rotateX: useSpring(useTransform(mouseY, [0, 1000], [-5, 5])),
+              rotateY: useSpring(useTransform(mouseX, [0, 1000], [5, -5])),
+              transformStyle: "preserve-3d"
+            }}
+            className="p-6 rounded-3xl border border-white/10 bg-black/40 backdrop-blur-xl shadow-2xl space-y-4 text-left w-64"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black uppercase tracking-widest text-magenta-400">Efficiency Expand</span>
+              <Sparkles className="w-4 h-4 text-magenta-400" />
+            </div>
+            <div className="space-y-1">
+              <div className="text-3xl font-black text-white">200%</div>
+              <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Retention Improvement</div>
+            </div>
+            <div className="flex gap-2">
+              {[1,2,3,4,5].map(i => (
+                <div key={i} className="flex-1 h-8 rounded bg-white/5 relative overflow-hidden">
+                   <motion.div 
+                    initial={{ height: 0 }}
+                    animate={{ height: `${i * 20}%` }}
+                    className="absolute bottom-0 inset-x-0 bg-magenta-500/40" />
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Main Product Preview Mockup */}
         <motion.div 
           style={{ 
             rotateX: useSpring(useTransform(mouseY, [0, 2000], [0, -10]), { damping: 20 }),
@@ -421,17 +502,19 @@ function LandingPage({ onEnter, onTryDemo, mouseX, mouseY }: { onEnter: () => vo
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="relative mt-20 pt-10 px-4 group/preview"
+          className="relative mt-24 pt-10 px-4 group/preview"
         >
-          <div className="relative mx-auto max-w-5xl rounded-[32px] overflow-hidden border border-white/10 bg-black/40 shadow-[0_0_100px_rgba(59,130,246,0.15)] aspect-video group-hover/preview:shadow-[0_0_120px_rgba(59,130,246,0.25)] transition-shadow duration-700">
+          <div className="relative mx-auto max-w-5xl rounded-[40px] overflow-hidden border border-white/10 bg-black/60 shadow-[0_0_120px_rgba(168,85,247,0.15)] aspect-video group-hover/preview:shadow-[0_0_150px_rgba(168,85,247,0.25)] transition-shadow duration-700">
              <div className="absolute inset-0 flex items-center justify-center bg-[#09090b]">
                 <motion.div 
                   animate={{ scale: [1, 1.05, 1], opacity: [0.2, 0.3, 0.2] }}
                   transition={{ duration: 4, repeat: Infinity }}
-                  className="flex flex-col items-center gap-4"
+                  className="flex flex-col items-center gap-6"
                 >
-                   <Monitor className="w-20 h-20" />
-                   <p className="text-sm font-black uppercase tracking-[0.4em]">Interactive Workspace Preview</p>
+                   <div className="w-24 h-24 rounded-3xl bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
+                      <Monitor className="w-10 h-10 text-purple-400" />
+                   </div>
+                   <p className="text-[13px] font-black uppercase tracking-[0.5em] text-purple-400">Interactive Thread Environment</p>
                 </motion.div>
              </div>
              {/* Subtle overlay gradients */}
@@ -440,12 +523,12 @@ function LandingPage({ onEnter, onTryDemo, mouseX, mouseY }: { onEnter: () => vo
         </motion.div>
       </motion.div>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl w-full py-32 border-t border-white/5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl w-full py-40 border-t border-white/5 relative z-10">
         {/* Feature Cards with Scroll Animations */}
         {[
-          { icon: Map, title: "Thread Navigation", desc: "Instantly jump between prompts with a structured sidebar." },
-          { icon: Activity, title: "Real-time Instruments", desc: "Integrated calculators, diagrams, and background Python execution." },
-          { icon: ShieldCheck, title: "Absolute Privacy", desc: "Local-first mindset. Your thoughts remain your own." }
+          { icon: Map, title: "Thread Navigation", desc: "Instantly jump between prompts with a structured sidebar.", color: "text-purple-400" },
+          { icon: Activity, title: "Real-time Instruments", desc: "Integrated calculators, diagrams, and background Python execution.", color: "text-magenta-400" },
+          { icon: ShieldCheck, title: "Absolute Privacy", desc: "Local-first mindset. Your thoughts remain your own.", color: "text-pink-400" }
         ].map((f, i) => (
           <motion.div 
             key={i}
@@ -453,17 +536,19 @@ function LandingPage({ onEnter, onTryDemo, mouseX, mouseY }: { onEnter: () => vo
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ delay: i * 0.15, type: "spring", damping: 20 }}
-            whileHover={{ y: -8, backgroundColor: "rgba(255,255,255,0.05)", borderColor: "rgba(59,130,246,0.3)" }}
-            className="p-10 rounded-[40px] bg-white/[0.02] text-left space-y-6 border border-white/5 transition-all duration-500 group cursor-default"
+            whileHover={{ y: -8, backgroundColor: "rgba(255,255,255,0.03)", borderColor: "rgba(168,85,247,0.3)" }}
+            className="p-12 rounded-[48px] bg-white/[0.01] text-left space-y-8 border border-white/5 transition-all duration-500 group cursor-default backdrop-blur-sm"
           >
             <motion.div 
               whileHover={{ rotate: 5, scale: 1.1 }}
-              className="w-16 h-16 rounded-2xl bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors shadow-inner"
+              className={`w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors shadow-inner`}
             >
-              <f.icon className="w-8 h-8 text-blue-500 transition-all duration-500 group-hover:drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
+              <f.icon className={`w-8 h-8 ${f.color} transition-all duration-500 group-hover:drop-shadow-[0_0_15px_rgba(168,85,247,0.5)]`} />
             </motion.div>
-            <h3 className="text-lg font-black uppercase tracking-[0.2em] text-white/90 group-hover:text-white transition-colors">{f.title}</h3>
-            <p className="text-lg text-(--apple-gray) font-medium leading-relaxed group-hover:text-white/70 transition-colors">{f.desc}</p>
+            <div className="space-y-4">
+              <h3 className="text-xl font-black uppercase tracking-[0.2em] text-white/90 group-hover:text-white transition-colors">{f.title}</h3>
+              <p className="text-lg text-gray-500 font-medium leading-relaxed group-hover:text-gray-300 transition-colors">{f.desc}</p>
+            </div>
           </motion.div>
         ))}
       </div>
