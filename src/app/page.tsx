@@ -612,7 +612,7 @@ export default function ChatPage() {
   const [editValue, setEditValue] = useState('')
   const [highlightedAnchor, setHighlightedAnchor] = useState<string | null>(null)
   
-  const [profileMemories, setProfileMemories] = useState<any[]>([])
+  const [profileMemories, setProfileMemories] = useState<string[]>([])
   const [attachedFile, setAttachedFile] = useState<{ name: string, content: string } | null>(null)
   
   // Phase 1 Sidebar States
@@ -684,7 +684,7 @@ export default function ChatPage() {
   const fetchProfile = async (uid: string) => {
     const { data } = await supabase.from('profiles').select('ai_memory').eq('id', uid).maybeSingle()
     if (data) {
-       let mems: any[] = []
+       let mems: string[] = []
        try {
           if (Array.isArray(data.ai_memory)) mems = data.ai_memory
           else if (typeof data.ai_memory === 'string') mems = JSON.parse(data.ai_memory)
@@ -1169,36 +1169,26 @@ export default function ChatPage() {
         
         finalContent = accumulatedContent
         const memoryPatterns = [
-           /\[MEMORY_UPSERT:\s*(.*?)\s*\|\s*(.*?)\]/i,
-           /\[MEMORY_INCREMENT:\s*(.*?)\]/i,
-           /\[MEMORY_DELETE:\s*(.*?)\]/i,
-           /\[MEMORY_.*?:.*?\]/gi, // Aggressive catch-all
-           /\[MEMORY_.*?\]/gi,      // Standalone catch-all
+           /\[MEMORY_(ADD|LEARNED|EDIT|DELETE):.*?\]/gi,
+           /\n[a-z]+\|.*$/i, // Catch legacy tag|fact at the very end
         ]
         
-        const upsertMatch = finalContent.match(/\[MEMORY_UPSERT:\s*(.*?)\s*\|\s*(.*?)\]/i)
-        const incrementMatch = finalContent.match(/\[MEMORY_INCREMENT:\s*(.*?)\]/i)
-        const deleteMatch = finalContent.match(/\[MEMORY_DELETE:\s*(.*?)\]/i)
+        const addMatch = finalContent.match(/\[MEMORY_ADD:\s*(.*?)\]/i) || finalContent.match(/\[MEMORY_LEARNED:\s*(.*?)\]/i)
+        const editMatch = finalContent.match(/\[MEMORY_EDIT:\s*(\d+)\s*\|\s*(.*?)\]/i)
+        const deleteMatch = finalContent.match(/\[MEMORY_DELETE:\s*(\d+)\]/i)
         
-        // Always strip tags from final content
-        memoryPatterns.forEach(pattern => {
-           finalContent = finalContent.replace(pattern, '')
-        })
-        finalContent = finalContent.trim()
-
-        // Safety: If response is empty after stripping, provide a silent fallback or acknowledgment
-        if (!finalContent && (upsertMatch || incrementMatch || deleteMatch)) {
-           finalContent = "Memory synchronized. System updated."
-        } else if (!finalContent) {
-           finalContent = "System ready."
-        }
-        
-        if (upsertMatch || incrementMatch || deleteMatch) {
-           // Sync logic...
+        if (addMatch || editMatch || deleteMatch) {
+           // Remove all memory tags
+           memoryPatterns.forEach(pattern => {
+              finalContent = finalContent.replace(pattern, '')
+           })
+           finalContent = finalContent.trim()
+           
+           // Sync new memory to Supabase
            const { data: { user } } = await supabase.auth.getUser()
            if (user) {
               const { data: currentProfile } = await supabase.from('profiles').select('ai_memory').eq('id', user.id).maybeSingle()
-              let mems: any[] = []
+              let mems: string[] = []
               try { 
                 if (Array.isArray(currentProfile?.ai_memory)) mems = currentProfile.ai_memory
                 else if (typeof currentProfile?.ai_memory === 'string') mems = JSON.parse(currentProfile.ai_memory)
@@ -1207,62 +1197,37 @@ export default function ChatPage() {
               if (!Array.isArray(mems)) mems = []
 
               let updated = false
-              if (upsertMatch) {
-                  const type = upsertMatch[1].trim().toLowerCase()
-                  const content = upsertMatch[2].trim()
-                  
-                  // Check for existing content to update confidence/content
-                  const existingIdx = mems.findIndex(m => 
-                    (typeof m === 'string' && m === content) || 
-                    (m.content === content)
-                  )
-
-                  if (existingIdx >= 0) {
-                    mems[existingIdx] = { 
-                      ...mems[existingIdx], 
-                      type, 
-                      content, 
-                      confidence: Math.min(1.0, (mems[existingIdx].confidence || 0.5) + 0.1),
-                      last_used: new Date().toISOString()
-                    }
-                  } else {
-                    mems.push({ 
-                      id: Math.random().toString(36).substr(2, 9),
-                      type, 
-                      content, 
-                      confidence: 0.5, 
-                      created_at: new Date().toISOString(),
-                      last_used: new Date().toISOString()
-                    })
-                  }
-                  updated = true
-              } else if (incrementMatch) {
-                  const targetId = incrementMatch[1].trim()
-                  const idx = mems.findIndex(m => m.id === targetId || m.id === parseInt(targetId))
-                  if (idx >= 0) {
-                    mems[idx] = { 
-                      ...mems[idx], 
-                      confidence: Math.min(1.0, (mems[idx].confidence || 0.5) + 0.1),
-                      last_used: new Date().toISOString()
-                    }
+              if (addMatch) {
+                 const newFact = addMatch[1].trim()
+                 if (!mems.includes(newFact)) {
+                    mems.push(newFact)
                     updated = true
-                  }
+                 }
+              } else if (editMatch) {
+                 const targetId = parseInt(editMatch[1].trim())
+                 const newFact = editMatch[2].trim()
+                 if (!isNaN(targetId) && targetId >= 0 && targetId < mems.length) {
+                    mems[targetId] = newFact
+                    updated = true
+                 }
               } else if (deleteMatch) {
-                  const targetId = deleteMatch[1].trim()
-                  mems = mems.filter(m => m.id !== targetId && m.id !== parseInt(targetId))
-                  updated = true
+                 const targetId = parseInt(deleteMatch[1].trim())
+                 if (!isNaN(targetId) && targetId >= 0 && targetId < mems.length) {
+                    mems.splice(targetId, 1)
+                    updated = true
+                 }
               }
 
               if (updated) {
-                  const { error: upsertError } = await supabase.from('profiles').upsert({ 
-                    id: user.id, 
-                    ai_memory: mems,
-                    updated_at: new Date().toISOString()
-                  }, { onConflict: 'id' })
-                  if (upsertError) console.error("Memory Sync Error:", upsertError)
-                  setProfileMemories([...mems])
-                  setSavedMemoryMsgId(assistantMsgId)
-                  setTimeout(() => setSavedMemoryMsgId(null), 4000)
+                 const { error: upsertError } = await supabase.from('profiles').upsert({ 
+                   id: user.id, 
+                   ai_memory: mems,
+                   updated_at: new Date().toISOString()
+                 }, { onConflict: 'id' })
+                 if (upsertError) console.error("Memory Upsert Error:", upsertError)
+                 setProfileMemories([...mems])
+                 setSavedMemoryMsgId(assistantMsgId)
+                 setTimeout(() => setSavedMemoryMsgId(null), 4000)
               }
            }
         }
@@ -2156,7 +2121,7 @@ export default function ChatPage() {
 function SettingsModal({ onClose, shortcuts, updateShortcut, resetShortcuts }: { onClose: () => void, shortcuts: any, updateShortcut: (id: ShortcutId, key: string) => void, resetShortcuts: () => void }) {
   const [activeTab, setActiveTab] = useState<'general' | 'personalization' | 'shortcuts'>('general')
   const [keys, setKeys] = useState({ openai: '' })
-  const [profile, setProfile] = useState({ custom_instructions: '', ai_memory: [] as any[] })
+  const [profile, setProfile] = useState({ custom_instructions: '', ai_memory: [] as string[] })
   const [newMemory, setNewMemory] = useState('')
   const [saving, setSaving] = useState(false)
   const { toast } = useToast()
@@ -2173,9 +2138,9 @@ function SettingsModal({ onClose, shortcuts, updateShortcut, resetShortcuts }: {
       if (user) {
         const { data } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle()
         if (data) {
-          let memoryArray: any[] = []
+          let memoryArray: string[] = []
           try {
-             if (Array.isArray(data.ai_memory)) memoryArray = data.ai_memory as any[]
+             if (Array.isArray(data.ai_memory)) memoryArray = data.ai_memory as string[]
              else if (typeof data.ai_memory === 'string') memoryArray = JSON.parse(data.ai_memory)
           } catch (e) { }
           setProfile({ 
@@ -2213,20 +2178,12 @@ function SettingsModal({ onClose, shortcuts, updateShortcut, resetShortcuts }: {
 
   const addMemory = () => {
     if (!newMemory.trim()) return
-    const mem = {
-      id: Math.random().toString(36).substr(2, 9),
-      type: 'identity',
-      content: newMemory.trim(),
-      confidence: 1.0,
-      created_at: new Date().toISOString(),
-      last_used: new Date().toISOString()
-    }
-    setProfile(prev => ({ ...prev, ai_memory: [mem, ...prev.ai_memory] }))
+    setProfile(prev => ({ ...prev, ai_memory: [...prev.ai_memory, newMemory.trim()] }))
     setNewMemory('')
   }
 
-  const removeMemory = (id: string) => {
-    setProfile(prev => ({ ...prev, ai_memory: prev.ai_memory.filter(m => m.id !== id) }))
+  const removeMemory = (index: number) => {
+    setProfile(prev => ({ ...prev, ai_memory: prev.ai_memory.filter((_, i) => i !== index) }))
   }
 
   return (
@@ -2307,57 +2264,27 @@ function SettingsModal({ onClose, shortcuts, updateShortcut, resetShortcuts }: {
                 </div>
 
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between ml-2">
-                    <label className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-500">AI Memory Store</label>
-                    <span className="text-[9px] font-bold text-blue-500 uppercase tracking-widest">{profile.ai_memory.length} Persistent Units</span>
-                  </div>
+                  <label className="text-[9px] font-black uppercase tracking-[0.4em] text-gray-500 ml-2">AI Memory</label>
                   <div className="flex gap-3">
                     <Input 
                       value={newMemory}
                       onChange={(e) => setNewMemory(e.target.value)}
-                      placeholder="Add high-value fact..."
-                      className="bg-white/5 border-white/5 rounded-2xl h-14 text-sm font-medium"
+                      placeholder="Save a fact..."
+                      className="bg-white/5 border-white/5 rounded-2xl h-14 text-sm"
                       onKeyDown={(e) => e.key === 'Enter' && addMemory()}
                     />
                     <Button onClick={addMemory} className="h-14 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl px-6"><Plus className="w-5 h-5" /></Button>
                   </div>
-                  
-                  <div className="grid gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                    {profile.ai_memory.map((mem) => {
-                      const typeColors: Record<string, string> = {
-                        identity: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-                        preference: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-                        goal: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-                        behavior: 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                      }
-                      
-                      const mContent = typeof mem === 'string' ? mem : mem.content
-                      const mType = mem.type || 'identity'
-                      const mConf = mem.confidence || 0.5
-                      const mId = mem.id || Math.random().toString()
-
-                      return (
-                        <div key={mId} className="group p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all flex items-center justify-between gap-4">
-                          <div className="flex-1 min-w-0 space-y-2">
-                             <div className="flex items-center gap-2">
-                                <span className={`text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${typeColors[mType] || typeColors.identity}`}>
-                                  {mType}
-                                </span>
-                                <div className="flex-1 h-1 bg-white/5 rounded-full overflow-hidden max-w-[40px]">
-                                   <div className="h-full bg-blue-500/40" style={{ width: `${mConf * 100}%` }} />
-                                </div>
-                             </div>
-                             <p className="text-sm font-bold text-white/90 truncate">{mContent}</p>
-                          </div>
-                          <button onClick={() => removeMemory(mId)} className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500/40 hover:text-red-500 p-2">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      )
-                    })}
+                  <div className="space-y-3">
+                    {profile.ai_memory.map((mem, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-5 rounded-2xl bg-white/2 border border-white/5 group hover:border-blue-500/20 transition-all">
+                        <span className="text-xs font-bold text-gray-400">{mem}</span>
+                        <button onClick={() => removeMemory(idx)} className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500/50 hover:text-red-500 p-2"><Trash2 className="w-4 h-4" /></button>
+                      </div>
+                    ))}
                     {profile.ai_memory.length === 0 && (
-                      <div className="text-center py-12 border-2 border-dashed border-white/5 rounded-[2.5rem]">
-                        <p className="text-xs font-bold text-gray-600 uppercase tracking-widest">Memory system empty. <br/>Start building to populate context.</p>
+                      <div className="py-12 text-center border-2 border-dashed border-white/5 rounded-4xl">
+                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-700">No memories saved</p>
                       </div>
                     )}
                   </div>

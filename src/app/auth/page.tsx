@@ -71,12 +71,12 @@ export default function AuthPage() {
           <div className="w-10 h-10 rounded-xl bg-(--apple-blue) flex items-center justify-center shadow-lg shadow-blue-500/10">
             <Globe className="w-5 h-5 text-white" />
           </div>
-          <span className="text-xl font-semibold tracking-tight text-(--foreground)">Threadly</span>
+          <span className="text-xl font-semibold tracking-tight text-white">Threadly</span>
         </div>
 
         <div className="bg-(--surface) rounded-(--radius-lg) p-8 md:p-10 space-y-8 border border-white/5 shadow-xl">
           <div className="space-y-2 text-center">
-            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-(--foreground)">
+            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-white">
               {isSignUp ? 'Create Account' : 'Sign In'}
             </h2>
             <p className="text-(--apple-gray) font-medium text-[15px] leading-relaxed">
@@ -101,7 +101,7 @@ export default function AuthPage() {
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/5"></div></div>
-              <div className="relative flex justify-center text-[11px]"><span className="bg-(--surface) px-4 text-(--apple-gray) font-medium tracking-tight">Or continue with</span></div>
+              <div className="relative flex justify-center text-[11px]"><span className="bg-[#000000] px-4 text-(--apple-gray) font-medium tracking-tight">Or continue with</span></div>
             </div>
 
             <form onSubmit={handleAuth} className="space-y-6">
@@ -114,7 +114,7 @@ export default function AuthPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full bg-(--surface-tertiary) border-none rounded-(--radius-md) py-6 px-6 text-[15px] font-medium text-(--foreground) placeholder-gray-500 focus:ring-1 focus:ring-blue-500/30 outline-none transition-all"
+                    className="w-full bg-(--surface-tertiary) border-none rounded-(--radius-md) py-6 px-6 text-[15px] font-medium text-white placeholder-gray-700 focus:ring-1 focus:ring-blue-500/30 outline-none transition-all"
                   />
                 </div>
                 <div className="space-y-2">
@@ -125,7 +125,7 @@ export default function AuthPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="w-full bg-(--surface-tertiary) border-none rounded-(--radius-md) py-6 px-6 text-[15px] font-medium text-(--foreground) placeholder-gray-500 focus:ring-1 focus:ring-blue-500/30 outline-none transition-all"
+                    className="w-full bg-(--surface-tertiary) border-none rounded-(--radius-md) py-6 px-6 text-[15px] font-medium text-white placeholder-gray-700 focus:ring-1 focus:ring-blue-500/30 outline-none transition-all"
                   />
                 </div>
               </div>
@@ -152,7 +152,7 @@ export default function AuthPage() {
                 <button
                   type="button"
                   onClick={() => setIsSignUp(!isSignUp)}
-                  className="w-full text-center text-[12px] font-medium tracking-tight text-(--apple-gray) hover:text-(--foreground) transition-colors py-2"
+                  className="w-full text-center text-[12px] font-medium tracking-tight text-(--apple-gray) hover:text-white transition-colors py-2"
                 >
                   {isSignUp ? 'Already have an account? Sign In' : "New to Threadly? Create Account"}
                 </button>

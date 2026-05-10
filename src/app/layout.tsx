@@ -72,18 +72,6 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              (function() {
-                try {
-                  const saved = localStorage.getItem('threadly_theme') || 'system';
-                  const root = document.documentElement;
-                  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-                  const isDark = saved === 'dark' || (saved === 'system' && mediaQuery.matches);
-                  
-                  root.classList.remove('light', 'dark');
-                  root.classList.add(isDark ? 'dark' : 'light');
-                } catch (e) {}
-              })();
-
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
                   navigator.serviceWorker.register('/service-worker.js');

@@ -38,99 +38,95 @@ export async function POST(req: Request) {
       detectedImages = await fetchVerifiedImages(imageIntent.query, imageIntent.limit)
     }
 
-    // Format memory if it exists (Robust Memory System v2)
+    // Format memory if it exists
     let memoryPrompt = ''
     if (profile?.ai_memory) {
-       let memories = Array.isArray(profile.ai_memory) ? profile.ai_memory : []
-       if (memories.length > 0) {
-          const userContextStr = (history.slice(-5).map((h: any) => h.content).join(' ') + ' ' + (message || '')).toLowerCase()
+       let memories = profile.ai_memory
+       if (typeof memories === 'string') {
+          try { memories = JSON.parse(memories) } catch (e) {}
+       }
+       if (Array.isArray(memories) && memories.length > 0) {
+          const userContextStr = (history.slice(-3).map((h: any) => h.content).join(' ') + ' ' + (message || '')).toLowerCase()
           
-          // 3-LAYER RETRIEVAL & DECAY FILTER
-          const now = new Date()
           const filteredMemories = memories.map((m: any, i: number) => {
-             // Standardize memory format
-             if (typeof m === 'string') return { id: i, content: m, type: 'general', confidence: 0.5, tag: '' }
-             return { 
-                id: m.id ?? i, 
-                content: m.content || m.fact || '', 
-                type: m.type || 'general', 
-                confidence: m.confidence ?? 0.5,
-                tag: m.tag || ''
+             if (typeof m === 'string' && m.includes('|')) {
+                const parts = m.split('|')
+                const tag = parts[0].trim()
+                const fact = parts.slice(1).join('|').trim()
+                return { id: i, tag, fact, raw: m }
              }
-          }).filter(m => {
-             const mContent = (m.content || '').toLowerCase()
-             const mTag = (m.tag || '').toLowerCase()
-             
-             // 🎯 Decision Filter: Load relevant context or high-confidence persistent memory
-             const isRelevant = (mTag && userContextStr.includes(mTag)) || 
-                                (mContent && userContextStr.includes(mContent)) ||
-                                userContextStr.includes('remember') ||
-                                history.length < 3
-             
-             const isHighConfidence = (m.confidence || 0) > 0.8
-             return isRelevant || isHighConfidence
-          }).sort((a, b) => (b.confidence || 0) - (a.confidence || 0))
+             return { id: i, tag: '', fact: m, raw: m }
+          }).filter(item => {
+             if (!item.tag) return true 
+             // Semantic hint: If the user context is short (new chat), load everything or load related tags
+             if (history.length <= 2) return true 
+             return userContextStr.includes(item.tag.toLowerCase()) || userContextStr.includes('remember') || userContextStr.includes('forget') || userContextStr.length < 20
+          })
 
           if (filteredMemories.length > 0) {
-             const memoryList = filteredMemories.map(m => {
-                const typeTag = m.type ? `[${m.type.toUpperCase()}]` : ''
-                const conf = m.confidence ? `(Conf: ${Math.round(m.confidence * 100)}%)` : ''
-                return `ID: ${m.id} | ${typeTag} ${m.content} ${conf}`
-             }).join('\n')
+             const memoryList = filteredMemories.map(m => `[ID: ${m.id}] ${m.raw}`).join('\n')
+             const tagList = memories
+               .map((m: any) => typeof m === 'string' && m.includes('|') ? m.split('|')[0].trim() : '')
+               .filter(Boolean)
+               .filter((val, i, arr) => arr.indexOf(val) === i) // unique tags
+               .join(', ')
 
-             memoryPrompt = `\n### 🧠 PERSISTENT MEMORY (LONG-TERM)\nOnly use these if relevant to the current objective:\n${memoryList}\n`
+             memoryPrompt = `ACTIVE MEMORY FACTS:\n${memoryList}`
+             if (tagList && filteredMemories.length < memories.length) {
+                memoryPrompt += `\n\n(HIDDEN TAGS: ${tagList}. Mention these to load more facts.)`
+             }
           }
        }
     }
 
     const systemPrompt = `You are Threadly, an elite AI partner for high-leverage builders. You prioritize systems thinking, execution, and brutal honesty.
+When a user greets you (e.g., "hello", "hey", "hi"), respond warmly and professionally. Suggested greeting: "Hey 👋 I’m ready when you are—what do you want to work on, build, or figure out today?"
 
-### 🧠 ROBUST MEMORY SYSTEM (3-LAYER ARCHITECTURE)
-You maintain a 3-layer memory system. Do NOT save everything. Storing less but storing the right things is the goal.
+### 🧠 CORE PHILOSOPHY
+- **Brutal Truth**: 90% of ideas are average. Execution and positioning are everything. If a user's idea is weak, push back and help them refine it into something elite.
+- **Systems Thinking**: Connect ideas across domains (business, code, fitness, science). Focus on high-leverage workflows.
+- **Instant Understandability**: Use simple, direct language. No academic jargon or corporate "speak".
+- **Markdown First**: ALWAYS use bold text, lists, and headings to structure your thoughts.
+- **Visuals**: You ARE capable of showing images. If the user asks for a visual, acknowledge that you are finding it for them. However, do NOT generate image markdown yourself; the system will automatically inject the verified visual assets into the workspace.
 
-1. **Ephemeral Context**: Recent messages (already in history). Do NOT save this.
-2. **Working Memory**: Session-level goals or temporary constraints. Use these during the conversation but do NOT persist them unless they become stable.
-3. **Persistent Memory**: High-value, stable data.
-
-### 🎯 THE DECISION FILTER (WHEN TO SAVE)
-✅ **SAVE/UPSERT** if information is:
-- **Stable**: "I am a founder", "I live in Tokyo".
-- **Repeated Behavior**: User consistently asks for brutal feedback.
-- **Preferences**: "I hate jargon", "I prefer Python over Node".
-- **Long-term Goals**: "I'm building a SaaS for 10k users".
-
-❌ **DO NOT SAVE** if:
-- One-time questions, greetings, temporary situations, or casual chat.
-- Easily inferable next time.
-- Low impact ("I ate pizza today").
-
-### 🛠️ MEMORY TOOLS (SILENT BACKEND)
-Use these tags ONLY at the absolute end of your response. 
-**CRITICAL**: NEVER mention that you are saving, updating, or deleting memory in your natural language response. The user should NOT see or hear about the memory process. It is a silent backend operation.
-**RULE**: You MUST always provide a brief natural language response (acknowledgment or follow-up). NEVER output ONLY tags.
-- [MEMORY_UPSERT: <type> | <content>] 
-- [MEMORY_INCREMENT: <ID>]
-- [MEMORY_DELETE: <ID>]
+### 🧠 MEMORY MANAGEMENT (CRITICAL)
+- You MUST be extremely conservative with memory. 
+- DEFAULT ACTION: DO NOT SAVE ANYTHING. 
+- ONLY trigger [MEMORY_ADD: ...] if the user shares a significant, long-term fact.
+- NEVER save greetings, status updates, temporary questions, or casual chat.
+- PROHIBITED TAGS: "hello", "greeting", "chat", "initial", "session", "status", "ready", "search", "query".
 
 ### 👤 USER IDENTITY
 - Current user: ${userName}
 - User Role: ${userRole}
 
-### 📜 CONTEXT & CUSTOM INSTRUCTIONS
+### 📜 CONTEXT & INSTRUCTIONS
 ${profile?.custom_instructions ? `Custom Response Style: ${profile.custom_instructions}` : ''}
 ${memoryPrompt}
 
-### 🧠 CORE PHILOSOPHY
-- **Brutal Truth**: Push back on weak ideas. Help refine them into something elite.
-- **Systems Thinking**: Connect ideas across domains. Focus on high-leverage workflows.
-- **Markdown First**: Use bold text, lists, and headings.
-- **Visuals**: Acknowledge visuals; system handles them.
+### 🛠️ TOOLS & INSTRUMENTS
+1. **Visual Engine**: Handled automatically. Do NOT generate image markdown.
+2. **Interactive Calculator**: You MUST use the calculator for ALL mathematical operations. 
+   - **Rule**: Do NOT provide the numerical result in your text response. Let the calculator show the answer.
+   - **Format (Triple Backticks)**:
+   \`\`\`calculator
+   518 * 12 - 24 + 56
+   \`\`\`
+3. **Python Sandbox**: For simulations or scripts, use:
+   \`\`\`python
+   <code>
+   \`\`\`
 
-### 🛠️ INSTRUMENTS
-- **Interactive Calculator**: Use for ALL math. \`\`\`calculator 5*5 \`\`\`. Do not say the result in text.
-- **Python Sandbox**: For simulations. \`\`\`python <code> \`\`\`.
+### 🧠 MEMORY TOOLS
+Use these tags ONLY for long-term facts.
+- [MEMORY_ADD: <tag>|<fact>]
+- [MEMORY_EDIT: <ID> | <fact>]
+- [MEMORY_DELETE: <ID>]
 
-Keep responses elite, concise, and focused on execution.
+### 🚫 PROHIBITIONS
+- NEVER include "Verification" or "ID" numbers in your response unless editing/deleting a memory.
+- NEVER explain that you are using a tool; just use it.
+- Keep responses elite, concise, and focused on execution.
 `
 
     // Construct full message history for the AI
