@@ -1172,22 +1172,22 @@ export default function ChatPage() {
            /\[MEMORY_UPSERT:\s*(.*?)\s*\|\s*(.*?)\]/i,
            /\[MEMORY_INCREMENT:\s*(.*?)\]/i,
            /\[MEMORY_DELETE:\s*(.*?)\]/i,
-           /\[MEMORY_.*?:.*?\]/gi, // Aggressive catch-all for any memory tags
-           /\[MEMORY_.*?\]/gi,      // Catch-all for standalone memory tags
+           /\[MEMORY_.*?:.*?\]/gi, // Aggressive catch-all
+           /\[MEMORY_.*?\]/gi,      // Standalone catch-all
         ]
         
         const upsertMatch = finalContent.match(/\[MEMORY_UPSERT:\s*(.*?)\s*\|\s*(.*?)\]/i)
         const incrementMatch = finalContent.match(/\[MEMORY_INCREMENT:\s*(.*?)\]/i)
         const deleteMatch = finalContent.match(/\[MEMORY_DELETE:\s*(.*?)\]/i)
         
+        // Always strip tags from final content
+        memoryPatterns.forEach(pattern => {
+           finalContent = finalContent.replace(pattern, '')
+        })
+        finalContent = finalContent.trim()
+        
         if (upsertMatch || incrementMatch || deleteMatch) {
-           // Remove all memory tags
-           memoryPatterns.forEach(pattern => {
-              finalContent = finalContent.replace(pattern, '')
-           })
-           finalContent = finalContent.trim()
-           
-           // Sync new memory to Supabase
+           // Sync logic...
            const { data: { user } } = await supabase.auth.getUser()
            if (user) {
               const { data: currentProfile } = await supabase.from('profiles').select('ai_memory').eq('id', user.id).maybeSingle()
