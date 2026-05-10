@@ -1185,6 +1185,13 @@ export default function ChatPage() {
            finalContent = finalContent.replace(pattern, '')
         })
         finalContent = finalContent.trim()
+
+        // Safety: If response is empty after stripping, provide a silent fallback or acknowledgment
+        if (!finalContent && (upsertMatch || incrementMatch || deleteMatch)) {
+           finalContent = "Memory synchronized. System updated."
+        } else if (!finalContent) {
+           finalContent = "System ready."
+        }
         
         if (upsertMatch || incrementMatch || deleteMatch) {
            // Sync logic...
