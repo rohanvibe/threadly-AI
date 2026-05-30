@@ -1570,7 +1570,7 @@ export default function ChatPage() {
                         }`}
                       >
                         <MessageSquare className={`w-4 h-4 shrink-0 transition-all ${currentChatId === chat.id ? 'text-(--apple-blue) scale-110' : 'text-(--apple-gray) group-hover:text-gray-300'}`} />
-                        <span className="truncate">{chat.title}</span>
+                        <span className="truncate">{typeof chat.title === 'string' ? chat.title : JSON.stringify(chat.title)}</span>
                         {currentChatId === chat.id && (
                           <motion.div 
                             layoutId="active-chat-indicator"
@@ -2209,7 +2209,7 @@ export default function ChatPage() {
                                   {idx + 1}
                                </span>
                                <span className={`text-xs font-bold truncate transition-colors ${isActive || isBookmarked ? 'text-gray-200' : 'text-gray-500 group-hover:text-white'}`}>
-                                 {msg.content}
+                                 {typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content)}
                                </span>
                              </div>
                              <button onClick={(e) => toggleBookmark(msg.id, e)} className={`p-1 rounded-md transition-all ${isBookmarked ? 'opacity-100 text-yellow-500' : 'opacity-0 group-hover:opacity-100 text-gray-600 hover:text-white hover:bg-white/10'}`}>
@@ -2399,7 +2399,7 @@ function SettingsModal({ onClose, shortcuts, updateShortcut, resetShortcuts }: {
                   <div className="space-y-3">
                     {profile.ai_memory.map((mem, idx) => (
                       <div key={idx} className="flex items-center justify-between p-5 rounded-2xl bg-white/2 border border-white/5 group hover:border-blue-500/20 transition-all">
-                        <span className="text-xs font-bold text-gray-400">{mem}</span>
+                        <span className="text-xs font-bold text-gray-400">{typeof mem === 'string' ? mem : JSON.stringify(mem)}</span>
                         <button onClick={() => removeMemory(idx)} className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500/50 hover:text-red-500 p-2"><Trash2 className="w-4 h-4" /></button>
                       </div>
                     ))}
