@@ -987,7 +987,12 @@ export default function ChatPage() {
   }, [])
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const container = document.getElementById('chat-messages-container')
+    if (container && loading) {
+       const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 200
+       if (!isNearBottom) return // Don't interrupt if user is reading up
+    }
+    messagesEndRef.current?.scrollIntoView({ behavior: loading ? 'auto' : 'smooth' })
   }
 
   const chatMap = useMemo(() => {
