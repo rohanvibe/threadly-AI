@@ -756,6 +756,7 @@ export default function ChatPage() {
   const [showJumpToBottom, setShowJumpToBottom] = useState(false)
   const [isSharedRecently, setIsSharedRecently] = useState(false)
   const [hasDiscoveredSidebar, setHasDiscoveredSidebar] = useState(true)
+  const [activeSidebarMsgId, setActiveSidebarMsgId] = useState<string | null>(null)
 
   useEffect(() => {
     if (currentChatId) {
@@ -952,6 +953,38 @@ export default function ChatPage() {
        document.getElementById('chat-input')?.focus()
     }
   }, [messages, loading, currentChatId])
+
+  useEffect(() => {
+    // Feature 16: Press "/" Anywhere to focus input or search
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '/' && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+        e.preventDefault()
+        document.getElementById('chat-input')?.focus()
+      }
+      if (e.key === '/' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        document.getElementById('chat-input')?.focus()
+      }
+    }
+    
+    // Feature 17: Swipe Sidebar Open (Mobile)
+    let touchStartX = 0
+    const handleTouchStart = (e: TouchEvent) => { touchStartX = e.touches[0].clientX }
+    const handleTouchEnd = (e: TouchEvent) => {
+      const touchEndX = e.changedTouches[0].clientX
+      if (touchStartX < 50 && touchEndX - touchStartX > 100) setIsNavOpen(true)
+      if (window.innerWidth - touchStartX < 50 && touchStartX - touchEndX > 100) setIsSidebarOpen(true)
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('touchstart', handleTouchStart)
+    document.addEventListener('touchend', handleTouchEnd)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('touchstart', handleTouchStart)
+      document.removeEventListener('touchend', handleTouchEnd)
+    }
+  }, [])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -1807,6 +1840,20 @@ export default function ChatPage() {
                  setChatScrolls(prev => ({ ...prev, [currentChatId]: scrollTop }))
               }
               setShowJumpToBottom(scrollHeight - scrollTop - clientHeight > 300)
+              
+              // Feature 2: Sidebar Auto-Reveals Current Position
+              const messageElements = Array.from(document.querySelectorAll('[id^="msg-"]'))
+              let currentActive = null
+              for (const el of messageElements) {
+                 const rect = el.getBoundingClientRect()
+                 if (rect.top >= 0 && rect.top <= window.innerHeight / 2) {
+                    currentActive = el.id.replace('msg-', '')
+                    break
+                 }
+              }
+              if (currentActive) {
+                 setActiveSidebarMsgId(currentActive)
+              }
            }}
         >
           {fetchingMessages ? (
@@ -2257,8 +2304,8 @@ export default function ChatPage() {
                                    if (isMobile) setIsSidebarOpen(false); 
                                  }}
                                  onDoubleClick={() => copyToClipboard(window.location.href.split('#')[0] + '#msg-' + msg.id)}
-                                 title="Double-click to copy direct link"
-                                 className="w-full text-left p-2 rounded-xl hover:bg-(--surface-tertiary) transition-all group flex items-center gap-2"
+                                 title={msg.content}
+                                 className={`w-full text-left p-2 rounded-xl transition-all group flex items-center gap-2 ${activeSidebarMsgId === msg.id ? 'bg-(--surface-tertiary) ring-1 ring-blue-500/30' : 'hover:bg-(--surface-tertiary)'}`}
                                >
                                   <span className="w-1 h-1 rounded-full bg-(--apple-gray) group-hover:bg-(--foreground) transition-colors shrink-0" />
                                   <span className="text-[11px] font-medium text-(--apple-gray) group-hover:text-(--foreground) truncate transition-colors">
@@ -2285,8 +2332,8 @@ export default function ChatPage() {
                              if (isMobile) setIsSidebarOpen(false); 
                            }}
                            onDoubleClick={() => copyToClipboard(window.location.href.split('#')[0] + '#msg-' + msg.id)}
-                           title="Double-click to copy direct link"
-                           className={`w-full text-left p-4 rounded-2xl border transition-all group active:scale-[0.98] relative overflow-hidden ${isActive ? 'bg-blue-600/10 border-blue-500/30' : 'border-white/3 bg-white/1 hover:bg-blue-600/5 hover:border-blue-500/20'}`}
+                           title={typeof msg.content === 'string' ? msg.content : "Message preview"}
+                           className={`w-full text-left p-4 rounded-2xl border transition-all group active:scale-[0.98] relative overflow-hidden ${isActive || activeSidebarMsgId === msg.id ? 'bg-blue-600/10 border-blue-500/30' : 'border-white/3 bg-white/1 hover:bg-blue-600/5 hover:border-blue-500/20'}`}
                          >
                            <div className="flex items-center justify-between gap-4 relative z-10">
                              <div className="flex items-center gap-3 min-w-0 flex-1">
