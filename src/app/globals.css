@@ -95,6 +95,26 @@ h1, h2, h3, h4, h5, h6 {
   transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
+.typing-cursor > *:last-child::after {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 15px;
+  background-color: currentColor;
+  margin-left: 4px;
+  vertical-align: middle;
+  animation: blink 1s step-end infinite;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
 }

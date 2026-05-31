@@ -1953,7 +1953,7 @@ export default function ChatPage() {
                            </div>
                         </div>
                       ) : (
-                        <div className="text-(--foreground) leading-relaxed text-[17px] prose prose-sm max-w-none prose-p:leading-[1.45] prose-pre:rounded-(--radius-md) prose-code:text-(--apple-blue) break-words selection:bg-blue-500/40 dark:prose-invert">
+                        <div className={`text-(--foreground) leading-relaxed text-[17px] prose prose-sm max-w-none prose-p:leading-[1.45] prose-pre:rounded-(--radius-md) prose-code:text-(--apple-blue) break-words selection:bg-blue-500/40 dark:prose-invert ${msg.role === 'assistant' && loading && i === messages.length - 1 ? 'typing-cursor' : ''}`}>
                           {msg.content === '' && loading ? (
                              <div className="flex items-center gap-4 py-2">
                                 <div className="flex gap-1.5 item-center">
@@ -2023,7 +2023,7 @@ export default function ChatPage() {
                                 }
                               }}
                             >
-                              {cleanDisplayContent(msg.content) + (msg.role === 'assistant' && loading && i === messages.length - 1 ? ' ▍' : '')}
+                              {cleanDisplayContent(msg.content)}
                             </ReactMarkdown>
                           )}
 
