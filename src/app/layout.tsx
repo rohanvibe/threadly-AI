@@ -60,7 +60,7 @@ export default function RootLayout({
         />
         <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
       </head>
-      <body className="min-h-full flex flex-col bg-[#09090b] selection:bg-blue-500/30">
+      <body className="min-h-full flex flex-col bg-(--background) text-(--foreground) selection:bg-blue-500/30">
         <ToastProvider>
            <VisualShell>
              <div id="spotlight" />
@@ -77,6 +77,19 @@ export default function RootLayout({
                   navigator.serviceWorker.register('/service-worker.js');
                 });
               }
+
+              // Apply Theme Immediately to prevent flash
+              try {
+                const savedTheme = localStorage.getItem('threadly_theme');
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const root = document.documentElement;
+                root.classList.remove('light', 'dark');
+                if (savedTheme === 'dark' || (savedTheme === 'system' && prefersDark) || (!savedTheme && prefersDark)) {
+                  root.classList.add('dark');
+                } else {
+                  root.classList.add('light');
+                }
+              } catch (e) {}
 
               // Liquid Spotlight Logic
               const spotlight = document.getElementById('spotlight');

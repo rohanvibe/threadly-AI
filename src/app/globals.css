@@ -6,6 +6,8 @@
   --color-foreground: var(--foreground);
 }
 
+@custom-variant dark (&:is(.dark *));
+
 @import "katex/dist/katex.min.css";
 :root, .light {
   --background: #f5f5f7;
