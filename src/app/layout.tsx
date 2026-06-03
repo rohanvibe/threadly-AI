@@ -78,17 +78,35 @@ export default function RootLayout({
                 });
               }
 
-              // Apply Theme Immediately to prevent flash
+              // Global Theme Controller
               try {
-                const savedTheme = localStorage.getItem('threadly_theme');
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                 const root = document.documentElement;
-                root.classList.remove('light', 'dark');
-                if (savedTheme === 'dark' || (savedTheme === 'system' && prefersDark) || (!savedTheme && prefersDark)) {
-                  root.classList.add('dark');
-                } else {
-                  root.classList.add('light');
-                }
+                const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                
+                const applyTheme = () => {
+                  const savedTheme = localStorage.getItem('threadly_theme');
+                  const prefersDark = mediaQuery.matches;
+                  root.classList.remove('light', 'dark');
+                  if (savedTheme === 'dark' || (savedTheme === 'system' && prefersDark) || (!savedTheme && prefersDark)) {
+                    root.classList.add('dark');
+                  } else {
+                    root.classList.add('light');
+                  }
+                };
+                
+                // Apply on load
+                applyTheme();
+                
+                // Listen to OS changes
+                mediaQuery.addEventListener('change', applyTheme);
+                
+                // Listen to UI changes from page.tsx
+                window.addEventListener('theme-changed', applyTheme);
+                
+                // Listen to cross-tab changes
+                window.addEventListener('storage', (e) => {
+                  if (e.key === 'threadly_theme') applyTheme();
+                });
               } catch (e) {}
 
               // Liquid Spotlight Logic
