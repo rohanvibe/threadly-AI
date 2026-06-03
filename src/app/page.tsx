@@ -1279,8 +1279,8 @@ export default function ChatPage() {
 
     setMessages(prev => [...prev, tempUserMsg])
     
-    // Start DB insert in parallel
-    const userMsgInsert = !isGuest ? supabase.from('messages').insert([{ chat_id: chatId, role: 'user', content: displayContent }]) : Promise.resolve()
+    // Start DB insert immediately so its created_at timestamp is earlier than the assistant's
+    const userMsgInsert = !isGuest ? supabase.from('messages').insert([{ chat_id: chatId, role: 'user', content: displayContent }]).then(res => res) : Promise.resolve({ error: null })
 
     // Create placeholder for assistant message
     const assistantMsgId = Math.random().toString()
@@ -1426,12 +1426,9 @@ export default function ChatPage() {
         let assistantResult: any = { error: null }
 
         if (!isGuest) {
-          const results = await Promise.all([
-            userMsgInsert,
-            supabase.from('messages').insert([{ chat_id: chatId, role: 'assistant', content: finalContent }])
-          ])
-          userResult = results[0]
-          assistantResult = results[1]
+          // Await the user insert first to guarantee sequential timestamp order in the DB
+          const userResult = await userMsgInsert
+          const assistantResult = await supabase.from('messages').insert([{ chat_id: chatId, role: 'assistant', content: finalContent }])
 
           if (userResult.error) console.error("User message save error:", userResult.error)
           if (assistantResult.error) console.error("Assistant message save error:", assistantResult.error)
