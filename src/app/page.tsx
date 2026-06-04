@@ -1930,7 +1930,7 @@ export default function ChatPage() {
                            </div>
                         </div>
                       ) : (
-                        <div className={`text-(--foreground) leading-relaxed text-base prose prose-sm max-w-none prose-pre:rounded-(--radius-md) prose-code:text-(--apple-blue) break-words selection:bg-blue-500/40 dark:prose-invert ${msg.role === 'assistant' && loading && i === messages.length - 1 ? 'typing-cursor' : ''}`}>
+                        <div className={`text-(--foreground) leading-relaxed text-lg prose prose-lg max-w-none prose-pre:rounded-(--radius-md) prose-code:text-(--apple-blue) break-words selection:bg-blue-500/40 dark:prose-invert ${msg.role === 'assistant' && loading && i === messages.length - 1 ? 'typing-cursor' : ''}`}>
                           {msg.content === '' && loading ? (
                              <div className="py-2">
                                <span className="inline-block w-2.5 h-2.5 rounded-full bg-current opacity-70 animate-blink my-1"></span>
