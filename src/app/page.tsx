@@ -1827,12 +1827,19 @@ export default function ChatPage() {
               // Feature 2: Sidebar Auto-Reveals Current Position
               const messageElements = Array.from(document.querySelectorAll('[id^="msg-"]'))
               let currentActive = null
+              const middleY = window.innerHeight / 2
+              
               for (const el of messageElements) {
                  const rect = el.getBoundingClientRect()
-                 if (rect.top >= 0 && rect.top <= window.innerHeight / 2) {
+                 if (rect.top <= middleY) {
                     currentActive = el.id.replace('msg-', '')
+                 } else {
                     break
                  }
+              }
+              
+              if (!currentActive && messageElements.length > 0) {
+                 currentActive = messageElements[0].id.replace('msg-', '')
               }
               if (currentActive) {
                  const msgIndex = messages.findIndex(m => m.id === currentActive)
