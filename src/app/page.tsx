@@ -60,8 +60,7 @@ import {
   Monitor,
   MousePointer2,
   Mic,
-  AudioLines,
-  Image as ImageIcon
+  FileUp
 } from 'lucide-react'
 import { motion, AnimatePresence, useScroll, useMotionValue, useSpring, useTransform, useMotionValueEvent } from 'framer-motion'
 import ReactMarkdown from 'react-markdown'
@@ -719,6 +718,7 @@ export default function ChatPage() {
   
   const [profileMemories, setProfileMemories] = useState<string[]>([])
   const [attachedFile, setAttachedFile] = useState<{ name: string, content: string } | null>(null)
+  const [isListening, setIsListening] = useState(false)
   
   // Phase 1 Sidebar States
   const [sidebarSearch, setSidebarSearch] = useState('')
@@ -790,19 +790,86 @@ export default function ChatPage() {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+    // Reset input so same file can be re-attached
+    e.target.value = ''
 
-    if (file.size > 1024 * 1024) { // 1MB limit for context injection
-      toast("File too large. Max 1MB for context injection.", "error")
+    const MAX_SIZE = 2 * 1024 * 1024 // 2MB
+    if (file.size > MAX_SIZE) {
+      toast("File too large. Max 2MB.", "error")
       return
     }
 
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      const content = event.target?.result as string
-      setAttachedFile({ name: file.name, content })
-      toast(`File "${file.name}" attached`, "success")
+    const textTypes = [
+      'text/plain', 'text/markdown', 'text/csv', 'text/html',
+      'application/json', 'application/xml', 'text/xml',
+      'application/javascript', 'text/javascript',
+    ]
+    const isText = textTypes.includes(file.type) || /\.(txt|md|csv|json|xml|html|js|ts|py|java|c|cpp|cs|go|rs|rb|php|yaml|yml|toml|ini|env|sh|bat|sql)$/i.test(file.name)
+
+    if (isText) {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        const content = event.target?.result as string
+        setAttachedFile({ name: file.name, content })
+        toast(`"${file.name}" attached`, "success")
+      }
+      reader.readAsText(file)
+    } else if (file.type === 'application/pdf') {
+      // Read PDF as array buffer and extract raw text naively
+      const reader = new FileReader()
+      reader.onload = async (event) => {
+        try {
+          const buffer = event.target?.result as ArrayBuffer
+          const bytes = new Uint8Array(buffer)
+          // Naive extraction: pull ASCII text runs from the PDF binary
+          let text = ''
+          for (let i = 0; i < bytes.length - 1; i++) {
+            const b = bytes[i]
+            if ((b >= 32 && b <= 126) || b === 10 || b === 13) {
+              text += String.fromCharCode(b)
+            } else {
+              text += ' '
+            }
+          }
+          // Collapse whitespace and filter garbage
+          const cleaned = text
+            .replace(/[ \t]{3,}/g, '  ')
+            .replace(/\n{4,}/g, '\n\n')
+            .replace(/[^ -~\n\r]{2,}/g, ' ')
+            .slice(0, 50000) // Cap at ~50k chars
+          setAttachedFile({ name: file.name, content: `[Extracted from PDF — layout may differ]\n${cleaned}` })
+          toast(`"${file.name}" attached (PDF text extracted)`, "success")
+        } catch (err) {
+          toast("Could not read PDF. Try a text file instead.", "error")
+        }
+      }
+      reader.readAsArrayBuffer(file)
+    } else {
+      toast("Unsupported file type. Attach a text, code, CSV, JSON, or PDF file.", "error")
     }
-    reader.readAsText(file)
+  }
+
+  const startVoiceInput = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (!SpeechRecognition) {
+      toast("Voice input not supported in this browser. Try Chrome.", "error")
+      return
+    }
+    if (isListening) return
+    const recognition = new SpeechRecognition()
+    recognition.lang = 'en-US'
+    recognition.interimResults = true
+    recognition.continuous = false
+    setIsListening(true)
+    recognition.start()
+    recognition.onresult = (event: any) => {
+      const transcript = Array.from(event.results)
+        .map((r: any) => r[0].transcript)
+        .join('')
+      setInput(transcript)
+    }
+    recognition.onerror = () => setIsListening(false)
+    recognition.onend = () => setIsListening(false)
   }
 
   const fetchProfile = async (uid: string) => {
@@ -2109,9 +2176,15 @@ export default function ChatPage() {
                 )}
               </AnimatePresence>
               <form onSubmit={sendMessage}>
-                <div className="relative bg-[#212121] dark:bg-[#212121] rounded-full p-1.5 shadow-xl group-focus-within:ring-1 ring-white/20 transition-all border border-white/10 flex items-center">
-                   <Button type="button" variant="ghost" size="icon" className="w-10 h-10 rounded-full shrink-0 text-gray-400 hover:text-white hover:bg-white/10 transition-colors ml-1" onClick={() => fileInputRef.current?.click()}>
-                     <Plus className="w-5 h-5" />
+                <div className="relative bg-(--surface) rounded-(--radius-lg) p-2 shadow-xl group-focus-within:ring-1 ring-blue-500/20 transition-all border border-(--border-color)">
+                   <Button 
+                     type="button" 
+                     variant="ghost" 
+                     size="icon" 
+                     className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full text-(--apple-gray) hover:text-(--foreground) hover:bg-(--surface-tertiary) transition-colors z-10" 
+                     onClick={() => fileInputRef.current?.click()}
+                   >
+                     <Plus className="w-5 h-5 md:w-6 md:h-6" />
                    </Button>
                    <textarea 
                      id="chat-input"
@@ -2133,27 +2206,31 @@ export default function ChatPage() {
                      }}
                      rows={1}
                      placeholder={loading ? "Generating..." : "Ask anything"}
-                     className="flex-1 py-3 px-3 bg-transparent text-base md:text-[17px] outline-none resize-none custom-scrollbar placeholder:text-gray-400 font-medium tracking-tight text-white h-12 flex items-center mt-1"
+                     className="w-full pr-28 md:pr-40 py-4 md:py-5 pl-14 md:pl-20 bg-transparent text-base md:text-[17px] outline-none resize-none custom-scrollbar placeholder:text-(--apple-gray) font-medium tracking-tight text-(--foreground) block"
                    />
-                   <div className="flex items-center gap-1.5 pr-1.5 shrink-0">
+                   <div className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
                      {loading ? (
-                       <Button onClick={stopResponding} variant="ghost" size="icon" className="w-10 h-10 rounded-full bg-white/10 hover:bg-red-500/20 hover:text-red-500 transition-all text-white">
-                         <Square className="w-4 h-4 fill-current" />
+                       <Button onClick={stopResponding} variant="ghost" size="icon" className="w-10 h-10 md:w-12 md:h-12 rounded-(--radius-pill) bg-(--surface-tertiary) hover:bg-red-500/10 hover:text-red-500 transition-all">
+                         <Square className="w-4 h-4 md:w-5 md:h-5 fill-current" />
                        </Button>
                      ) : (
                        <>
                          {!input.trim() ? (
-                           <>
-                             <Button type="button" variant="ghost" size="icon" className="w-10 h-10 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-colors">
-                               <Mic className="w-5 h-5" />
-                             </Button>
-                             <Button type="button" size="icon" className="w-10 h-10 rounded-full bg-white text-black shadow-md hover:bg-gray-200 transition-all border-none">
-                               <AudioLines className="w-5 h-5" />
-                             </Button>
-                           </>
+                           <Button
+                             type="button"
+                             onClick={startVoiceInput}
+                             size="icon"
+                             className={`w-10 h-10 md:w-12 md:h-12 rounded-(--radius-pill) transition-all border-none ${
+                               isListening
+                                 ? 'bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/30'
+                                 : 'bg-(--apple-blue) text-white shadow-md hover:opacity-80'
+                             }`}
+                           >
+                             <Mic className="w-5 h-5 md:w-6 md:h-6" />
+                           </Button>
                          ) : (
-                           <Button type="submit" disabled={!input.trim()} size="icon" className="w-10 h-10 rounded-full bg-white text-black shadow-md hover:bg-gray-200 active:scale-90 transition-all border-none" >
-                             <ArrowRight className="w-5 h-5" />
+                           <Button type="submit" disabled={!input.trim()} size="icon" className="w-10 h-10 md:w-12 md:h-12 rounded-(--radius-pill) bg-(--apple-blue) text-white shadow-lg active:scale-90 disabled:opacity-20 transition-all border-none" >
+                             <ArrowRight className="w-5 h-5 md:w-6 md:h-6" />
                            </Button>
                          )}
                        </>
@@ -2161,19 +2238,44 @@ export default function ChatPage() {
                    </div>
                 </div>
               </form>
+
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                className="hidden"
+                accept=".txt,.md,.csv,.json,.xml,.html,.js,.ts,.py,.java,.c,.cpp,.cs,.go,.rs,.rb,.php,.yaml,.yml,.toml,.ini,.sh,.bat,.sql,.pdf"
+                onChange={handleFileUpload}
+              />
+
+              {/* Attached file chip */}
+              {attachedFile && (
+                <div className="flex items-center gap-2 mt-3 px-1">
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-(--surface-tertiary) border border-(--border-color) text-sm text-(--foreground) font-medium max-w-xs truncate">
+                    <FileText className="w-3.5 h-3.5 text-(--apple-blue) shrink-0" />
+                    <span className="truncate">{attachedFile.name}</span>
+                    <button onClick={() => setAttachedFile(null)} className="ml-1 text-(--apple-gray) hover:text-red-500 shrink-0 transition-colors">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <span className="text-xs text-(--apple-gray)">AI will read this file</span>
+                </div>
+              )}
               
               {messages.length === 0 && !input.trim() && (
                 <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
-                   <button className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 hover:bg-white/5 transition-colors text-sm font-medium text-gray-300 hover:text-white">
-                     <ImageIcon className="w-4 h-4" />
-                     Create an image
-                   </button>
-                   <button className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 hover:bg-white/5 transition-colors text-sm font-medium text-gray-300 hover:text-white">
-                     <Edit2 className="w-4 h-4" />
+                   <button 
+                     onClick={() => { setInput('Help me write '); document.getElementById('chat-input')?.focus() }}
+                     className="flex items-center gap-2 px-4 py-2 rounded-full border border-(--border-color) bg-(--surface) hover:bg-(--surface-tertiary) transition-colors text-sm font-medium text-(--foreground) shadow-sm"
+                   >
+                     <Edit2 className="w-4 h-4 text-purple-500" />
                      Write or edit
                    </button>
-                   <button className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 hover:bg-white/5 transition-colors text-sm font-medium text-gray-300 hover:text-white">
-                     <Globe className="w-4 h-4" />
+                   <button 
+                     onClick={() => { setInput('Look up information about '); document.getElementById('chat-input')?.focus() }}
+                     className="flex items-center gap-2 px-4 py-2 rounded-full border border-(--border-color) bg-(--surface) hover:bg-(--surface-tertiary) transition-colors text-sm font-medium text-(--foreground) shadow-sm"
+                   >
+                     <Globe className="w-4 h-4 text-green-500" />
                      Look something up
                    </button>
                 </div>
