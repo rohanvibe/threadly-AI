@@ -58,7 +58,10 @@ import {
   Sun,
   Moon,
   Monitor,
-  MousePointer2
+  MousePointer2,
+  Mic,
+  AudioLines,
+  Image as ImageIcon
 } from 'lucide-react'
 import { motion, AnimatePresence, useScroll, useMotionValue, useSpring, useTransform, useMotionValueEvent } from 'framer-motion'
 import ReactMarkdown from 'react-markdown'
@@ -2106,50 +2109,86 @@ export default function ChatPage() {
                 )}
               </AnimatePresence>
               <form onSubmit={sendMessage}>
-                <div className="relative bg-(--surface) rounded-(--radius-lg) p-2 shadow-xl group-focus-within:ring-1 ring-blue-500/20 transition-all border border-(--border-color)">
-                  <textarea 
-                    id="chat-input"
-                    value={input}
-                    onChange={(e) => {
-                      setInput(e.target.value)
-                      if (currentChatId) {
-                         setChatDrafts(prev => ({ ...prev, [currentChatId]: e.target.value }))
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey || !e.shiftKey)) {
-                        if (!e.shiftKey || (e.metaKey || e.ctrlKey)) {
-                           e.preventDefault()
-                           if (isMobile) e.currentTarget.blur()
-                           sendMessage()
-                        }
-                      }
-                    }}
-                    rows={1}
-                    placeholder={loading ? "Generating response..." : ["Ask anything...", "Continue where you left off...", "Find an old answer instantly...", "Study without losing context..."][(messages.length + (currentChatId ? 1 : 0)) % 4]}
-                    className="w-full pr-24 md:pr-32 py-4 md:py-5 pl-6 md:pl-8 bg-transparent text-base md:text-[17px] outline-none resize-none custom-scrollbar placeholder:text-(--apple-gray) font-medium tracking-tight text-(--foreground)"
-                  />
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-3">
-                    {loading ? (
-                      <Button onClick={stopResponding} variant="ghost" size="icon" className="w-12 h-12 rounded-(--radius-pill) bg-(--surface-tertiary) hover:bg-red-500/10 hover:text-red-500 transition-all">
-                        <Square className="w-5 h-5 fill-current" />
-                      </Button>
-                    ) : (
-                      <Button type="submit" disabled={!input.trim()} size="icon" className="w-12 h-12 rounded-(--radius-pill) bg-(--apple-blue) text-white shadow-lg active:scale-90 disabled:opacity-20 transition-all border-none" >
-                        <ArrowRight className="w-6 h-6" />
-                      </Button>
-                    )}
-                  </div>
+                <div className="relative bg-[#212121] dark:bg-[#212121] rounded-full p-1.5 shadow-xl group-focus-within:ring-1 ring-white/20 transition-all border border-white/10 flex items-center">
+                   <Button type="button" variant="ghost" size="icon" className="w-10 h-10 rounded-full shrink-0 text-gray-400 hover:text-white hover:bg-white/10 transition-colors ml-1" onClick={() => fileInputRef.current?.click()}>
+                     <Plus className="w-5 h-5" />
+                   </Button>
+                   <textarea 
+                     id="chat-input"
+                     value={input}
+                     onChange={(e) => {
+                       setInput(e.target.value)
+                       if (currentChatId) {
+                          setChatDrafts(prev => ({ ...prev, [currentChatId]: e.target.value }))
+                       }
+                     }}
+                     onKeyDown={(e) => {
+                       if (e.key === 'Enter' && (e.metaKey || e.ctrlKey || !e.shiftKey)) {
+                         if (!e.shiftKey || (e.metaKey || e.ctrlKey)) {
+                            e.preventDefault()
+                            if (isMobile) e.currentTarget.blur()
+                            sendMessage()
+                         }
+                       }
+                     }}
+                     rows={1}
+                     placeholder={loading ? "Generating..." : "Ask anything"}
+                     className="flex-1 py-3 px-3 bg-transparent text-base md:text-[17px] outline-none resize-none custom-scrollbar placeholder:text-gray-400 font-medium tracking-tight text-white h-12 flex items-center mt-1"
+                   />
+                   <div className="flex items-center gap-1.5 pr-1.5 shrink-0">
+                     {loading ? (
+                       <Button onClick={stopResponding} variant="ghost" size="icon" className="w-10 h-10 rounded-full bg-white/10 hover:bg-red-500/20 hover:text-red-500 transition-all text-white">
+                         <Square className="w-4 h-4 fill-current" />
+                       </Button>
+                     ) : (
+                       <>
+                         {!input.trim() ? (
+                           <>
+                             <Button type="button" variant="ghost" size="icon" className="w-10 h-10 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-colors">
+                               <Mic className="w-5 h-5" />
+                             </Button>
+                             <Button type="button" size="icon" className="w-10 h-10 rounded-full bg-white text-black shadow-md hover:bg-gray-200 transition-all border-none">
+                               <AudioLines className="w-5 h-5" />
+                             </Button>
+                           </>
+                         ) : (
+                           <Button type="submit" disabled={!input.trim()} size="icon" className="w-10 h-10 rounded-full bg-white text-black shadow-md hover:bg-gray-200 active:scale-90 transition-all border-none" >
+                             <ArrowRight className="w-5 h-5" />
+                           </Button>
+                         )}
+                       </>
+                     )}
+                   </div>
                 </div>
               </form>
-              <div className="hidden md:flex justify-between items-center mt-6 px-4">
-                 <div className="flex items-center gap-3">
-                    <span className="text-[9px] font-black text-(--apple-gray) uppercase tracking-[0.4em]">Groq Llama-3.3</span>
-                    <div className="w-1 h-1 rounded-full bg-(--apple-gray)" />
-                    <span className="text-[9px] font-black text-(--apple-gray) uppercase tracking-[0.4em]">Optimized Inference</span>
-                 </div>
-                 <p className="text-[9px] font-bold text-(--apple-gray) uppercase tracking-widest opacity-50">⌘ + Enter to dispatch</p>
-              </div>
+              
+              {messages.length === 0 && !input.trim() && (
+                <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
+                   <button className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 hover:bg-white/5 transition-colors text-sm font-medium text-gray-300 hover:text-white">
+                     <ImageIcon className="w-4 h-4" />
+                     Create an image
+                   </button>
+                   <button className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 hover:bg-white/5 transition-colors text-sm font-medium text-gray-300 hover:text-white">
+                     <Edit2 className="w-4 h-4" />
+                     Write or edit
+                   </button>
+                   <button className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 hover:bg-white/5 transition-colors text-sm font-medium text-gray-300 hover:text-white">
+                     <Globe className="w-4 h-4" />
+                     Look something up
+                   </button>
+                </div>
+              )}
+
+              {messages.length > 0 && (
+                <div className="hidden md:flex justify-between items-center mt-6 px-4">
+                   <div className="flex items-center gap-3">
+                      <span className="text-[9px] font-black text-(--apple-gray) uppercase tracking-[0.4em]">Groq Llama-3.3</span>
+                      <div className="w-1 h-1 rounded-full bg-(--apple-gray)" />
+                      <span className="text-[9px] font-black text-(--apple-gray) uppercase tracking-[0.4em]">Optimized Inference</span>
+                   </div>
+                   <p className="text-[9px] font-bold text-(--apple-gray) uppercase tracking-widest opacity-50">⌘ + Enter to dispatch</p>
+                </div>
+              )}
            </div>
         </div>
       </motion.div>
