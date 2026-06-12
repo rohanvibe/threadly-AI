@@ -1734,7 +1734,7 @@ export default function ChatPage() {
 
               <button onClick={() => setIsCodexMode(true)} className={`w-full text-left p-3 rounded-xl flex items-center gap-3 group hover:bg-white/5 transition-colors text-[13px] font-medium tracking-tight ${isCodexMode ? 'bg-white/10' : ''}`}>
                 <TerminalSquare className={`w-4 h-4 ${isCodexMode ? 'text-white' : 'text-gray-500 group-hover:text-white'}`} />
-                <span className={isCodexMode ? 'text-white font-semibold' : 'text-gray-300 group-hover:text-white'}>Codex</span>
+                <span className={isCodexMode ? 'text-white font-semibold' : 'text-gray-300 group-hover:text-white'}>Loom</span>
               </button>
 
               <button className="w-full text-left p-3 rounded-xl flex items-center gap-3 group hover:bg-white/5 transition-colors text-[13px] font-medium tracking-tight">
@@ -1820,7 +1820,6 @@ export default function ChatPage() {
                   <span className="text-[11px] text-gray-500 truncate">Free</span>
                 </div>
               </div>
-            </div>
 
               <div className="pt-4 mt-2 border-t border-white/5">
                 <div className="flex bg-(--surface-tertiary) p-1 rounded-xl items-center border border-white/5">
@@ -1867,7 +1866,6 @@ export default function ChatPage() {
           localStorage.setItem('threadly_onboarding_shown', 'true')
         }}
       />
-
       <AnimatePresence>
         {showBigSignup && (
           <BigSignupModal onClose={() => setShowBigSignup(false)} onAction={() => {
@@ -1881,7 +1879,6 @@ export default function ChatPage() {
 
       {isCodexMode ? (
         <div className="flex-1 flex w-full h-full bg-[#18181b] text-[#cccccc] font-sans text-xs overflow-hidden z-[45] relative">
-          {/* Activity Bar */}
           <div className="w-12 border-r border-[#2b2d31] flex flex-col items-center py-2 gap-4 bg-[#18181b] shrink-0">
              <button className="p-2 text-gray-500 hover:text-white mt-2 mb-4" title="Menu">
                <Menu className="w-5 h-5" />
@@ -1897,7 +1894,6 @@ export default function ChatPage() {
              </div>
           </div>
 
-          {/* Primary Side Bar (Source Control/Explorer) */}
           <div className="w-64 border-r border-[#2b2d31] bg-[#18181b] flex flex-col shrink-0 hidden md:flex">
              <div className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-400 border-b border-[#2b2d31] flex justify-between items-center">
                 Source Control
@@ -1917,9 +1913,7 @@ export default function ChatPage() {
              </div>
           </div>
 
-          {/* Main Editor Area */}
           <div className="flex-1 flex flex-col min-w-0 bg-[#1e1e1e]">
-             {/* Editor Tabs */}
              <div className="flex bg-[#18181b] overflow-x-auto custom-scrollbar border-b border-[#2b2d31]">
                 <div className="px-4 py-2 bg-[#1e1e1e] border-t-2 border-t-blue-500 text-white flex items-center gap-2 text-xs">
                    <Monitor className="w-3.5 h-3.5 text-blue-400" />
@@ -1928,7 +1922,6 @@ export default function ChatPage() {
                 </div>
              </div>
              
-             {/* Editor Content */}
              <div className="flex-1 flex flex-col relative items-center justify-center p-8 text-center text-gray-400">
                 <div className="w-16 h-16 rounded-2xl bg-[#ffffff] flex items-center justify-center mb-6 shadow-xl opacity-80">
                    <div className="w-8 h-8 rounded-full border-4 border-black" style={{ borderTopColor: 'transparent', transform: 'rotate(45deg)' }} />
@@ -1946,7 +1939,6 @@ export default function ChatPage() {
                 </div>
              </div>
              
-             {/* Terminal Area at bottom */}
              <div className="h-64 border-t border-[#2b2d31] bg-[#1e1e1e] flex flex-col hidden md:flex">
                 <div className="flex gap-4 px-4 pt-2 text-[11px] uppercase tracking-wider text-gray-500 border-b border-[#2b2d31]">
                    <span className="pb-2 cursor-pointer hover:text-white">Problems</span>
@@ -1961,10 +1953,9 @@ export default function ChatPage() {
              </div>
           </div>
 
-          {/* Right Sidebar (Chat) */}
           <div className="w-full md:w-[450px] border-l border-[#2b2d31] bg-[#1e1e1e] flex flex-col shrink-0 relative">
              <div className="px-4 py-3 border-b border-[#2b2d31] flex justify-between items-center shrink-0 bg-[#18181b]">
-                <span className="text-[13px] font-medium text-gray-300">Removing Text Generation Anim...</span>
+                <span className="text-[13px] font-medium text-gray-300">Loom</span>
                 <div className="flex gap-2">
                    <Plus className="w-4 h-4 text-gray-400 hover:text-white cursor-pointer" />
                    <History className="w-4 h-4 text-gray-400 hover:text-white cursor-pointer" />
@@ -2003,7 +1994,6 @@ export default function ChatPage() {
           </div>
         )}
 
-        {/* Desktop Header Actions */}
         {!isMobile && (
                <div className="absolute top-8 right-8 z-40 flex items-center gap-3">
               {currentChatId && (
@@ -2034,7 +2024,6 @@ export default function ChatPage() {
            </div>
         )}
 
-        {/* Conversation Minimap */}
         {!isMobile && messages.filter(m => m.role === 'user').length > 3 && (
            <div className="absolute right-6 top-32 bottom-40 w-4 z-40 opacity-30 hover:opacity-100 transition-opacity hidden md:block">
               <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-0.5 bg-white/10 rounded-full" />
@@ -2062,7 +2051,6 @@ export default function ChatPage() {
               setShowJumpToBottom(isScrolledUp)
               userScrolledUpRef.current = isScrolledUp
               
-              // Feature 2: Sidebar Auto-Reveals Current Position
               const messageElements = Array.from(document.querySelectorAll('[id^="msg-"]'))
               let currentActive = null
               const middleY = window.innerHeight / 2
@@ -2191,29 +2179,29 @@ export default function ChatPage() {
                                   </div>
                                 ),
                                 th: ({ children }) => <th className="px-6 py-4 text-left text-[11px] font-black uppercase tracking-[0.2em] text-blue-400 bg-white/5 whitespace-nowrap">{children}</th>,
-                                 td: ({ children }) => <td className="px-6 py-4 text-sm border-t border-white/5 text-gray-300 whitespace-nowrap min-w-[120px]">{children}</td>,
-                                 ul: ({ children }) => <ul className="list-disc pl-5 space-y-2 mb-4 break-words">{children}</ul>,
-                                 ol: ({ children }) => <ol className="list-decimal pl-5 space-y-2 mb-4 break-words">{children}</ol>,
-                                 li: ({ children }) => <li className="leading-relaxed break-words">{children}</li>,
-                                 img: ({ src, alt }) => (
-                                   <a href={typeof src === 'string' ? src : undefined} target="_blank" rel="noopener noreferrer" className="block my-6 max-w-2xl group relative cursor-zoom-in">
-                                      <img src={typeof src === 'string' ? src : undefined} alt={typeof alt === 'string' ? alt : "Image"} className="w-full rounded-2xl border border-white/10 shadow-2xl transition-transform group-hover:scale-[1.01]" loading="lazy" />
-                                      <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-2xl pointer-events-none" />
-                                   </a>
-                                 ),
-                                 a: ({ href, children, ...props }) => {
-                                   if (href && /\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(href)) {
-                                     return (
-                                       <a href={typeof href === 'string' ? href : undefined} target="_blank" rel="noopener noreferrer" className="block my-6 max-w-2xl group relative cursor-zoom-in">
-                                          <img src={typeof href === 'string' ? href : undefined} alt={String(children) || "Image"} className="w-full rounded-2xl border border-white/10 shadow-2xl transition-transform group-hover:scale-[1.01]" loading="lazy" />
-                                          <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-2xl pointer-events-none" />
-                                       </a>
-                                     )
-                                   }
-                                   return <a href={typeof href === 'string' ? href : undefined} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline underline-offset-4" {...props}>{children}</a>
-                                 },
-                                 code: ({ node, className, children, ...props }: any) => {
-                                   const match = /language-(\w+)/.exec(className || '');
+                                td: ({ children }) => <td className="px-6 py-4 text-sm border-t border-white/5 text-gray-300 whitespace-nowrap min-w-[120px]">{children}</td>,
+                                ul: ({ children }) => <ul className="list-disc pl-5 space-y-2 mb-4 break-words">{children}</ul>,
+                                ol: ({ children }) => <ol className="list-decimal pl-5 space-y-2 mb-4 break-words">{children}</ol>,
+                                li: ({ children }) => <li className="leading-relaxed break-words">{children}</li>,
+                                img: ({ src, alt }) => (
+                                  <a href={typeof src === 'string' ? src : undefined} target="_blank" rel="noopener noreferrer" className="block my-6 max-w-2xl group relative cursor-zoom-in">
+                                     <img src={typeof src === 'string' ? src : undefined} alt={typeof alt === 'string' ? alt : "Image"} className="w-full rounded-2xl border border-white/10 shadow-2xl transition-transform group-hover:scale-[1.01]" loading="lazy" />
+                                     <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-2xl pointer-events-none" />
+                                  </a>
+                                ),
+                                a: ({ href, children, ...props }) => {
+                                  if (href && /\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(href)) {
+                                    return (
+                                      <a href={typeof href === 'string' ? href : undefined} target="_blank" rel="noopener noreferrer" className="block my-6 max-w-2xl group relative cursor-zoom-in">
+                                         <img src={typeof href === 'string' ? href : undefined} alt={String(children) || "Image"} className="w-full rounded-2xl border border-white/10 shadow-2xl transition-transform group-hover:scale-[1.01]" loading="lazy" />
+                                         <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-2xl pointer-events-none" />
+                                      </a>
+                                    )
+                                  }
+                                  return <a href={typeof href === 'string' ? href : undefined} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline underline-offset-4" {...props}>{children}</a>
+                                },
+                                code: ({ node, className, children, ...props }: any) => {
+                                  const match = /language-(\w+)/.exec(className || '');
                                   if (match?.[1] === 'calculator') {
                                     return <Calculator initialExpression={String(children).replace(/\n$/, '')} />
                                   }
@@ -2227,10 +2215,6 @@ export default function ChatPage() {
                                           <div className="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/5">
                                             <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Python Source</span>
                                             <div className="flex items-center gap-2">
-                                              <button onClick={() => setActiveArtifact({ id: Math.random().toString(), title: 'Python Source', content: String(children).replace(/\n$/, ''), language: 'python' })} className="text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1.5 px-3 py-1 bg-blue-500/10 rounded-lg border border-blue-500/20 active:scale-95">
-                                                <Monitor className="w-3 h-3" />
-                                                <span className="text-[9px] font-black uppercase tracking-widest">Open Workspace</span>
-                                              </button>
                                               <button onClick={() => copyToClipboard(String(children).replace(/\n$/, ''))} className="text-gray-500 hover:text-white transition-colors flex items-center gap-1.5 px-3 py-1 bg-white/5 rounded-lg border border-white/5 active:scale-95">
                                                 <Copy className="w-3 h-3" />
                                                 <span className="text-[9px] font-black uppercase tracking-widest">Copy</span>
@@ -2252,16 +2236,10 @@ export default function ChatPage() {
                                     <div className="relative group my-4 rounded-xl overflow-hidden border border-white/10 bg-[#09090b]">
                                       <div className="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/5">
                                         <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">{match?.[1] || 'Code'}</span>
-                                        <div className="flex items-center gap-2">
-                                          <button onClick={() => setActiveArtifact({ id: Math.random().toString(), title: match?.[1] || 'Code', content: String(children).replace(/\n$/, ''), language: match?.[1] || 'text' })} className="text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1.5 px-3 py-1 bg-blue-500/10 rounded-lg border border-blue-500/20 active:scale-95">
-                                            <Monitor className="w-3 h-3" />
-                                            <span className="text-[9px] font-black uppercase tracking-widest">Open Workspace</span>
-                                          </button>
-                                          <button onClick={() => copyToClipboard(String(children).replace(/\n$/, ''))} className="text-gray-500 hover:text-white transition-colors flex items-center gap-1.5 px-3 py-1 bg-white/5 rounded-lg border border-white/5 active:scale-95">
-                                            <Copy className="w-3 h-3" />
-                                            <span className="text-[9px] font-black uppercase tracking-widest">Copy</span>
-                                          </button>
-                                        </div>
+                                        <button onClick={() => copyToClipboard(String(children).replace(/\n$/, ''))} className="text-gray-500 hover:text-white transition-colors flex items-center gap-1.5 px-3 py-1 bg-white/5 rounded-lg border border-white/5 active:scale-95">
+                                          <Copy className="w-3 h-3" />
+                                          <span className="text-[9px] font-black uppercase tracking-widest">Copy</span>
+                                        </button>
                                       </div>
                                       <div className="p-4 overflow-x-auto text-[13px] leading-relaxed custom-scrollbar text-gray-300">
                                         <code className={className} {...props}>{children}</code>
@@ -2273,58 +2251,6 @@ export default function ChatPage() {
                             >
                               {cleanDisplayContent(msg.content)}
                             </ReactMarkdown>
-                          )}
-
-                          {/* PHASE 7: Deterministic Visual Rendering */}
-                          {msg.role === 'assistant' && msg.images && msg.images.length > 0 && (
-                            <div className="mt-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-                               <div className="flex items-center gap-3 mb-2 px-1">
-                                  <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-blue-400">Verified Visual Assets</span>
-                               </div>
-                               <div className="flex flex-col gap-12">
-                                  {msg.images.map((img: any, idx: number) => {
-                                    const aspectRatio = img.width && img.height ? img.width / img.height : 16/10;
-                                    const maxWidth = img.width ? `${Math.min(img.width, 1200)}px` : '100%';
-                                    
-                                    return (
-                                      <div 
-                                        key={idx} 
-                                        style={{ maxWidth }}
-                                        className="group/img relative rounded-3xl overflow-hidden border border-(--border-color) bg-(--surface) shadow-2xl transition-all duration-500 hover:border-blue-500/40 hover:shadow-blue-500/20 mx-auto w-full"
-                                      >
-                                        <div 
-                                          className="relative overflow-hidden bg-(--surface-secondary)"
-                                          style={{ aspectRatio: aspectRatio.toString() }}
-                                        >
-                                          <img 
-                                            src={`/api/proxy-image?url=${encodeURIComponent(img.url)}`}
-                                            alt={img.alt}
-                                            className="w-full h-full object-cover transition-all duration-1000 group-hover/img:scale-105"
-                                            loading="lazy"
-                                          />
-                                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover/img:opacity-60 transition-opacity" />
-                                          
-                                          <div className="absolute bottom-0 inset-x-0 p-8 flex flex-col gap-2 translate-y-2 group-hover/img:translate-y-0 transition-transform">
-                                            <p className="text-[14px] font-black uppercase tracking-[0.2em] text-white drop-shadow-2xl line-clamp-2">{img.alt}</p>
-                                            <div className="flex items-center justify-between mt-2 border-t border-white/10 pt-4">
-                                               <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">{img.attribution || 'Visual Resource'}</span>
-                                               <a 
-                                                 href={img.source} 
-                                                 target="_blank" 
-                                                 rel="noopener noreferrer"
-                                                 className="text-[10px] font-black text-blue-400 hover:text-white transition-colors uppercase tracking-widest flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 backdrop-blur-sm"
-                                               >
-                                                 Source <ExternalLink className="w-3 h-3" />
-                                               </a>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    );
-                                  })}
-                               </div>
-                            </div>
                           )}
                         </div>
                       )}
@@ -2419,7 +2345,6 @@ export default function ChatPage() {
                 </div>
               </form>
 
-              {/* Hidden file input */}
               <input
                 ref={fileInputRef}
                 type="file"
@@ -2428,7 +2353,6 @@ export default function ChatPage() {
                 onChange={handleFileUpload}
               />
 
-              {/* Attached file chip */}
               {attachedFile && (
                 <div className="flex items-center gap-2 mt-3 px-1">
                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-(--surface-tertiary) border border-(--border-color) text-sm text-(--foreground) font-medium max-w-xs truncate">
@@ -2441,7 +2365,7 @@ export default function ChatPage() {
                   <span className="text-xs text-(--apple-gray)">AI will read this file</span>
                 </div>
               )}
-              
+
               {messages.length === 0 && !input.trim() && (
                 <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
                    <button 
@@ -2472,13 +2396,16 @@ export default function ChatPage() {
                 </div>
               )}
            </div>
-        </div>
-      {isCodexMode ? (
-               </motion.div>
+         </div>
+       </motion.div>
              </div>
           </div>
         </div>
-      ) : null}
+      ) : (
+        <motion.div layout transition={{ type: 'spring', damping: 32, stiffness: 180 }} className={`flex-1 flex flex-col relative bg-(--background) ${isMobile ? 'pt-14' : ''}`}>
+           {/* Normal chat view goes here */}
+        </motion.div>
+      )}
 
       <ShortcutContextMenu
         state={contextMenu}
