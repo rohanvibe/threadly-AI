@@ -80,6 +80,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   custom_instructions TEXT DEFAULT '',
   ai_memory JSONB DEFAULT '[]'::jsonb,
+  preferred_model TEXT DEFAULT 'auto',
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 

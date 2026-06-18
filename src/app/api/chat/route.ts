@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
 import { aiService } from '@/lib/ai'
+import { AIRouter } from '@/lib/ai/router'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,7 +24,7 @@ export async function POST(req: Request) {
       .eq('id', user.id)
       .maybeSingle()
 
-    const { message, messages: history = [], chatId, skipSave, stream: requestedStream = true } = await req.json()
+    const { message, messages: history = [], chatId, skipSave, stream: requestedStream = true, selectedModel } = await req.json()
 
     if (!message && history.length === 0) {
       return NextResponse.json({ error: 'Message or history is required' }, { status: 400 })
@@ -163,7 +164,16 @@ Use these tags ONLY for long-term facts.
     ]
 
     // Use AI service for intelligent routing and fallback
-    const routingDecision = aiService.getRoutingDecision(history, message)
+    let routingDecision
+    if (selectedModel) {
+      // User manually selected a model
+      const provider = selectedModel.includes('gemini') ? 'gemini' : 'groq'
+      routingDecision = AIRouter.forceModel(provider, selectedModel)
+      console.log('[Chat API] User selected model:', selectedModel)
+    } else {
+      // Use automatic routing
+      routingDecision = aiService.getRoutingDecision(history, message)
+    }
     console.log('[Chat API] Routing decision:', routingDecision)
 
     // Step 1: Initial call to check for tools using AI service
@@ -174,6 +184,8 @@ Use these tags ONLY for long-term facts.
         tools: isSimpleGreeting ? undefined : tools,
         tool_choice: isSimpleGreeting ? undefined : 'auto',
         temperature: 0.1,
+        forceModel: selectedModel,
+        forceProvider: selectedModel?.includes('gemini') ? 'gemini' : selectedModel?.includes('llama') ? 'groq' : undefined,
       })
     } catch (error: any) {
       console.error('[Chat API] AI Service Error:', error)
@@ -272,6 +284,8 @@ Use these tags ONLY for long-term facts.
     // Use AI service for streaming
     const stream = await aiService.stream(apiMessages, {
       temperature: 0.1,
+      forceModel: selectedModel,
+      forceProvider: selectedModel?.includes('gemini') ? 'gemini' : selectedModel?.includes('llama') ? 'groq' : undefined,
     })
     return handleStreaming(stream, detectedImages)
   } catch (error: any) {

@@ -26,7 +26,7 @@ export class GeminiProvider extends BaseProvider {
           contents: geminiMessages,
           generationConfig: {
             temperature: request.temperature || 0.1,
-            maxOutputTokens: request.max_tokens,
+            maxOutputTokens: request.max_tokens || 8192,
           },
           tools: request.tools ? this.convertTools(request.tools) : undefined,
         }),
@@ -42,7 +42,15 @@ export class GeminiProvider extends BaseProvider {
     const data = await response.json();
     console.log(`[GeminiProvider] Response:`, JSON.stringify(data, null, 2));
     
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    // Handle different response formats from Gemini
+    let content = '';
+    if (data.candidates && data.candidates.length > 0) {
+      const candidate = data.candidates[0];
+      if (candidate.content && candidate.content.parts && candidate.content.parts.length > 0) {
+        content = candidate.content.parts[0].text || '';
+      }
+    }
+    
     console.log(`[GeminiProvider] Extracted content: "${content}"`);
 
     return {

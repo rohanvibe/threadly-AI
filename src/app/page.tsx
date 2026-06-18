@@ -673,6 +673,36 @@ export default function ChatPage() {
   const [showPrompts, setShowPrompts] = useState(false)
   const [prompts, setPrompts] = useState<Prompt[]>([])
   const [modelType, setModelType] = useState<'default' | 'byok'>('default')
+  const [selectedModel, setSelectedModel] = useState<'auto' | 'llama-3.3-70b-versatile' | 'gemini-2.0-flash-exp' | 'gemini-2.0-pro-exp'>('auto')
+
+  // Load user's model preference from profile
+  useEffect(() => {
+    const loadModelPreference = async () => {
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('preferred_model')
+          .eq('id', user.id)
+          .maybeSingle()
+        
+        if (profile?.preferred_model) {
+          setSelectedModel(profile.preferred_model)
+        }
+      }
+    }
+    loadModelPreference()
+  }, [user])
+
+  // Save model preference when changed
+  const handleModelChange = async (model: 'auto' | 'llama-3.3-70b-versatile' | 'gemini-2.0-flash-exp' | 'gemini-2.0-pro-exp') => {
+    setSelectedModel(model)
+    if (user) {
+      await supabase
+        .from('profiles')
+        .update({ preferred_model: model })
+        .eq('id', user.id)
+    }
+  }
   const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null)
   const [editingChatId, setEditingChatId] = useState<string | null>(null)
   const [onboardingStep, setOnboardingStep] = useState<number>(-1)
@@ -1358,7 +1388,8 @@ export default function ChatPage() {
           body: JSON.stringify({ 
             message: finalPrompt, 
             messages: messages.slice(-20), // Send last 20 messages for context
-            chatId 
+            chatId,
+            selectedModel: selectedModel !== 'auto' ? selectedModel : undefined
           }),
           signal: abortControllerRef.current.signal
         })
@@ -2186,6 +2217,18 @@ export default function ChatPage() {
                    >
                      <Plus className="w-5 h-5 md:w-6 md:h-6" />
                    </Button>
+                   <div className="absolute left-14 md:left-20 top-1/2 -translate-y-1/2 z-10">
+                     <select
+                       value={selectedModel}
+                       onChange={(e) => handleModelChange(e.target.value as any)}
+                       className="bg-(--surface-tertiary) border border-(--border-color) rounded-lg px-2 py-1 text-xs font-medium text-(--foreground) outline-none hover:border-blue-500/50 transition-colors cursor-pointer"
+                     >
+                       <option value="auto">Auto</option>
+                       <option value="llama-3.3-70b-versatile">Llama 70B</option>
+                       <option value="gemini-2.0-flash-exp">Gemini Flash</option>
+                       <option value="gemini-2.0-pro-exp">Gemini Pro</option>
+                     </select>
+                   </div>
                    <textarea 
                      id="chat-input"
                      value={input}
@@ -2206,7 +2249,7 @@ export default function ChatPage() {
                      }}
                      rows={1}
                      placeholder={loading ? "Generating..." : "Ask anything"}
-                     className="w-full pr-28 md:pr-40 py-4 md:py-5 pl-14 md:pl-20 bg-transparent text-base md:text-[17px] outline-none resize-none custom-scrollbar placeholder:text-(--apple-gray) font-medium tracking-tight text-(--foreground) block"
+                     className="w-full pr-28 md:pr-40 py-4 md:py-5 pl-32 md:pl-40 bg-transparent text-base md:text-[17px] outline-none resize-none custom-scrollbar placeholder:text-(--apple-gray) font-medium tracking-tight text-(--foreground) block"
                    />
                    <div className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
                      {loading ? (
