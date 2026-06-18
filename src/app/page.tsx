@@ -2277,10 +2277,10 @@ export default function ChatPage() {
                      onChange={(e) => handleModelChange(e.target.value as any)}
                      className="bg-purple-500/10 border border-purple-500/30 rounded-lg px-3 py-2 text-sm font-medium text-purple-300 outline-none hover:border-purple-500/60 hover:bg-purple-500/20 transition-all cursor-pointer"
                    >
-                     <option value="auto">🤖 Auto (Smart Routing)</option>
-                     <option value="llama-3.3-70b-versatile">⚡ Llama 70B (Fast)</option>
-                     <option value="gemini-2.0-flash-exp">🔥 Gemini Flash (Balanced)</option>
-                     <option value="gemini-2.0-pro-exp">🧠 Gemini Pro (Advanced)</option>
+                     <option value="auto">Auto (Smart Routing)</option>
+                     <option value="llama-3.3-70b-versatile">Llama 70B (Fast)</option>
+                     <option value="gemini-2.0-flash-exp">Gemini Flash (Balanced)</option>
+                     <option value="gemini-2.0-pro-exp">Gemini Pro (Advanced)</option>
                    </select>
                 </div>
               </form>

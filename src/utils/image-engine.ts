@@ -149,12 +149,26 @@ export async function fetchVerifiedImages(query: string, limit = 5): Promise<Ima
         }).then(res => res.json()).catch(() => ({ photos: [] }))
       : Promise.resolve({ photos: [] });
 
-    // Tavily/Web as fallback or secondary
+    // Tavily/Web as primary source
     const webPromise = searchWeb(query).catch(() => "");
 
     const [pexelsData, webContent] = await Promise.all([pexelsPromise, webPromise]);
 
-    // 1. Process Pexels (Primary/Trusted)
+    // 1. Process Web Scraped Images (Primary - 97% priority)
+    const webImagesMatch = webContent.match(/\[VERIFIED IMAGES FOUND.*?\]:\n([\s\S]*?)(?:\n\n|$)/);
+    if (webImagesMatch && webImagesMatch[1]) {
+      const urls = webImagesMatch[1].split('\n').filter(u => u.startsWith('http'));
+      for (const url of urls) {
+        results.push({
+          url,
+          source: url,
+          alt: query,
+          score: 100 // High score for web search (primary)
+        });
+      }
+    }
+
+    // 2. Process Pexels (Secondary - 3% priority)
     if (pexelsData.photos) {
       for (const photo of pexelsData.photos) {
         results.push({
@@ -164,22 +178,7 @@ export async function fetchVerifiedImages(query: string, limit = 5): Promise<Ima
           width: photo.width,
           height: photo.height,
           attribution: `Photo by ${photo.photographer} on Pexels`,
-          score: 100 // High score for trusted source
-        });
-      }
-    }
-
-    // 2. Process Web Scraped Images
-    // Extract images from webContent if they exist (we tagged them [VERIFIED IMAGES FOUND])
-    const webImagesMatch = webContent.match(/\[VERIFIED IMAGES FOUND.*?\]:\n([\s\S]*?)(?:\n\n|$)/);
-    if (webImagesMatch && webImagesMatch[1]) {
-      const urls = webImagesMatch[1].split('\n').filter(u => u.startsWith('http'));
-      for (const url of urls) {
-        results.push({
-          url,
-          source: url,
-          alt: query,
-          score: 50 // Lower score for web results
+          score: 50 // Lower score for Pexels (secondary)
         });
       }
     }
@@ -193,7 +192,7 @@ export async function fetchVerifiedImages(query: string, limit = 5): Promise<Ima
     );
 
     const finalImages = (validatedResults.filter(Boolean) as ImageResult[])
-      .sort((a, b) => b.score - a.score) // Rank by score
+      .sort((a, b) => b.score - a.score) // Rank by score (web search first)
       .slice(0, limit);
 
     // PHASE 5: Update Cache
