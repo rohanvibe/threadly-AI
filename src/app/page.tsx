@@ -2217,18 +2217,6 @@ export default function ChatPage() {
                    >
                      <Plus className="w-5 h-5 md:w-6 md:h-6" />
                    </Button>
-                   <div className="absolute left-14 md:left-20 top-1/2 -translate-y-1/2 z-10">
-                     <select
-                       value={selectedModel}
-                       onChange={(e) => handleModelChange(e.target.value as any)}
-                       className="bg-(--surface-tertiary) border border-(--border-color) rounded-lg px-2 py-1 text-xs font-medium text-(--foreground) outline-none hover:border-blue-500/50 transition-colors cursor-pointer"
-                     >
-                       <option value="auto">Auto</option>
-                       <option value="llama-3.3-70b-versatile">Llama 70B</option>
-                       <option value="gemini-2.0-flash-exp">Gemini Flash</option>
-                       <option value="gemini-2.0-pro-exp">Gemini Pro</option>
-                     </select>
-                   </div>
                    <textarea 
                      id="chat-input"
                      value={input}
@@ -2249,7 +2237,7 @@ export default function ChatPage() {
                      }}
                      rows={1}
                      placeholder={loading ? "Generating..." : "Ask anything"}
-                     className="w-full pr-28 md:pr-40 py-4 md:py-5 pl-32 md:pl-40 bg-transparent text-base md:text-[17px] outline-none resize-none custom-scrollbar placeholder:text-(--apple-gray) font-medium tracking-tight text-(--foreground) block"
+                     className="w-full pr-28 md:pr-40 py-4 md:py-5 pl-14 md:pl-20 bg-transparent text-base md:text-[17px] outline-none resize-none custom-scrollbar placeholder:text-(--apple-gray) font-medium tracking-tight text-(--foreground) block"
                    />
                    <div className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
                      {loading ? (
@@ -2279,6 +2267,21 @@ export default function ChatPage() {
                        </>
                      )}
                    </div>
+                </div>
+                
+                {/* Model Selection Dropdown */}
+                <div className="mt-3 flex items-center gap-2">
+                   <Sparkles className="w-4 h-4 text-purple-500" />
+                   <select
+                     value={selectedModel}
+                     onChange={(e) => handleModelChange(e.target.value as any)}
+                     className="bg-purple-500/10 border border-purple-500/30 rounded-lg px-3 py-2 text-sm font-medium text-purple-300 outline-none hover:border-purple-500/60 hover:bg-purple-500/20 transition-all cursor-pointer"
+                   >
+                     <option value="auto">🤖 Auto (Smart Routing)</option>
+                     <option value="llama-3.3-70b-versatile">⚡ Llama 70B (Fast)</option>
+                     <option value="gemini-2.0-flash-exp">🔥 Gemini Flash (Balanced)</option>
+                     <option value="gemini-2.0-pro-exp">🧠 Gemini Pro (Advanced)</option>
+                   </select>
                 </div>
               </form>
 
