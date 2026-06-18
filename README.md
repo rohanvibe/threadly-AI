@@ -43,7 +43,7 @@ Every traditional AI chat app has the same flaw: **long conversations become unu
 | **Persistent Memory** | "Custom Instructions" (Limited) | **Semantic, Tag-Based Fact Store** |
 | **Data Control** | Their server, their rules | **Your Keys (BYOK), Your Database** |
 | **Interface** | One-size-fits-all | **Pro-Grade Workspace (Shortcuts, Maps)** |
-| **Latency** | Perceptible cloud delay | **Zero-Delay Streaming (groq AI)** |
+| **Latency** | Perceptible cloud delay | **Intelligent Model Routing & Zero-Delay Streaming** |
 
 ---
 
@@ -77,7 +77,7 @@ Install Threadly on your desktop or mobile. The UI shell is fully offline-capabl
 
 - **Framework:** Next.js 16 (App Router, Turbopack)
 - **Database/Auth:** Supabase (PostgreSQL + RLS)
-- **AI Engine:** groq AI (LLaMA 3.3 70B)
+- **AI Engine:** Intelligent Model Routing (Llama 3.3 70B, Gemini 2.5 Flash/Pro)
 - **Styling:** Tailwind CSS v4 + Apple Design Language
 - **Animations:** Framer Motion
 
@@ -99,7 +99,8 @@ Create a `.env.local` file:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-groq_API_KEY=your_api_key
+GROQ_API_KEY=your_groq_api_key
+GEMINI_API_KEY=your_gemini_api_key
 ```
 
 ### 3. Run
@@ -113,7 +114,7 @@ npm run dev
 
 - [x] High-speed Llama 3.3 Integration
 - [x] Semantic Memory Sync
-- [ ] Multi-model Support (Claude 3.5, Gemini 1.5)
+- [x] Intelligent Multi-Model Routing (Llama, Gemini Flash/Pro)
 - [ ] Voice-to-Thought (Whisper Sync)
 - [ ] Collaborative Workspaces
 

@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
+import { aiService } from '@/lib/ai'
 
 export const dynamic = 'force-dynamic'
 
@@ -140,18 +141,9 @@ Use these tags ONLY for long-term facts.
       apiMessages.push({ role: 'user', content: message })
     }
 
-    // Tier-Based Model Routing Logic (Groq Free Tier)
+    // Simple greetings detection for tool optimization
     const prompt = (message || '').toLowerCase()
-    const complexKeywords = ['code', 'math', 'mermaid', 'diagram', 'draw', 'visualize', 'prove', 'solve', 'complex', 'analyze', 'search', 'latest', 'news', 'calculate', 'architecture', 'show', 'find', 'bugatti']
-    
-    // Simple greetings should NEVER use tools or 70B to save quota and prevent "empty" responses
     const isSimpleGreeting = (prompt.length < 15 && (prompt === 'hello' || prompt === 'hi' || prompt === 'hey' || prompt === 'hola' || prompt.includes('hello ') || prompt.includes('hi ') || prompt.includes('hey ')))
-    const isComplex = !isSimpleGreeting && (complexKeywords.some(k => prompt.includes(k)) || prompt.length > 500)
-    
-    // Model Selection
-    const model70B = 'llama-3.3-70b-versatile'
-    const model8B = 'llama-3.1-8b-instant'
-    const primaryModel = isComplex ? model70B : model8B
 
     const tools = [
       {
@@ -170,54 +162,28 @@ Use these tags ONLY for long-term facts.
       },
     ]
 
-    // Step 1: Initial call to check for tools (Groq API)
-    let aiResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: primaryModel,
-        messages: apiMessages,
-        // Only send tools if NOT a simple greeting
+    // Use AI service for intelligent routing and fallback
+    const routingDecision = aiService.getRoutingDecision(history, message)
+    console.log('[Chat API] Routing decision:', routingDecision)
+
+    // Step 1: Initial call to check for tools using AI service
+    let aiResponse
+    try {
+      aiResponse = await aiService.complete(apiMessages, {
+        currentMessage: message,
         tools: isSimpleGreeting ? undefined : tools,
         tool_choice: isSimpleGreeting ? undefined : 'auto',
         temperature: 0.1,
       })
-    })
-
-    if (!aiResponse.ok) {
-        const errorText = await aiResponse.text()
-        console.error('Groq API Error:', errorText)
-        
-        // Final fallback to 8B if everything fails
-        aiResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
-          },
-          body: JSON.stringify({
-            model: model8B,
-            messages: apiMessages,
-            stream: requestedStream
-          })
-        })
-        if (!aiResponse.ok) {
-           const finalError = await aiResponse.text()
-           if (aiResponse.status === 429) {
-             return NextResponse.json({ error: "Groq is currently at capacity. Please wait a moment." }, { status: 429 })
-           }
-           return NextResponse.json({ error: `Groq Error: ${finalError.slice(0, 150)}` }, { status: 500 })
-        }
-        if (requestedStream) return handleStreaming(aiResponse, detectedImages)
-        const data = await aiResponse.json()
-        return NextResponse.json({ content: data.choices[0].message.content, images: detectedImages })
+    } catch (error: any) {
+      console.error('[Chat API] AI Service Error:', error)
+      return NextResponse.json({ error: error.message || 'AI service failed' }, { status: 500 })
     }
 
-    const data = await aiResponse.json()
-    const messageObj = data.choices[0].message
+    const messageObj = {
+      content: aiResponse.content,
+      tool_calls: aiResponse.tool_calls,
+    }
 
     // Fallback for empty content
     if (!messageObj.content && (!messageObj.tool_calls || messageObj.tool_calls.length === 0)) {
@@ -250,22 +216,13 @@ Use these tags ONLY for long-term facts.
         }
       }
 
-      // Final call after all tools are executed
-      const finalResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: model70B, 
-          messages: apiMessages,
-          stream: true
-        })
+      // Final call after all tools are executed using AI service
+      const finalStream = await aiService.stream(apiMessages, {
+        temperature: 0.1,
+        forceModel: 'llama-3.3-70b-versatile',
+        forceProvider: 'groq',
       })
-
-      if (!finalResponse.ok) throw new Error('Groq final stream failed')
-      return handleStreaming(finalResponse, detectedImages)
+      return handleStreaming(finalStream, detectedImages)
     }
 
     // Step 2.5: Catch "hallucinated" text-based function calls (Multiple)
@@ -298,19 +255,12 @@ Use these tags ONLY for long-term facts.
           apiMessages.push({ role: 'assistant', content: strippedContent })
           apiMessages.push({ role: 'user', content: `USE THESE REAL SEARCH RESULTS TO PROVIDE LINKS AND IMAGES IN YOUR FINAL RESPONSE. DO NOT SAY "I CAN'T PROVIDE LINKS": ${combinedSearchResults}` })
           
-          const finalResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
-            },
-            body: JSON.stringify({
-              model: model70B, 
-              messages: apiMessages,
-              stream: true
-            })
+          const finalStream = await aiService.stream(apiMessages, {
+            temperature: 0.1,
+            forceModel: 'llama-3.3-70b-versatile',
+            forceProvider: 'groq',
           })
-          return handleStreaming(finalResponse, detectedImages)
+          return handleStreaming(finalStream, detectedImages)
        }
     }
 
@@ -319,36 +269,11 @@ Use these tags ONLY for long-term facts.
       return NextResponse.json({ content: messageObj.content, images: detectedImages })
     }
 
-    const encoder = new TextEncoder()
-    const content = messageObj.content || ''
-    
-    const manualStream = new ReadableStream({
-      async start(controller) {
-        // PHASE 6: Inject structured image data at the start of the stream
-        if (detectedImages && detectedImages.length > 0) {
-          const imageResult = {
-            type: "image_result",
-            images: detectedImages
-          }
-          controller.enqueue(encoder.encode(`[METADATA]:${JSON.stringify(imageResult)}\n`))
-        }
-
-        // Stream character by character or word by word for better effect
-        const words = content.split(' ')
-        for (let i = 0; i < words.length; i++) {
-          controller.enqueue(encoder.encode(words[i] + (i === words.length - 1 ? '' : ' ')))
-          await new Promise(r => setTimeout(r, 15))
-        }
-        controller.close()
-      }
+    // Use AI service for streaming
+    const stream = await aiService.stream(apiMessages, {
+      temperature: 0.1,
     })
-
-    return new Response(manualStream, {
-      headers: { 'Content-Type': 'text/event-stream' }
-    })
-    return new Response(manualStream, {
-      headers: { 'Content-Type': 'text/event-stream' }
-    })
+    return handleStreaming(stream, detectedImages)
   } catch (error: any) {
     console.error('Chat API Error:', error)
     return NextResponse.json({ error: 'fetch failed', details: error.message }, { status: 500 })
@@ -356,11 +281,11 @@ Use these tags ONLY for long-term facts.
 }
 
 // Helper to handle streaming logic
-async function handleStreaming(response: Response, images?: any[]) {
+async function handleStreaming(stream: ReadableStream, images?: any[]) {
   const encoder = new TextEncoder()
   const decoder = new TextDecoder()
 
-  const stream = new ReadableStream({
+  const wrappedStream = new ReadableStream({
     async start(controller) {
       // PHASE 6: Inject structured image data at the start of the stream
       if (images && images.length > 0) {
@@ -371,36 +296,19 @@ async function handleStreaming(response: Response, images?: any[]) {
         controller.enqueue(encoder.encode(`[METADATA]:${JSON.stringify(imageResult)}\n`))
       }
 
-      const reader = response.body?.getReader()
+      const reader = stream.getReader()
       if (!reader) {
         controller.close()
         return
       }
 
-      let buffer = ''
       try {
         while (true) {
           const { done, value } = await reader.read()
           if (done) break
 
-          buffer += decoder.decode(value, { stream: true })
-          const lines = buffer.split('\n')
-          buffer = lines.pop() || ''
-
-          for (const line of lines) {
-            const trimmed = line.trim()
-            if (!trimmed || trimmed === 'data: [DONE]') continue
-            
-            if (trimmed.startsWith('data: ')) {
-              try {
-                const json = JSON.parse(trimmed.slice(6))
-                const content = json.choices[0]?.delta?.content || ''
-                if (content) {
-                  controller.enqueue(encoder.encode(content))
-                }
-              } catch (e) {}
-            }
-          }
+          // Pass through the stream content directly
+          controller.enqueue(value)
         }
       } catch (error) {
         controller.error(error)
@@ -410,7 +318,7 @@ async function handleStreaming(response: Response, images?: any[]) {
     }
   })
 
-  return new Response(stream, {
+  return new Response(wrappedStream, {
     headers: { 'Content-Type': 'text/event-stream' }
   })
 }
