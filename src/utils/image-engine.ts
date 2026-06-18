@@ -135,26 +135,15 @@ export async function fetchVerifiedImages(query: string, limit = 5): Promise<Ima
     return cached.data;
   }
 
-  console.log(`[ImageEngine] Fetching for: ${query}`);
+  console.log(`[ImageEngine] Fetching for: ${query} (Web Search Only)`);
   const startTime = Date.now();
 
   const results: ImageResult[] = [];
-  const pexelsKey = process.env.PEXELS_API_KEY;
 
   try {
-    // Parallel Fetch from Sources
-    const pexelsPromise = pexelsKey 
-      ? fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=10`, {
-          headers: { Authorization: pexelsKey }
-        }).then(res => res.json()).catch(() => ({ photos: [] }))
-      : Promise.resolve({ photos: [] });
-
-    // Tavily/Web as primary source
-    const webPromise = searchWeb(query).catch(() => "");
-
-    const [pexelsData, webContent] = await Promise.all([pexelsPromise, webPromise]);
-
-    // 1. Process Web Scraped Images (Primary - 97% priority)
+    // Use Web Search exclusively
+    const webContent = await searchWeb(query).catch(() => "");
+    
     const webImagesMatch = webContent.match(/\[VERIFIED IMAGES FOUND.*?\]:\n([\s\S]*?)(?:\n\n|$)/);
     if (webImagesMatch && webImagesMatch[1]) {
       const urls = webImagesMatch[1].split('\n').filter(u => u.startsWith('http'));
@@ -163,25 +152,12 @@ export async function fetchVerifiedImages(query: string, limit = 5): Promise<Ima
           url,
           source: url,
           alt: query,
-          score: 100 // High score for web search (primary)
+          score: 100
         });
       }
     }
 
-    // 2. Process Pexels (Secondary - 3% priority)
-    if (pexelsData.photos) {
-      for (const photo of pexelsData.photos) {
-        results.push({
-          url: photo.src.large,
-          source: photo.url,
-          alt: photo.alt || query,
-          width: photo.width,
-          height: photo.height,
-          attribution: `Photo by ${photo.photographer} on Pexels`,
-          score: 50 // Lower score for Pexels (secondary)
-        });
-      }
-    }
+    console.log(`[ImageEngine] Web search returned ${results.length} images`);
 
     // PHASE 3: Strict Validation
     const validatedResults = await Promise.all(
@@ -192,7 +168,6 @@ export async function fetchVerifiedImages(query: string, limit = 5): Promise<Ima
     );
 
     const finalImages = (validatedResults.filter(Boolean) as ImageResult[])
-      .sort((a, b) => b.score - a.score) // Rank by score (web search first)
       .slice(0, limit);
 
     // PHASE 5: Update Cache
