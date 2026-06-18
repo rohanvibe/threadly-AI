@@ -14,6 +14,9 @@ export class GeminiProvider extends BaseProvider {
   async complete(request: ChatCompletionRequest): Promise<ChatCompletionResponse> {
     const geminiMessages = this.convertToGeminiFormat(request.messages);
     
+    console.log(`[GeminiProvider] Requesting model: ${this.model}`);
+    console.log(`[GeminiProvider] Messages:`, JSON.stringify(geminiMessages, null, 2));
+    
     const response = await fetch(
       `${this.baseURL}/models/${this.model}:generateContent?key=${this.apiKey}`,
       {
@@ -32,11 +35,15 @@ export class GeminiProvider extends BaseProvider {
 
     if (!response.ok) {
       const error = await response.text();
+      console.error(`[GeminiProvider] API Error: ${response.status} - ${error}`);
       throw new Error(`${this.name} API Error: ${response.status} - ${error}`);
     }
 
     const data = await response.json();
+    console.log(`[GeminiProvider] Response:`, JSON.stringify(data, null, 2));
+    
     const content = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    console.log(`[GeminiProvider] Extracted content: "${content}"`);
 
     return {
       content,

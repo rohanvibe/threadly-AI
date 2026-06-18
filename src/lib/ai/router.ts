@@ -199,12 +199,12 @@ export class AIRouter {
       case ComplexityLevel.HIGH:
         return {
           provider: 'gemini',
-          model: 'gemini-2.5-pro',
+          model: 'gemini-2.0-pro-exp',
         };
       case ComplexityLevel.MEDIUM:
         return {
           provider: 'gemini',
-          model: 'gemini-2.5-flash',
+          model: 'gemini-2.0-flash-exp',
         };
       case ComplexityLevel.SIMPLE:
       default:
