@@ -2043,7 +2043,10 @@ export default function ChatPage() {
               <Skeleton className="h-32 w-full rounded-2xl bg-white/5" />
             </div>
           ) : messages.length === 0 ? (
-            <EmptyState onCreateNew={() => createNewChat()} />
+            <EmptyState 
+              onCreateNew={() => createNewChat()} 
+              onSelectPrompt={(prompt) => { setInput(prompt); document.getElementById('chat-input')?.focus() }}
+            />
           ) : (
             <div className="max-w-3xl mx-auto px-4 py-8 md:p-10 space-y-12 pb-32">
               <div className="space-y-12">
@@ -2372,34 +2375,6 @@ export default function ChatPage() {
                 </div>
               )}
               
-              {messages.length === 0 && !input.trim() && (
-                <div className="flex flex-col items-center justify-center pt-8 pb-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-                   <motion.div 
-                     animate={{ y: [-5, 5, -5] }}
-                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                     className="w-24 h-24 md:w-28 md:h-28 mb-6 relative group"
-                   >
-                     <div className="absolute inset-0 bg-blue-500/10 blur-xl rounded-full group-hover:bg-purple-500/20 transition-colors" />
-                     <img src="/threadly.svg" alt="Threadly" className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(0,240,255,0.2)] relative z-10" />
-                   </motion.div>
-                   <div className="flex flex-wrap items-center justify-center gap-3">
-                     <button 
-                       onClick={() => { setInput('Help me write '); document.getElementById('chat-input')?.focus() }}
-                       className="flex items-center gap-2 px-4 py-2 rounded-full border border-(--border-color) bg-(--surface) hover:bg-(--surface-tertiary) transition-colors text-sm font-medium text-(--foreground) shadow-sm"
-                     >
-                     <Edit2 className="w-4 h-4 text-purple-500" />
-                     Write or edit
-                   </button>
-                   <button 
-                     onClick={() => { setInput('Look up information about '); document.getElementById('chat-input')?.focus() }}
-                     className="flex items-center gap-2 px-4 py-2 rounded-full border border-(--border-color) bg-(--surface) hover:bg-(--surface-tertiary) transition-colors text-sm font-medium text-(--foreground) shadow-sm"
-                   >
-                     <Globe className="w-4 h-4 text-green-500" />
-                   </button>
-                 </div>
-                </div>
-              )}
-
               {messages.length > 0 && (
                 <div className="hidden md:flex justify-between items-center mt-6 px-4">
                    <div className="flex items-center gap-3">
@@ -3201,37 +3176,31 @@ function BigSignupModal({ onClose, onAction }: { onClose: () => void, onAction: 
 
 
 
-function EmptyState({ onCreateNew }: { onCreateNew: () => void }) {
+function EmptyState({ onCreateNew, onSelectPrompt }: { onCreateNew: () => void, onSelectPrompt: (prompt: string) => void }) {
   return (
     <motion.div 
       initial={{ opacity: 0, scale: 0.95 }} 
       animate={{ opacity: 1, scale: 1 }} 
       transition={{ type: 'spring', damping: 28, stiffness: 220 }} 
-      className="h-full flex flex-col items-center justify-center text-center space-y-6 md:space-y-8 px-6 max-w-2xl mx-auto py-10"
+      className="h-full flex flex-col items-center justify-center text-center space-y-6 md:space-y-8 px-6 max-w-2xl mx-auto py-10 pt-20"
     >
       <motion.div 
-        animate={{ y: [0, -10, 0], rotate: [0, 5, 0] }}
+        animate={{ y: [0, -10, 0] }}
         transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
-        className="relative group hidden md:block"
+        className="relative group hidden md:block w-32 h-32"
       >
-        <div className="w-24 h-24 rounded-3xl bg-(--apple-blue) flex items-center justify-center shadow-2xl shadow-blue-500/40 relative z-10 overflow-hidden">
-          <motion.div 
-            animate={{ rotate: 360 }}
-            transition={{ repeat: Infinity, duration: 12, ease: "linear" }}
-            className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"
-          />
-          <Sparkles className="w-12 h-12 text-white relative z-10" />
-        </div>
+        <div className="absolute inset-0 bg-blue-500/10 blur-[50px] rounded-full group-hover:bg-purple-500/20 transition-colors duration-700" />
+        <img src="/threadly.svg" alt="Threadly Mascot" className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_30px_rgba(0,240,255,0.15)] group-hover:scale-105 transition-transform duration-500" />
       </motion.div>
 
-      <div className="space-y-2 md:space-y-4">
+      <div className="space-y-2 md:space-y-4 relative z-20">
         <motion.h2 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="text-5xl md:text-7xl font-bold tracking-tight text-(--foreground) leading-tight"
+          className="text-4xl md:text-6xl font-black tracking-tighter text-(--foreground) leading-tight"
         >
-          Clear mind. <br/> <span className="text-(--apple-gray) opacity-50">Simple work.</span>
+          Clear mind. <br/> <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Simple work.</span>
         </motion.h2>
         <motion.p 
           initial={{ opacity: 0 }}
@@ -3247,14 +3216,19 @@ function EmptyState({ onCreateNew }: { onCreateNew: () => void }) {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6 }}
-        className="flex flex-col sm:flex-row gap-4 w-full justify-center"
+        className="flex flex-wrap items-center justify-center gap-3 w-full relative z-20"
       >
-          <Button onClick={onCreateNew} size="lg" className="px-10 py-8 rounded-full bg-(--foreground) text-(--background) hover:opacity-90 font-bold transition-all shadow-2xl border-none">
-            <Plus className="w-5 h-5 mr-2" />
-            New Thread
+          <Button onClick={() => onSelectPrompt('Help me write ')} variant="outline" className="rounded-full px-5 py-6 border-(--border-color) bg-(--surface) hover:bg-(--surface-tertiary) text-(--foreground) font-semibold transition-all shadow-lg text-[13px]">
+            <Edit2 className="w-4 h-4 text-purple-500 mr-2" />
+            Write or edit
           </Button>
-          <Button variant="outline" size="lg" onClick={() => (document.getElementById('tutorial-prompts') as HTMLElement)?.click()} className="hidden md:flex px-10 py-8 rounded-full border-(--border-color) hover:bg-(--surface-tertiary) text-(--foreground) font-bold transition-all">
-            Browse Registry
+          <Button onClick={() => onSelectPrompt('Look up information about ')} variant="outline" className="rounded-full px-5 py-6 border-(--border-color) bg-(--surface) hover:bg-(--surface-tertiary) text-(--foreground) font-semibold transition-all shadow-lg text-[13px]">
+            <Globe className="w-4 h-4 text-green-500 mr-2" />
+            Look something up
+          </Button>
+          <Button onClick={onCreateNew} className="rounded-full px-5 py-6 bg-(--foreground) text-(--background) hover:opacity-90 font-bold transition-all shadow-2xl border-none text-[13px] ml-2">
+            <Plus className="w-4 h-4 mr-2" />
+            New Thread
           </Button>
       </motion.div>
     </motion.div>
