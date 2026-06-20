@@ -1,0 +1,161 @@
+<svg width="100%" height="100%" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- DEFS -->
+  <defs>
+    <!-- Base Chassis Gradients -->
+    <linearGradient id="chassisBase" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="40%" stop-color="#E2E4E9"/>
+      <stop offset="100%" stop-color="#AEB3BF"/>
+    </linearGradient>
+    <linearGradient id="chassisShadow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8A91A1"/>
+      <stop offset="100%" stop-color="#545A66"/>
+    </linearGradient>
+
+    <!-- Face Screen Gradients -->
+    <linearGradient id="screenBase" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14151A"/>
+      <stop offset="100%" stop-color="#0A0A0D"/>
+    </linearGradient>
+    <linearGradient id="screenHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Neon Accent Gradients -->
+    <linearGradient id="neonBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F0FF"/>
+      <stop offset="100%" stop-color="#0055FF"/>
+    </linearGradient>
+    <linearGradient id="neonPurple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#B800FF"/>
+      <stop offset="100%" stop-color="#FF00E6"/>
+    </linearGradient>
+    <linearGradient id="neonCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E0FFFF"/>
+      <stop offset="100%" stop-color="#00F0FF"/>
+    </linearGradient>
+
+    <!-- Dynamic Thread Gradient -->
+    <linearGradient id="threadGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00F0FF"/>
+      <stop offset="50%" stop-color="#B800FF"/>
+      <stop offset="100%" stop-color="#FF00E6"/>
+    </linearGradient>
+
+    <!-- Eye Glow -->
+    <radialGradient id="eyeGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00F0FF" stop-opacity="1"/>
+      <stop offset="40%" stop-color="#0088FF" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#0022FF" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Neon Glow Filter -->
+    <filter id="neonGlowOuter" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <g id="threadly-mascot">
+    <!-- DYNAMIC BACKGROUND THREAD (Orbiting back) -->
+    <g id="orbiting-thread-back" filter="url(#neonGlowOuter)">
+      <path d="M 100 320 C 100 220, 400 170, 400 240" fill="none" stroke="url(#threadGradient)" stroke-width="8" stroke-linecap="round"/>
+    </g>
+
+    <!-- LEFT ARM (Behind body) -->
+    <g id="arm-left">
+      <path d="M 180 260 C 140 280 130 320 150 360 C 160 380 190 380 200 360 C 210 340 210 280 180 260 Z" fill="url(#chassisShadow)"/>
+      <path d="M 150 360 C 130 390 150 420 180 430 C 200 440 220 420 200 390 Z" fill="url(#chassisShadow)"/>
+    </g>
+
+    <!-- TORSO (Digital Spool Concept, perfectly centered at X=250) -->
+    <g id="torso">
+      <!-- Top of Spool -->
+      <ellipse cx="250" cy="220" rx="60" ry="20" fill="url(#chassisBase)"/>
+      
+      <!-- Main Core (Cylinder shape) -->
+      <path d="M 200 220 L 190 330 C 190 350 310 350 310 330 L 300 220 Z" fill="url(#chassisBase)"/>
+      <path d="M 200 220 L 190 330 C 190 350 310 350 310 330 L 300 220 Z" fill="url(#chassisShadow)" opacity="0.3"/>
+      
+      <!-- Inner Dark Spool Core -->
+      <path d="M 210 230 L 205 320 C 205 330 295 330 295 320 L 290 230 Z" fill="#14151A"/>
+
+      <!-- Neon Wires Wound Around Core -->
+      <g id="torso-threads" filter="url(#neonGlowOuter)">
+        <path d="M 210 250 Q 250 270 293 245" fill="none" stroke="url(#neonCyan)" stroke-width="6" stroke-linecap="round"/>
+        <path d="M 208 270 Q 250 290 294 265" fill="none" stroke="url(#neonPurple)" stroke-width="6" stroke-linecap="round"/>
+        <path d="M 206 290 Q 250 310 294 285" fill="none" stroke="url(#threadGradient)" stroke-width="6" stroke-linecap="round"/>
+        <path d="M 205 310 Q 250 330 295 305" fill="none" stroke="url(#neonBlue)" stroke-width="6" stroke-linecap="round"/>
+      </g>
+      
+      <!-- Bottom of Spool Base -->
+      <ellipse cx="250" cy="330" rx="65" ry="25" fill="url(#chassisBase)"/>
+      <ellipse cx="250" cy="330" rx="65" ry="25" fill="url(#chassisShadow)" opacity="0.5"/>
+      <ellipse cx="250" cy="326" rx="60" ry="20" fill="url(#chassisBase)"/>
+    </g>
+
+    <!-- RIGHT ARM (In Front) -->
+    <g id="arm-right">
+      <path d="M 290 240 C 330 240 360 270 350 310 C 340 350 310 360 290 340 C 270 320 270 260 290 240 Z" fill="url(#chassisBase)"/>
+      <path d="M 290 240 C 330 240 360 270 350 310 C 340 350 310 360 290 340 C 270 320 270 260 290 240 Z" fill="url(#chassisShadow)" opacity="0.2"/>
+      
+      <!-- Lower arm -->
+      <path d="M 335 300 C 380 320 370 380 340 390 C 310 400 300 360 310 330 Z" fill="url(#chassisBase)"/>
+      
+      <!-- Glowing Joint -->
+      <circle cx="340" cy="300" r="15" fill="#14151A"/>
+      <circle cx="340" cy="300" r="8" fill="url(#neonCyan)" filter="url(#neonGlowOuter)"/>
+    </g>
+
+    <!-- HEAD (Clean, Geometric, Aligned with Body, Facing Right) -->
+    <g id="head">
+      <!-- Neck -->
+      <rect x="235" y="160" width="30" height="50" rx="5" fill="url(#chassisShadow)"/>
+      
+      <!-- Main Head Casing (Symmetrical Pill perfectly centered at X=250) -->
+      <rect x="150" y="60" width="200" height="120" rx="60" fill="url(#chassisBase)"/>
+      <!-- Shading to give 3D depth -->
+      <path d="M 150 120 L 150 130 C 150 163 176 190 210 190 L 290 190 C 323 190 350 163 350 130 L 350 120 C 350 153 323 180 290 180 L 210 180 C 176 180 150 153 150 120 Z" fill="#8A91A1"/>
+      
+      <!-- Visor / Face Screen (Extended across front to eliminate the weird white circle) -->
+      <!-- Left bezel is 20px, Right bezel is 10px to indicate subtle right-facing perspective -->
+      <rect x="170" y="70" width="170" height="100" rx="50" fill="url(#screenBase)"/>
+      <!-- Screen Reflection -->
+      <path d="M 175 75 L 290 75 A 45 45 0 0 1 335 120 A 45 45 0 0 1 290 165 L 175 165 C 205 165 215 145 215 120 C 215 95 205 75 175 75 Z" fill="url(#screenHighlight)" opacity="0.3"/>
+
+      <!-- Glowing Digital Eyes -->
+      <g id="eyes">
+        <!-- Left Eye (Smaller, further away in 3D perspective) -->
+        <g id="eye-left" transform="translate(250, 120)">
+          <ellipse cx="0" cy="0" rx="12" ry="22" fill="url(#eyeGlow)"/>
+          <ellipse cx="0" cy="0" rx="7" ry="14" fill="url(#neonCyan)"/>
+          <circle cx="-2" cy="-5" r="2.5" fill="#FFFFFF"/>
+        </g>
+        
+        <!-- Right Eye (Larger, prominent) -->
+        <g id="eye-right" transform="translate(305, 120)">
+          <ellipse cx="0" cy="0" rx="16" ry="28" fill="url(#eyeGlow)"/>
+          <ellipse cx="0" cy="0" rx="10" ry="18" fill="url(#neonCyan)"/>
+          <circle cx="-3" cy="-7" r="3.5" fill="#FFFFFF"/>
+        </g>
+      </g>
+    </g>
+
+    <!-- DYNAMIC FOREGROUND THREAD (Orbiting front) -->
+    <g id="orbiting-thread-front" filter="url(#neonGlowOuter)">
+      <path d="M 400 240 C 400 330, 100 420, 100 320" fill="none" stroke="url(#threadGradient)" stroke-width="8" stroke-linecap="round"/>
+    </g>
+    
+    <!-- Floating Data Particles -->
+    <g id="particles" fill="#FFFFFF" filter="url(#neonGlowOuter)">
+      <circle cx="100" cy="360" r="4" fill="url(#neonBlue)"/>
+      <circle cx="420" cy="280" r="5" fill="url(#neonPurple)"/>
+      <circle cx="300" cy="60" r="3" fill="url(#neonCyan)"/>
+      <circle cx="160" cy="90" r="2" fill="url(#neonCyan)"/>
+    </g>
+  </g>
+</svg>

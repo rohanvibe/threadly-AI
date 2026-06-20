@@ -60,7 +60,8 @@ import {
   Monitor,
   MousePointer2,
   Mic,
-  FileUp
+  FileUp,
+  ChevronDown
 } from 'lucide-react'
 import { motion, AnimatePresence, useScroll, useMotionValue, useSpring, useTransform, useMotionValueEvent } from 'framer-motion'
 import ReactMarkdown from 'react-markdown'
@@ -647,6 +648,81 @@ export type Prompt = {
   id: string
   title: string
   template: string
+}
+
+function ModelSelector({ selectedModel, onSelectModel }: { selectedModel: string, onSelectModel: (m: any) => void }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const models = [
+    { id: 'auto', name: 'Auto (Smart Routing)', icon: Sparkles, color: 'text-purple-400', bg: 'bg-purple-500/10' },
+    { id: 'llama-3.3-70b-versatile', name: 'Llama 70B (Fast)', icon: Zap, color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
+    { id: 'gemini-2.0-flash-exp', name: 'Gemini Flash (Balanced)', icon: Zap, color: 'text-blue-400', bg: 'bg-blue-500/10' },
+    { id: 'gemini-2.0-pro-exp', name: 'Gemini Pro (Advanced)', icon: Star, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+  ]
+  
+  const current = models.find(m => m.id === selectedModel) || models[0]
+
+  return (
+    <div className="relative mt-4 flex items-center" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2.5 bg-(--surface-secondary) border border-(--border-color) hover:border-blue-500/30 hover:bg-(--surface-tertiary) rounded-full px-4 py-1.5 transition-all shadow-sm group"
+      >
+        <div className={`flex items-center justify-center ${current.bg} w-6 h-6 rounded-full`}>
+           <current.icon className={`w-3.5 h-3.5 ${current.color}`} />
+        </div>
+        <span className="text-[13px] font-bold text-(--foreground) tracking-tight">{current.name}</span>
+        <ChevronDown className={`w-4 h-4 text-(--apple-gray) transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="absolute left-0 top-full mt-2 w-[280px] bg-[#1c1c1e] dark:bg-[#1c1c1e] border border-white/10 rounded-[24px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] overflow-hidden z-50 p-2 backdrop-blur-xl"
+          >
+            <div className="px-3 py-3 flex items-center gap-2 border-b border-white/5 mb-2">
+               <Activity className="w-3.5 h-3.5 text-white/40" />
+               <span className="text-[10px] font-black uppercase tracking-widest text-white/40">AI Model Engine</span>
+            </div>
+            <div className="space-y-1">
+              {models.map(model => (
+                <button
+                  key={model.id}
+                  type="button"
+                  onClick={() => { onSelectModel(model.id); setIsOpen(false); }}
+                  className={`w-full flex items-center justify-between p-3 rounded-2xl transition-all ${selectedModel === model.id ? 'bg-white/10 shadow-sm' : 'border border-transparent hover:bg-white/5'}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${model.bg.replace('10', '20')}`}>
+                      <model.icon className={`w-4.5 h-4.5 ${model.color}`} />
+                    </div>
+                    <span className={`text-[13px] font-bold ${selectedModel === model.id ? 'text-white' : 'text-white/80'}`}>{model.name}</span>
+                  </div>
+                  {selectedModel === model.id && <Check className="w-4 h-4 text-white" />}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
 }
 
 export default function ChatPage() {
@@ -2270,19 +2346,7 @@ export default function ChatPage() {
                 </div>
                 
                 {/* Model Selection Dropdown */}
-                <div className="mt-3 flex items-center gap-2">
-                   <Sparkles className="w-4 h-4 text-purple-500" />
-                   <select
-                     value={selectedModel}
-                     onChange={(e) => handleModelChange(e.target.value as any)}
-                     className="bg-purple-500/10 border border-purple-500/30 rounded-lg px-3 py-2 text-sm font-medium text-purple-300 outline-none hover:border-purple-500/60 hover:bg-purple-500/20 transition-all cursor-pointer"
-                   >
-                     <option value="auto">Auto (Smart Routing)</option>
-                     <option value="llama-3.3-70b-versatile">Llama 70B (Fast)</option>
-                     <option value="gemini-2.0-flash-exp">Gemini Flash (Balanced)</option>
-                     <option value="gemini-2.0-pro-exp">Gemini Pro (Advanced)</option>
-                   </select>
-                </div>
+                <ModelSelector selectedModel={selectedModel} onSelectModel={handleModelChange} />
               </form>
 
               {/* Hidden file input */}
@@ -2309,11 +2373,20 @@ export default function ChatPage() {
               )}
               
               {messages.length === 0 && !input.trim() && (
-                <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
-                   <button 
-                     onClick={() => { setInput('Help me write '); document.getElementById('chat-input')?.focus() }}
-                     className="flex items-center gap-2 px-4 py-2 rounded-full border border-(--border-color) bg-(--surface) hover:bg-(--surface-tertiary) transition-colors text-sm font-medium text-(--foreground) shadow-sm"
+                <div className="flex flex-col items-center justify-center pt-8 pb-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+                   <motion.div 
+                     animate={{ y: [-5, 5, -5] }}
+                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                     className="w-24 h-24 md:w-28 md:h-28 mb-6 relative group"
                    >
+                     <div className="absolute inset-0 bg-blue-500/10 blur-xl rounded-full group-hover:bg-purple-500/20 transition-colors" />
+                     <img src="/threadly.svg" alt="Threadly" className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(0,240,255,0.2)] relative z-10" />
+                   </motion.div>
+                   <div className="flex flex-wrap items-center justify-center gap-3">
+                     <button 
+                       onClick={() => { setInput('Help me write '); document.getElementById('chat-input')?.focus() }}
+                       className="flex items-center gap-2 px-4 py-2 rounded-full border border-(--border-color) bg-(--surface) hover:bg-(--surface-tertiary) transition-colors text-sm font-medium text-(--foreground) shadow-sm"
+                     >
                      <Edit2 className="w-4 h-4 text-purple-500" />
                      Write or edit
                    </button>
@@ -2322,8 +2395,8 @@ export default function ChatPage() {
                      className="flex items-center gap-2 px-4 py-2 rounded-full border border-(--border-color) bg-(--surface) hover:bg-(--surface-tertiary) transition-colors text-sm font-medium text-(--foreground) shadow-sm"
                    >
                      <Globe className="w-4 h-4 text-green-500" />
-                     Look something up
                    </button>
+                 </div>
                 </div>
               )}
 
@@ -2362,10 +2435,13 @@ export default function ChatPage() {
             <div className="flex flex-col h-full">
               {/* Guest Banner */}
               {isGuest && (
-                <div className="m-4 p-4 rounded-2xl bg-(--surface) border border-blue-500/30 shadow-lg shadow-blue-500/10">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center shrink-0 shadow-xl">
-                      <Sparkles className="w-5 h-5 text-black" />
+                <div className="m-4 p-4 rounded-2xl bg-(--surface) border border-blue-500/30 shadow-lg shadow-blue-500/10 relative overflow-hidden group">
+                  <div className="absolute -right-6 -bottom-6 w-28 h-28 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <img src="/threadly.svg" alt="Threadly" className="w-full h-full object-contain" />
+                  </div>
+                  <div className="flex items-start gap-3 relative z-10">
+                    <div className="w-10 h-10 rounded-2xl bg-(--apple-blue) flex items-center justify-center shrink-0 shadow-xl overflow-hidden border border-white/10">
+                      <img src="/threadly.svg" alt="Threadly" className="w-8 h-8 object-contain" />
                     </div>
                     <div className="flex flex-col">
                       <h3 className="text-[13px] font-bold tracking-tight text-(--foreground)">Unlock Infinite Flow</h3>

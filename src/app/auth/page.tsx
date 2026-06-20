@@ -61,18 +61,51 @@ export default function AuthPage() {
       <div id="spotlight" />
       <div className="fixed inset-0 pointer-events-none z-10 grain-texture opacity-[0.03]" />
 
-      <motion.div
+      <div className="w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-center justify-center gap-16 relative z-20">
+        
+        {/* Left Side: Mascot & Branding (Hidden on mobile) */}
+        <motion.div 
+          initial={{ opacity: 0, x: -40 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 200, delay: 0.1 }}
+          className="hidden lg:flex flex-col items-center justify-center w-1/2 max-w-md text-center"
+        >
+          <motion.div
+            animate={{ y: [-15, 15, -15] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            className="w-full aspect-square relative cursor-pointer group"
+          >
+            <div className="absolute inset-0 bg-blue-500/20 blur-[100px] rounded-full group-hover:bg-purple-500/30 transition-colors duration-700" />
+            <img 
+              src="/threadly.svg" 
+              alt="Threadly Mascot" 
+              className="w-full h-full object-contain drop-shadow-[0_0_40px_rgba(0,240,255,0.2)] group-hover:scale-105 group-hover:-rotate-2 transition-all duration-500 relative z-10"
+            />
+          </motion.div>
+          <div className="space-y-4 mt-8 relative z-20">
+            <h1 className="text-4xl lg:text-5xl font-black text-white tracking-tighter leading-tight">
+              Your Intelligent <br/> <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Co-Pilot.</span>
+            </h1>
+            <p className="text-gray-400 font-medium text-lg leading-relaxed max-w-sm mx-auto">
+              Join Threadly to unlock a memory-augmented workspace that adapts to how you think and build.
+            </p>
+          </div>
+        </motion.div>
+
+        {/* Right Side: Auth Form */}
+        <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ type: 'spring', damping: 28, stiffness: 220 }}
         className="w-full max-w-lg relative z-20"
       >
-        <div className="flex flex-col items-center gap-3 mb-10">
-          <div className="w-10 h-10 rounded-xl bg-(--apple-blue) flex items-center justify-center shadow-lg shadow-blue-500/10">
-            <Globe className="w-5 h-5 text-white" />
+          {/* Mobile Branding (Only visible on smaller screens) */}
+          <div className="flex lg:hidden flex-col items-center gap-3 mb-10">
+            <div className="w-12 h-12 rounded-xl bg-(--apple-blue) flex items-center justify-center shadow-lg shadow-blue-500/20">
+              <img src="/threadly.svg" alt="Threadly" className="w-8 h-8 object-contain" />
+            </div>
+            <span className="text-xl font-black tracking-tight text-white uppercase">Threadly</span>
           </div>
-          <span className="text-xl font-semibold tracking-tight text-white">Threadly</span>
-        </div>
 
         <div className="bg-(--surface) rounded-(--radius-lg) p-8 md:p-10 space-y-8 border border-white/5 shadow-xl">
           <div className="space-y-2 text-center">
@@ -161,19 +194,20 @@ export default function AuthPage() {
           </div>
         </div>
 
-        <div className="mt-12 grid grid-cols-3 gap-6 opacity-20 filter grayscale">
+        <div className="mt-12 grid grid-cols-3 gap-6 opacity-30 filter grayscale hover:grayscale-0 transition-all duration-500">
           {[
             { icon: Zap, label: "Fast AI" },
             { icon: Sparkles, label: "Smart Memory" },
             { icon: Command, label: "Pro Tools" }
           ].map((item, i) => (
-            <div key={i} className="flex flex-col items-center gap-3">
-              <item.icon className="w-4 h-4 text-white" />
-              <span className="text-[8px] font-black uppercase tracking-widest text-white">{item.label}</span>
+            <div key={i} className="flex flex-col items-center gap-3 group">
+              <item.icon className="w-5 h-5 text-gray-400 group-hover:text-blue-400 transition-colors" />
+              <span className="text-[9px] font-black uppercase tracking-widest text-gray-500 group-hover:text-white transition-colors">{item.label}</span>
             </div>
           ))}
         </div>
       </motion.div>
+      </div>
     </div>
   )
 }
