@@ -782,6 +782,26 @@ export default function ChatPage() {
   const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null)
   const [editingChatId, setEditingChatId] = useState<string | null>(null)
   const [onboardingStep, setOnboardingStep] = useState<number>(-1)
+  const [mascotMessage, setMascotMessage] = useState<string | null>(null)
+  const prevLoadingRef = useRef(false)
+
+  // Show mascot celebration toast when AI finishes a long response
+  useEffect(() => {
+    if (prevLoadingRef.current && !loading) {
+      const lastMsg = messages[messages.length - 1]
+      if (lastMsg?.role === 'assistant' && lastMsg.content.length > 400) {
+        const celebrations = [
+          "Done! Hope that helps 🎯",
+          "All yours — let me know what you think!",
+          "Finished! That was a meaty one.",
+          "Ready! Anything else you need?",
+        ]
+        setMascotMessage(celebrations[Math.floor(Math.random() * celebrations.length)])
+        setTimeout(() => setMascotMessage(null), 3500)
+      }
+    }
+    prevLoadingRef.current = loading
+  }, [loading])
   const [showBigSignup, setShowBigSignup] = useState(false)
   const [editingTitle, setEditingTitle] = useState('')
   const [isMobile, setIsMobile] = useState(false)
@@ -2061,11 +2081,15 @@ export default function ChatPage() {
                       id={`msg-${msg.id}`}
                   className={`group relative ${highlightedAnchor === msg.id ? 'highlight-bg p-4 -m-4 rounded-2xl bg-blue-500/5 ring-1 ring-blue-500/20' : ''} transition-all duration-700`}
                 >
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 shadow-lg ${
-                    msg.role === 'assistant' ? 'bg-(--apple-blue) text-white' : 'bg-(--surface) text-(--apple-gray)'
-                  }`}>
-                    {msg.role === 'assistant' ? <Zap className="w-5 h-5" /> : <Plus className="w-5 h-5 rotate-45" />}
-                  </div>
+                  {msg.role === 'assistant' ? (
+                    <div className="w-10 h-10 rounded-xl shrink-0 overflow-hidden relative border border-white/10 shadow-lg">
+                      <img src="/threadly.svg" alt="Threadly" className="w-full h-full object-contain" />
+                    </div>
+                  ) : (
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 shadow-lg bg-(--surface) text-(--apple-gray)">
+                      <Plus className="w-5 h-5 rotate-45" />
+                    </div>
+                  )}
                   <div className="flex-1 space-y-4 min-w-0 overflow-hidden">
                     <motion.div 
                       className={`p-6 md:p-8 rounded-(--radius-lg) bg-(--surface) shadow-xl relative overflow-hidden border border-white/5 ${
@@ -2119,8 +2143,22 @@ export default function ChatPage() {
                       ) : (
                         <div className={`text-(--foreground) leading-relaxed text-lg prose prose-lg max-w-none prose-pre:rounded-(--radius-md) prose-code:text-(--apple-blue) break-words selection:bg-blue-500/40 dark:prose-invert ${msg.role === 'assistant' && loading && i === messages.length - 1 ? 'typing-cursor' : ''}`}>
                           {msg.content === '' && loading ? (
-                             <div className="py-2">
-                               <span className="inline-block w-2.5 h-2.5 rounded-full bg-current opacity-70 animate-blink my-1"></span>
+                             <div className="flex items-center gap-4 py-3">
+                               <motion.div
+                                 animate={{ rotate: [-8, 8, -8], y: [-3, 3, -3] }}
+                                 transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+                                 className="w-10 h-10 shrink-0"
+                               >
+                                 <img src="/threadly.svg" alt="Thinking..." className="w-full h-full object-contain" />
+                               </motion.div>
+                               <div className="flex flex-col gap-1">
+                                 <div className="flex items-center gap-1.5">
+                                   <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                                   <span className="inline-block w-1.5 h-1.5 rounded-full bg-purple-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+                                   <span className="inline-block w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+                                 </div>
+                                 <span className="text-[11px] font-bold text-(--apple-gray) tracking-wide">Threadly is thinking...</span>
+                               </div>
                              </div>
                           ) : (
                             <ReactMarkdown 
@@ -2388,6 +2426,24 @@ export default function ChatPage() {
            </div>
         </div>
       </motion.div>
+
+      {/* Mascot Feedback Toast */}
+      <AnimatePresence>
+        {mascotMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+            className="fixed bottom-36 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-(--surface) border border-white/10 rounded-full px-5 py-3 shadow-2xl shadow-black/40 backdrop-blur-xl"
+          >
+            <div className="w-8 h-8 shrink-0">
+              <img src="/threadly.svg" alt="Threadly" className="w-full h-full object-contain" />
+            </div>
+            <span className="text-[13px] font-semibold text-(--foreground) tracking-tight">{mascotMessage}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Global shortcut context menu */}
       <ShortcutContextMenu
