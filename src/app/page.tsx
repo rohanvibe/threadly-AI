@@ -690,11 +690,11 @@ function ModelSelector({ selectedModel, onSelectModel }: { selectedModel: string
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="absolute left-0 top-full mt-2 w-[280px] bg-[#1c1c1e] dark:bg-[#1c1c1e] border border-white/10 rounded-[24px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] overflow-hidden z-50 p-2 backdrop-blur-xl"
+            className="absolute left-0 bottom-full mb-2 w-[280px] bg-[#1c1c1e] dark:bg-[#1c1c1e] border border-white/10 rounded-[24px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.6)] overflow-hidden z-50 p-2 backdrop-blur-xl"
           >
             <div className="px-3 py-3 flex items-center gap-2 border-b border-white/5 mb-2">
                <Activity className="w-3.5 h-3.5 text-white/40" />
