@@ -4,98 +4,99 @@
 
 # Threadly AI
 
-### The AI Workspace for Deep, Long Conversations
+### A Better Way to Talk with AI
 
-**Stop losing context. Stop scrolling endlessly. Start thinking clearly.**
+**Stop scrolling forever. Stop repeating yourself. Start getting work done.**
 
 [![Live App](https://img.shields.io/badge/Live%20App-threadly--ai--zeta.vercel.app-blue?style=flat-square&logo=vercel)](https://threadly-ai-zeta.vercel.app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
-[![Stars](https://img.shields.io/github/stars/rohanvibe/threadly-AI?style=flat-square&logo=github)](https://github.com/rohanvibe/threadly-AI/stargazers)
-[![Clones](https://img.shields.io/badge/clones-1.6k+-brightgreen?style=flat-square)](https://github.com/rohanvibe/threadly-AI)
-[![Last Commit](https://img.shields.io/github/last-commit/rohanvibe/threadly-AI?style=flat-square)](https://github.com/rohanvibe/threadly-AI/commits)
 
 <br />
 
-> **Stop losing context in AI chats.** Threadly is a high-performance workspace designed for complex flows and long-term memory.
+> **Tired of AI forgetting your chat?** Threadly is built to remember what matters and make long chats easy to read.
 
 </div>
 
 ---
 
-## 🚀 Why Threadly? (The Pain Point)
+## 🚀 The Problem
 
-Every traditional AI chat app has the same flaw: **long conversations become unusable.**
+Most AI chat apps share the same problems when you use them for real work:
 
-- **The Memory Leak:** You lose track of what was said 40 messages ago.
-- **The Scroll Fatigue:** You can't jump back to a key decision point without scrolling for minutes.
-- **The Context Reset:** Your "memory" disappears when you close the tab.
-- **The Black Box:** You have no control over your API keys or data persistence.
+- **The AI forgets:** After 40 messages, it forgets what you were talking about.
+- **Too much scrolling:** You have to scroll forever to find an old idea.
+- **Starting over:** When you close the app, the AI forgets everything about you.
+- **No privacy control:** Your data is kept on someone else's server.
 
-**Threadly is built specifically to bridge this trust and context gap.**
+**Threadly was built to fix all of this.**
 
 ---
 
-## ⚡ Why not ChatGPT?
+## ⚡ Why is it better than ChatGPT?
 
-| Feature | ChatGPT / Generic Wrappers | Threadly AI |
+| What it does | Normal AI Apps | Threadly AI |
 |---|---|---|
-| **Deep Navigation** | Endless scrolling only | **Instant Thread Sidebar Anchors** |
-| **Persistent Memory** | "Custom Instructions" (Limited) | **Semantic, Tag-Based Fact Store** |
-| **Data Control** | Their server, their rules | **Your Keys (BYOK), Your Database** |
-| **Interface** | One-size-fits-all | **Pro-Grade Workspace (Shortcuts, Maps)** |
-| **Latency** | Perceptible cloud delay | **Intelligent Model Routing & Zero-Delay Streaming** |
+| **Finding old messages** | Scroll forever | **Clickable sidebar links** |
+| **Remembering things** | Small "Custom Instructions" | **Smart, long-term memory** |
+| **Privacy** | They keep your data | **Your keys, your device** |
+| **Speed & Smarts** | Sometimes slow or basic | **Picks the fastest or smartest AI for you** |
 
 ---
 
-## 📽️ Proof in Motion
+## 📽️ See it in action
 
 > [!TIP]
-> **See it in action.** Threadly isn't just a shell; it's a high-performance inference engine.
+> **Try it out.** Threadly is fast and built for getting real work done.
 
 ![Chat Interface](public/Screenshot%202026-04-17%20at%2021-35-58%20Threadly%20AI.png)
-*Real-time streaming powered by Llama 3.3 70B via groq AI.*
+*Fast, instant answers using the best AI models.*
 
 ---
 
-## 🧠 Core Pillars
+## 🧠 Why you'll love it
 
-### 🧵 Deep Navigation Sidebar
-Every user message becomes a clickable anchor. Instantly jump to any point in a 200-message conversation. It’s a "Table of Contents" for your thoughts.
+### 🧵 Never lose your place
+Jump to any old message instantly without scrolling forever. Every question you ask turns into a clickable link on the side of your screen.
 
-### 🧠 Persistent Brain (AI Memory)
-Threadly intelligently remembers facts across sessions. Using a tag-based system, it only injects facts when contextually relevant — keeping your context window clean and your AI focused.
+### 🧠 It learns about you
+The AI remembers your past work and preferences across all your chats. It only brings up old facts when they actually help, keeping your chat clean.
 
-### 🔑 Bring Your Own Key (BYOK)
-Total sovereignty. Use your own OpenAI or groq AI keys. Keys are stored in your browser's local storage — they never touch our servers.
+### ⚡ No more guessing or bad math
+AI is usually bad at math and logic. Threadly uses a real calculator and runs real code in the background to make sure you get the exact, correct answer every time.
 
-### 📱 PWA & Offline Shell
-Install Threadly on your desktop or mobile. The UI shell is fully offline-capable, ensuring your workspace is always ready when the spark hits.
+### 🌍 Real-time answers
+Get today's news and live web data instead of old, outdated information. The AI automatically searches the web when you need current facts.
 
----
+### ⚙️ Always the right AI for the job
+The app automatically picks the smartest AI (like Gemini Pro) for hard questions and the fastest AI (like Llama 70B) for simple ones, so you never have to guess.
 
-## 🛠️ Tech Stack
-
-- **Framework:** Next.js 16 (App Router, Turbopack)
-- **Database/Auth:** Supabase (PostgreSQL + RLS)
-- **AI Engine:** Intelligent Model Routing (Llama 3.3 70B, Gemini 2.5 Flash/Pro)
-- **Styling:** Tailwind CSS v4 + Apple Design Language
-- **Animations:** Framer Motion
+### 🔒 Total privacy
+Your data and API keys stay on your own device. We never save your keys on our servers. You are in total control.
 
 ---
 
-## 📦 Quick Start
+## 🛠️ How it's built
 
-Get your private workspace running in under 3 minutes.
+- **Website Code:** Next.js 16
+- **Database:** Supabase
+- **AI Brains:** Llama 3.3 and Gemini
+- **Looks:** Tailwind CSS and Framer Motion
 
-### 1. Clone & Install
+---
+
+## 📦 Try it yourself
+
+Get your private app running in under 3 minutes.
+
+### 1. Download it
 ```bash
 git clone https://github.com/rohanvibe/threadly-AI.git
 cd threadly-AI
 npm install
 ```
 
-### 2. Configure Environment
-Create a `.env.local` file:
+### 2. Add your keys
+Create a `.env.local` file and add your info:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
@@ -103,33 +104,33 @@ GROQ_API_KEY=your_groq_api_key
 GEMINI_API_KEY=your_gemini_api_key
 ```
 
-### 3. Run
+### 3. Start it
 ```bash
 npm run dev
 ```
 
 ---
 
-## 🛣️ Roadmap
+## 🛣️ What's Next
 
-- [x] High-speed Llama 3.3 Integration
-- [x] Semantic Memory Sync
-- [x] Intelligent Multi-Model Routing (Llama, Gemini Flash/Pro)
-- [ ] Voice-to-Thought (Whisper Sync)
-- [ ] Collaborative Workspaces
+- [x] Fast Llama 3.3 support
+- [x] Smart long-term memory
+- [x] Auto-picking the best AI model
+- [ ] Talk to type (Voice support)
+- [ ] Working with friends (Team chats)
 
 ---
 
 ## 📄 License
 
-Threadly is now licensed under the **MIT License**. We believe in open-source growth and invite the community to build, fork, and star.
+Threadly is free and open-source (MIT License). We'd love for you to use it and help make it better!
 
 ---
 
 <div align="center">
 
-Built with care. Designed for focused work.
+Built to make working with AI easier and faster.
 
-**[⭐ Star this repo](https://github.com/rohanvibe/threadly-AI) · [Report a Bug](https://github.com/rohanvibe/threadly-AI/issues/new) · [Request a Feature](https://github.com/rohanvibe/threadly-AI/issues/new)**
+**[⭐ Star this project](https://github.com/rohanvibe/threadly-AI) · [Report a Bug](https://github.com/rohanvibe/threadly-AI/issues/new)**
 
 </div>
